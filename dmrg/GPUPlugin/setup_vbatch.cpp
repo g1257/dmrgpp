@@ -591,7 +591,7 @@ void setup_vbatch(
 
 int ICEIL2(const SizeType& x, const SizeType& n) { return (((x) + (n)-1) / (n)); }
 
-template void setup_vbatch<MYTYPE>(
+template void setup_vbatch<double>(
     SizeType              noperator, /* number of connections (INPUT) */
     SizeType              npatches, /* number of patches (INPUT) */
     const VectorSizeType& left_patch_size_, /* sizes of left patches (INPUT) */
@@ -599,12 +599,32 @@ template void setup_vbatch<MYTYPE>(
     VectorSizeType&       left_patch_start_, /* cumulative sum  of left_patch_size (OUTPUT) */
     VectorSizeType&       right_patch_start_, /* cumulative sum of right_patch_size (OUTPUT) */
     VectorSizeType&       xy_patch_start_, /* cumulative sum of product patch size (OUTPUT) */
-    std::vector<MYTYPE>&  pAbatch, /* Abatch matrix (OUTPUT) */
+    std::vector<double>&  pAbatch, /* Abatch matrix (OUTPUT) */
     SizeType&             ld_Abatch, /* leading dimension of Abatch matrix (OUTPUT) */
-    std::vector<MYTYPE>&  pBbatch, /* Bbatch matrix (OUTPUT) */
+    std::vector<double>&  pBbatch, /* Bbatch matrix (OUTPUT) */
     SizeType&             ld_Bbatch, /*  leading dimension of Bbatch matrix (OUTPUT) */
-    const std::vector<MYTYPE*>& Amatrix_, /* array of pointers to small Amat matrices */
+    const std::vector<double*>& Amatrix_, /* array of pointers to small Amat matrices */
     const VectorSizeType& ld_Amatrix_, /* array of leading dimension of the small Amat matrices */
-    const std::vector<MYTYPE*>& Bmatrix_, /* array of pointers to small Bmat matrices */
+    const std::vector<double*>& Bmatrix_, /* array of pointers to small Bmat matrices */
+    const VectorSizeType& ld_Bmatrix_ /* array of leading dimension of the small Bmat matrices */
+);
+
+template void setup_vbatch<std::complex<double>>(
+    SizeType              noperator, /* number of connections (INPUT) */
+    SizeType              npatches, /* number of patches (INPUT) */
+    const VectorSizeType& left_patch_size_, /* sizes of left patches (INPUT) */
+    const VectorSizeType& right_patch_size_, /* sizes of right patches (INPUT) */
+    VectorSizeType&       left_patch_start_, /* cumulative sum  of left_patch_size (OUTPUT) */
+    VectorSizeType&       right_patch_start_, /* cumulative sum of right_patch_size (OUTPUT) */
+    VectorSizeType&       xy_patch_start_, /* cumulative sum of product patch size (OUTPUT) */
+    std::vector<std::complex<double>>& pAbatch, /* Abatch matrix (OUTPUT) */
+    SizeType&                          ld_Abatch, /* leading dimension of Abatch matrix (OUTPUT) */
+    std::vector<std::complex<double>>& pBbatch, /* Bbatch matrix (OUTPUT) */
+    SizeType&                          ld_Bbatch, /*  leading dimension of Bbatch matrix (OUTPUT) */
+    const std::vector<std::complex<double>*>&
+                          Amatrix_, /* array of pointers to small Amat matrices */
+    const VectorSizeType& ld_Amatrix_, /* array of leading dimension of the small Amat matrices */
+    const std::vector<std::complex<double>*>&
+                          Bmatrix_, /* array of pointers to small Bmat matrices */
     const VectorSizeType& ld_Bmatrix_ /* array of leading dimension of the small Bmat matrices */
 );

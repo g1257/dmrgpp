@@ -2,13 +2,9 @@
 #include "dmrg_lapack.h"
 #include "dmrg_types.h"
 
-#define USE_MALLOC
-
 static IntegerType is_initialized = 0;
 
 #ifdef USE_MAGMA
-#undef USE_MALLOC
-#define USE_MALLOC
 
 #include "dmrg_magma.h"
 
@@ -133,7 +129,7 @@ void dmrg_Xgetvector(const IntegerType n,
                      const IntegerType incy)
 {
 #ifdef USE_MAGMA
-	magma_Xgetvector(n, (MAGMA_T*)dx_src, incx, (MAGMA_T*)hy_dst, incy, queue);
+	magma_Xgetvector(n, dx_src, incx, hy_dst, incy, queue);
 #else
 	Xcopy_(&n, dx_src, &incx, hy_dst, &incy);
 #endif
@@ -147,7 +143,7 @@ void dmrg_Xsetvector(const IntegerType n,
                      const IntegerType incy)
 {
 #ifdef USE_MAGMA
-	magma_Xsetvector(n, (MAGMA_T*)hx_src, incx, (MAGMA_T*)dy_dst, incy, queue);
+	magma_Xsetvector(n, hx_src, incx, dy_dst, incy, queue);
 #else
 	Xcopy_(&n, hx_src, &incx, dy_dst, &incy);
 #endif
@@ -162,7 +158,7 @@ void dmrg_Xgetmatrix(const IntegerType m,
                      const IntegerType ldb)
 {
 #ifdef USE_MAGMA
-	magma_Xgetmatrix(m, n, (MAGMA_T*)dA_src, ldda, (MAGMA_T*)hB_dst, ldb, queue);
+	magma_Xgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
 #else
 	const char* uplo = "A";
 	Xlacpy_(uplo, &m, &n, dA_src, &ldda, hB_dst, &ldb);
@@ -178,7 +174,7 @@ void dmrg_Xsetmatrix(const IntegerType m,
                      const IntegerType lddb)
 {
 #ifdef USE_MAGMA
-	magma_Xsetmatrix(m, n, (MAGMA_T*)hA_src, lda, (MAGMA_T*)dB_dst, lddb, queue);
+	magma_Xsetmatrix(m, n, hA_src, lda, dB_dst, lddb, queue);
 #else
 	const char* uplo = "A";
 	Xlacpy_(uplo, &m, &n, hA_src, &lda, dB_dst, &lddb);
@@ -241,7 +237,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
    */
 	const IntegerType ialign     = 32;
 	IntegerType       vbatch_dim = ialign * ICEIL((batch_size + 1), ialign);
-#ifdef USE_MAGMA
 
 	nbytes = sizeof(T) * (vbatch_dim);
 	nbytes_total += nbytes;
@@ -294,79 +289,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	nbytes = sizeof(T*) * (vbatch_dim);
 	nbytes_total += nbytes;
 	T** c_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-
-#elif defined(USE_MALLOC)
-
-	nbytes = sizeof(T) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T* alpha_vbatch = new T[vbatch_dim];
-
-	nbytes = sizeof(T) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T* beta_vbatch = new T[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* m_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* n_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* k_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transa_vbatch = new char[vbatch_dim];
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transb_vbatch = new char[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* lda_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* ldb_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* ldc_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** a_vbatch = new T*[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** b_vbatch = new T*[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** c_vbatch = new T*[vbatch_dim];
-
-#else
-
-	std::vector<T> alpha_vbatch(vbatch_dim, 0.0);
-	std::vector<T> beta_vbatch(vbatch_dim, 0.0);
-	VectorSizeType m_vbatch(vbatch_dim, 0);
-	VectorSizeType n_vbatch(vbatch_dim, 0);
-	VectorSizeType k_vbatch(vbatch_dim, 0);
-	VectorCharType transa_vbatch(vbatch_dim, ' ');
-	VectorCharType transb_vbatch(vbatch_dim, ' ');
-	VectorSizeType lda_vbatch(vbatch_dim, 0);
-	VectorSizeType ldb_vbatch(vbatch_dim, 0);
-	VectorSizeType ldc_vbatch(vbatch_dim, 0);
-
-	std::vector<T*> a_vbatch = a_array;
-	std::vector<T*> b_vbatch = b_array;
-	std::vector<T*> c_vbatch = c_array;
-
-#endif
 
 	IntegerType idx = 0;
 	for (SizeType igroup = 0; igroup < group_count; igroup++) {
@@ -457,8 +379,8 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		magma_trans_t transA = isTransA ? MagmaTrans : MagmaNoTrans;
 		magma_trans_t transB = isTransB ? MagmaTrans : MagmaNoTrans;
 
-		MAGMA_T alpha = *((MAGMA_T*)&(alpha_vbatch[0]));
-		MAGMA_T beta  = *((MAGMA_T*)&(beta_vbatch[0]));
+		auto alpha = alpha_vbatch[0];
+		auto beta  = beta_vbatch[0];
 
 		/*
 		 * ------------
@@ -547,25 +469,24 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					    "max_m=%d, max_n=%d, max_k=%d\n", max_m, max_n, max_k);
 				};
 
-				magmablas_Xgemm_vbatched_max_nocheck(
-				    transA,
-				    transB,
-				    m_vbatch,
-				    n_vbatch,
-				    k_vbatch,
-				    (MAGMA_T)alpha,
-				    (MAGMA_T const* const*)a_vbatch,
-				    lda_vbatch,
-				    (MAGMA_T const* const*)b_vbatch,
-				    ldb_vbatch,
-				    (MAGMA_T)beta,
-				    (MAGMA_T**)c_vbatch,
-				    ldc_vbatch,
-				    batch_size,
-				    max_m,
-				    max_n,
-				    max_k,
-				    queue);
+				magmablas_Xgemm_vbatched_max_nocheck(transA,
+				                                     transB,
+				                                     m_vbatch,
+				                                     n_vbatch,
+				                                     k_vbatch,
+				                                     alpha,
+				                                     a_vbatch,
+				                                     lda_vbatch,
+				                                     b_vbatch,
+				                                     ldb_vbatch,
+				                                     beta,
+				                                     c_vbatch,
+				                                     ldc_vbatch,
+				                                     batch_size,
+				                                     max_m,
+				                                     max_n,
+				                                     max_k,
+				                                     queue);
 			}
 		} else {
 			/*
@@ -619,25 +540,28 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				 * --------------
 				 */
 
-				IntegerType* pm_vbatch = new IntegerType[1 + isize];
-				IntegerType* pn_vbatch = new IntegerType[1 + isize];
-				IntegerType* pk_vbatch = new IntegerType[1 + isize];
+				size_t       nbytes    = (1 + isize) * sizeof(IntegerType);
+				IntegerType* pm_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pn_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pk_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 
-				assert(pm_vbatch != NULL);
-				assert(pn_vbatch != NULL);
-				assert(pk_vbatch != NULL);
+				assert(pm_vbatch != nullptr);
+				assert(pn_vbatch != nullptr);
+				assert(pk_vbatch != nullptr);
 
-				T** pa_vbatch = new T*[1 + isize];
-				T** pb_vbatch = new T*[1 + isize];
-				T** pc_vbatch = new T*[1 + isize];
+				nbytes        = (1 + isize) * sizeof(T*);
+				T** pa_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+				T** pb_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+				T** pc_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
 
-				assert(pa_vbatch != NULL);
-				assert(pb_vbatch != NULL);
-				assert(pc_vbatch != NULL);
+				assert(pa_vbatch != nullptr);
+				assert(pb_vbatch != nullptr);
+				assert(pc_vbatch != nullptr);
 
-				IntegerType* plda_vbatch = new IntegerType[1 + isize];
-				IntegerType* pldb_vbatch = new IntegerType[1 + isize];
-				IntegerType* pldc_vbatch = new IntegerType[1 + isize];
+				nbytes                   = (1 + isize) * sizeof(IntegerType);
+				IntegerType* plda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pldb_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pldc_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 
 				assert(plda_vbatch != 0);
 				assert(pldb_vbatch != 0);
@@ -729,25 +653,25 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType* pn_vbatch = gpn_vbatch[idev];
 				IntegerType* pk_vbatch = gpk_vbatch[idev];
 
-				assert(pm_vbatch != NULL);
-				assert(pn_vbatch != NULL);
-				assert(pk_vbatch != NULL);
+				assert(pm_vbatch != nullptr);
+				assert(pn_vbatch != nullptr);
+				assert(pk_vbatch != nullptr);
 
 				T** pa_vbatch = gpa_vbatch[idev];
 				T** pb_vbatch = gpb_vbatch[idev];
 				T** pc_vbatch = gpc_vbatch[idev];
 
-				assert(pa_vbatch != NULL);
-				assert(pb_vbatch != NULL);
-				assert(pc_vbatch != NULL);
+				assert(pa_vbatch != nullptr);
+				assert(pb_vbatch != nullptr);
+				assert(pc_vbatch != nullptr);
 
 				IntegerType* plda_vbatch = gplda_vbatch[idev];
 				IntegerType* pldb_vbatch = gpldb_vbatch[idev];
 				IntegerType* pldc_vbatch = gpldc_vbatch[idev];
 
-				assert(plda_vbatch != NULL);
-				assert(pldb_vbatch != NULL);
-				assert(pldc_vbatch != NULL);
+				assert(plda_vbatch != nullptr);
+				assert(pldb_vbatch != nullptr);
+				assert(pldc_vbatch != nullptr);
 
 				IntegerType max_m = gmax_m[idev];
 				IntegerType max_n = gmax_n[idev];
@@ -760,25 +684,24 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType pbatch_size = gBatchCount[idev];
 
 				if (pbatch_size >= 1) {
-					magmablas_Xgemm_vbatched_max_nocheck(
-					    transA,
-					    transB,
-					    pm_vbatch,
-					    pn_vbatch,
-					    pk_vbatch,
-					    (MAGMA_T)alpha,
-					    (MAGMA_T const* const*)pa_vbatch,
-					    plda_vbatch,
-					    (MAGMA_T const* const*)pb_vbatch,
-					    pldb_vbatch,
-					    (MAGMA_T)beta,
-					    (MAGMA_T**)pc_vbatch,
-					    pldc_vbatch,
-					    pbatch_size,
-					    max_m,
-					    max_n,
-					    max_k,
-					    queue);
+					magmablas_Xgemm_vbatched_max_nocheck(transA,
+					                                     transB,
+					                                     pm_vbatch,
+					                                     pn_vbatch,
+					                                     pk_vbatch,
+					                                     alpha,
+					                                     pa_vbatch,
+					                                     plda_vbatch,
+					                                     pb_vbatch,
+					                                     pldb_vbatch,
+					                                     beta,
+					                                     pc_vbatch,
+					                                     pldc_vbatch,
+					                                     pbatch_size,
+					                                     max_m,
+					                                     max_n,
+					                                     max_k,
+					                                     queue);
 				};
 
 			}; /* end for idev */
@@ -808,17 +731,17 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType* pldb_vbatch = gpldb_vbatch[idev];
 				IntegerType* pldc_vbatch = gpldc_vbatch[idev];
 
-				delete[] pm_vbatch;
-				delete[] pn_vbatch;
-				delete[] pk_vbatch;
+				dmrg_free(pm_vbatch);
+				dmrg_free(pn_vbatch);
+				dmrg_free(pk_vbatch);
 
-				delete[] pa_vbatch;
-				delete[] pb_vbatch;
-				delete[] pc_vbatch;
+				dmrg_free(pa_vbatch);
+				dmrg_free(pb_vbatch);
+				dmrg_free(pc_vbatch);
 
-				delete[] plda_vbatch;
-				delete[] pldb_vbatch;
-				delete[] pldc_vbatch;
+				dmrg_free(plda_vbatch);
+				dmrg_free(pldb_vbatch);
+				dmrg_free(pldc_vbatch);
 
 			}; /* end for idev */
 
@@ -864,8 +787,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 #endif
 
-#ifdef USE_MAGMA
-
 	dmrg_free(alpha_vbatch);
 	dmrg_free(beta_vbatch);
 
@@ -884,28 +805,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	dmrg_free(b_vbatch);
 	dmrg_free(c_vbatch);
 
-#elif defined(USE_MALLOC)
-
-	delete[] alpha_vbatch;
-	delete[] beta_vbatch;
-
-	delete[] m_vbatch;
-	delete[] n_vbatch;
-	delete[] k_vbatch;
-
-	delete[] transa_vbatch;
-	delete[] transb_vbatch;
-
-	delete[] lda_vbatch;
-	delete[] ldb_vbatch;
-	delete[] ldc_vbatch;
-
-	delete[] a_vbatch;
-	delete[] b_vbatch;
-	delete[] c_vbatch;
-
-#endif
-
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
 		double gflops_per_sec = 0;
@@ -921,23 +820,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 }
 
-template void dmrg_Xgemm_vbatch<MYTYPE>(char*,
-                                        char*,
-                                        IntegerType*,
-                                        IntegerType*,
-                                        IntegerType*,
-                                        MYTYPE*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        MYTYPE*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        SizeType,
-                                        IntegerType*);
-
-#if defined(USE_COMPLEX_Z)
 template void dmrg_Xgemm_vbatch<double>(char*,
                                         char*,
                                         IntegerType*,
@@ -954,7 +836,6 @@ template void dmrg_Xgemm_vbatch<double>(char*,
                                         SizeType,
                                         IntegerType*);
 
-#else
 template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctransa_array,
                                                       char*                  ctransb_array,
                                                       IntegerType*           m_array,
@@ -970,24 +851,52 @@ template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctr
                                                       IntegerType*           ldc_array,
                                                       SizeType               group_count,
                                                       IntegerType*           group_size);
-#endif
 
 template void
-dmrg_Xgetvector<MYTYPE>(const IntegerType, MYTYPE*, const IntegerType, MYTYPE*, const IntegerType);
-template void dmrg_Xsetvector<MYTYPE>(const IntegerType,
-                                      const MYTYPE*,
+dmrg_Xgetvector<double>(const IntegerType, double*, const IntegerType, double*, const IntegerType);
+
+template void dmrg_Xgetvector<std::complex<double>>(const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xsetvector<double>(const IntegerType,
+                                      const double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
-template void dmrg_Xgetmatrix<MYTYPE>(const IntegerType,
+
+template void dmrg_Xsetvector<std::complex<double>>(const IntegerType,
+                                                    const std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xgetmatrix<double>(const IntegerType,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
-template void dmrg_Xsetmatrix<MYTYPE>(const IntegerType,
+
+template void dmrg_Xgetmatrix<std::complex<double>>(const IntegerType,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xsetmatrix<double>(const IntegerType,
                                       const IntegerType,
-                                      const MYTYPE*,
+                                      const double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
+
+template void dmrg_Xsetmatrix<std::complex<double>>(const IntegerType,
+                                                    const IntegerType,
+                                                    const std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);

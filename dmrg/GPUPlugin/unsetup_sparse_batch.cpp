@@ -16,15 +16,7 @@ void unsetup_sparse_batch(std::vector<T*>& gAbatch_, std::vector<T*>& gBbatch_)
 	delete pBmem;
 }
 
-template void unsetup_sparse_batch<MYTYPE>(std::vector<MYTYPE*>&, std::vector<MYTYPE*>&);
-
-#if defined(USE_COMPLEX_Z)
-
 template void unsetup_sparse_batch<double>(std::vector<double*>&, std::vector<double*>&);
-
-#else
 
 template void unsetup_sparse_batch<std::complex<double>>(std::vector<std::complex<double>*>&,
                                                          std::vector<std::complex<double>*>&);
-
-#endif
