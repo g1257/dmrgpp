@@ -5,13 +5,11 @@ add_custom_command(
   COMMENT "Generating Git Revision File"
   VERBATIM)
 
-if(DMRG_BUILD_BATCHED)
-  add_subdirectory(GPUPlugin)
-  set(PLUGIN_SC ON)
-  set(FpType "double")
-  if(DMRG_BUILD_BATCHED_MAGMA)
-    set(USE_MAGMA ON)
-  endif()
+add_subdirectory(GPUPlugin)
+set(PLUGIN_SC ON)
+set(FpType "double")
+if(DMRG_BUILD_BATCHED_MAGMA)
+  set(USE_MAGMA ON)
 endif()
 
 add_subdirectory(KronUtil)
@@ -25,16 +23,12 @@ add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
-if(DMRG_BUILD_BATCHED)
-  target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
-endif()
+target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
-if(DMRG_BUILD_BATCHED)
-  target_link_libraries(dmrg_runner PUBLIC gpuplugin)
-endif()
+target_link_libraries(dmrg_runner PUBLIC gpuplugin)
 
 # Dmrg executable (main executable)
 add_executable(dmrg ${instantiationFileList} dmrg.cpp)
@@ -102,10 +96,8 @@ endfunction()
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 
-if(DMRG_BUILD_BATCHED)
-  add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
-  add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
-endif()
+add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
+add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
 
 add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain) # energy -21.5102
 add_lowest_eigenvalue_check_test(output3 input3 -21.5102 runForinput3.cout)

@@ -65,10 +65,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   add_compile_options(-Wall -Wextra -Wno-unused-parameter)
 endif()
 
-option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
-
-include(CMakeDependentOption)
-cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF "DMRG_BUILD_BATCHED" OFF)
+option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma")
 
 add_subdirectory(util)
 
