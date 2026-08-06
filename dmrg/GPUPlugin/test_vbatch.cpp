@@ -303,8 +303,9 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 		    xy_size,
 		    KOKKOS_LAMBDA(const int                                          i,
 		                  typename Kokkos::MinMax<KokkosScalar>::value_type& update) {
-			    update.min_val = Kokkos::min(update.min_val, Kokkos::abs(Y_[i]));
-			    update.max_val = Kokkos::max(update.max_val, Kokkos::abs(Y_[i]));
+			    auto abs_Y     = Kokkos::abs(Y_[i]);
+			    update.min_val = Kokkos::min(update.min_val, abs_Y);
+			    update.max_val = Kokkos::max(update.max_val, abs_Y);
 		    },
 		    Kokkos::MinMax<KokkosScalar>(Result));
 
