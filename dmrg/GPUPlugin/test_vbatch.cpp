@@ -235,7 +235,7 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 	    "test_vbatch", xy_size, KOKKOS_LAMBDA(const IntegerType i) {
 		    X_[i] = static_cast<KokkosScalar>(i + 1) / static_cast<KokkosScalar>(xy_size);
 	    });
-
+	Kokkos::fence();
 	{
 		const IntegerType ntimes     = 3;
 		double            total_time = -dmrg_get_wtime();
@@ -297,28 +297,21 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 		    Y_avg);
 		Y_avg = Y_avg / static_cast<FpType>(xy_size);
 
-		KokkosScalar Y_max = 0.;
+		Kokkos::MinMax<KokkosScalar>::value_type Result;
 		Kokkos::parallel_reduce(
-		    "MaxReduction",
+		    "MinMaxReduction",
 		    xy_size,
-		    KOKKOS_LAMBDA(const int i, KokkosScalar& current_max) {
-			    current_max = Kokkos::max(current_max, Kokkos::abs(Y_[i]));
+		    KOKKOS_LAMBDA(const int                                          i,
+		                  typename Kokkos::MinMax<KokkosScalar>::value_type& update) {
+			    update.min_val = Kokkos::min(update.min_val, Kokkos::abs(Y_[i]));
+			    update.max_val = Kokkos::max(update.max_val, Kokkos::abs(Y_[i]));
 		    },
-		    Kokkos::Max<KokkosScalar>(Y_max));
-
-		KokkosScalar Y_min = 0.;
-		Kokkos::parallel_reduce(
-		    "MinReduction",
-		    xy_size,
-		    KOKKOS_LAMBDA(const int i, KokkosScalar& current_min) {
-			    current_min = Kokkos::min(current_min, Kokkos::abs(Y_[i]));
-		    },
-		    Kokkos::Min<KokkosScalar>(Y_min));
+		    Kokkos::MinMax<KokkosScalar>(Result));
 
 		printf("std::abs(Y_avg) = %le, Y_max = %le Y_min = %le \n",
 		       std::abs(Y_avg),
-		       Y_max,
-		       Y_min);
+		       Result.max_val,
+		       Result.min_val);
 	}
 
 	if (use_sparse) {
