@@ -2,6 +2,9 @@
 #include "dmrg_lapack.h"
 #include "dmrg_types.h"
 
+#include "PsimagLite/KokkosType.h"
+#include <Kokkos_Core.hpp>
+
 static IntegerType is_initialized = 0;
 
 #ifdef USE_MAGMA
@@ -183,22 +186,23 @@ void dmrg_Xsetmatrix(const IntegerType m,
 }
 
 template <typename T>
-void dmrg_Xgemm_vbatch(char*        ctransa_array,
-                       char*        ctransb_array,
+void dmrg_Xgemm_vbatch(char         ctransa,
+                       char         ctransb,
                        IntegerType* m_array,
                        IntegerType* n_array,
                        IntegerType* k_array,
-                       T*           alpha_array,
+                       T            alpha,
                        T**          a_array,
                        IntegerType* lda_array,
                        T**          b_array,
                        IntegerType* ldb_array,
-                       T*           beta_array,
+                       T            beta,
                        T**          c_array,
                        IntegerType* ldc_array,
                        SizeType     group_count,
                        IntegerType* group_size)
 {
+	using KokkosScalar = PsimagLite::KokkosType<T>::type;
 
 	const IntegerType idebug       = 1;
 	const double      giga         = 1000.0 * 1000.0 * 1000.0;
@@ -239,149 +243,76 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	const IntegerType ialign     = 32;
 	IntegerType       vbatch_dim = ialign * ICEIL((batch_size + 1), ialign);
 
-	nbytes = sizeof(T) * (vbatch_dim);
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	T* alpha_vbatch = dmrg_malloc<T>(nbytes, nbytes);
-
-	nbytes = sizeof(T) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T* beta_vbatch = dmrg_malloc<T>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> m_vbatch("m_vbatch", vbatch_dim);
 
 	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* m_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> n_vbatch("n_vbatch", vbatch_dim);
 
 	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* n_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> k_vbatch("k_vbatch", vbatch_dim);
 
 	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* k_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transa_vbatch = dmrg_malloc<char>(nbytes, nbytes);
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transb_vbatch = dmrg_malloc<char>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> lda_vbatch("lda_vbatch", vbatch_dim);
 
 	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* lda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> ldb_vbatch("ldb_vbatch", vbatch_dim);
 
 	nbytes = sizeof(IntegerType) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* ldb_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> ldc_vbatch("ldc_vbatch", vbatch_dim);
 
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
-	IntegerType* ldc_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+	KokkosScalar** a_vbatch
+	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
-	nbytes = sizeof(T*) * (vbatch_dim);
+	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
-	T** a_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+	KokkosScalar** b_vbatch
+	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
-	nbytes = sizeof(T*) * (vbatch_dim);
+	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
-	T** b_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** c_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+	KokkosScalar** c_vbatch
+	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
 	IntegerType idx = 0;
 	for (SizeType igroup = 0; igroup < group_count; igroup++) {
 		for (IntegerType i = 0; i < group_size[igroup]; i++) {
-			transa_vbatch[idx] = ctransa_array[igroup];
-			transb_vbatch[idx] = ctransb_array[igroup];
-
 			m_vbatch[idx] = m_array[igroup];
 			n_vbatch[idx] = n_array[igroup];
 			k_vbatch[idx] = k_array[igroup];
-
-			alpha_vbatch[idx] = alpha_array[igroup];
-			beta_vbatch[idx]  = beta_array[igroup];
 
 			lda_vbatch[idx] = lda_array[igroup];
 			ldb_vbatch[idx] = ldb_array[igroup];
 			ldc_vbatch[idx] = ldc_array[igroup];
 
-			a_vbatch[idx] = a_array[idx];
-			b_vbatch[idx] = b_array[idx];
-			c_vbatch[idx] = c_array[idx];
+			a_vbatch[idx] = reinterpret_cast<KokkosScalar*>(a_array[idx]);
+			b_vbatch[idx] = reinterpret_cast<KokkosScalar*>(b_array[idx]);
+			c_vbatch[idx] = reinterpret_cast<KokkosScalar*>(c_array[idx]);
 
 			idx = idx + 1;
 		};
 	};
 
 #ifdef USE_MAGMA
-	{
-		/*
+	/*
 	---------------------------------------------------------------
 	Note magma_Xgemm_vbatched assumes all transa, transb, alpha, beta are the same
 	---------------------------------------------------------------
 	*/
-		IntegerType is_same_transa = 1;
-		IntegerType is_same_transb = 1;
-		IntegerType is_same_alpha  = 1;
-		IntegerType is_same_beta   = 1;
+	IntegerType isTransA = ((ctransa == 'T') || (ctransa == 't'));
+	IntegerType isTransB = ((ctransb == 'T') || (ctransb == 't'));
 
-		for (idx = 0; idx < batch_size; idx++) {
-			is_same_transa = (transa_vbatch[0] == transa_vbatch[idx]);
-			if (!is_same_transa) {
-				break;
-			};
-		};
-		for (idx = 0; idx < batch_size; idx++) {
-			is_same_transb = (transb_vbatch[0] == transb_vbatch[idx]);
-			if (!is_same_transb) {
-				break;
-			};
-		};
-		for (idx = 0; idx < batch_size; idx++) {
-			is_same_alpha = (alpha_vbatch[0] == alpha_vbatch[idx]);
-			if (!is_same_alpha) {
-				break;
-			};
-		};
-		for (idx = 0; idx < batch_size; idx++) {
-			is_same_beta = (beta_vbatch[0] == beta_vbatch[idx]);
-			if (!is_same_beta) {
-				break;
-			};
-		};
-
-		IntegerType is_same_all
-		    = is_same_transa && is_same_transb && is_same_alpha && is_same_beta;
-
-		if (!is_same_all) {
-			if (!is_same_transa) {
-				fprintf(
-				    stderr, "dmrg_vbatch: is_same_transa = %d\n", is_same_transa);
-			};
-			if (!is_same_transb) {
-				fprintf(
-				    stderr, "dmrg_vbatch: is_same_transb = %d\n", is_same_transb);
-			};
-			if (!is_same_alpha) {
-				fprintf(stderr, "dmrg_vbatch: is_same_alpha = %d\n", is_same_alpha);
-			};
-			if (!is_same_beta) {
-				fprintf(stderr, "dmrg_vbatch: is_same_beta = %d\n", is_same_beta);
-			};
-		};
-		assert(is_same_all);
-
-		IntegerType isTransA = ((transa_vbatch[0] == 'T') || (transa_vbatch[0] == 't'));
-		IntegerType isTransB = ((transb_vbatch[0] == 'T') || (transb_vbatch[0] == 't'));
-
-		magma_trans_t transA = isTransA ? MagmaTrans : MagmaNoTrans;
-		magma_trans_t transB = isTransB ? MagmaTrans : MagmaNoTrans;
-
-		auto alpha = alpha_vbatch[0];
-		auto beta  = beta_vbatch[0];
+	magma_trans_t transA = isTransA ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t transB = isTransB ? MagmaTrans : MagmaNoTrans;
+	{
 
 		/*
 		 * ------------
@@ -455,8 +386,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType max_n = 0;
 				IntegerType max_k = 0;
 
-				IntegerType i = 0;
-				for (i = 0; i < group_count; i++) {
+				for (SizeType i = 0; i < group_count; i++) {
 					const IntegerType m = m_array[i];
 					const IntegerType n = n_array[i];
 					const IntegerType k = k_array[i];
@@ -472,17 +402,17 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 
 				magmablas_Xgemm_vbatched_max_nocheck(transA,
 				                                     transB,
-				                                     m_vbatch,
-				                                     n_vbatch,
-				                                     k_vbatch,
+				                                     m_vbatch.data(),
+				                                     n_vbatch.data(),
+				                                     k_vbatch.data(),
 				                                     alpha,
 				                                     a_vbatch,
-				                                     lda_vbatch,
+				                                     lda_vbatch.data(),
 				                                     b_vbatch,
-				                                     ldb_vbatch,
+				                                     ldb_vbatch.data(),
 				                                     beta,
 				                                     c_vbatch,
-				                                     ldc_vbatch,
+				                                     ldc_vbatch.data(),
 				                                     batch_size,
 				                                     max_m,
 				                                     max_n,
@@ -500,9 +430,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 			IntegerType* gpn_vbatch[MAXGPUS];
 			IntegerType* gpk_vbatch[MAXGPUS];
 
-			T** gpa_vbatch[MAXGPUS];
-			T** gpb_vbatch[MAXGPUS];
-			T** gpc_vbatch[MAXGPUS];
+			KokkosScalar** gpa_vbatch[MAXGPUS];
+			KokkosScalar** gpb_vbatch[MAXGPUS];
+			KokkosScalar** gpc_vbatch[MAXGPUS];
 
 			IntegerType* gplda_vbatch[MAXGPUS];
 			IntegerType* gpldb_vbatch[MAXGPUS];
@@ -541,32 +471,29 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				 * --------------
 				 */
 
-				size_t       nbytes    = (1 + isize) * sizeof(IntegerType);
-				IntegerType* pm_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-				IntegerType* pn_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-				IntegerType* pk_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				size_t nbytes = (1 + isize) * sizeof(IntegerType);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> pm_vbatch(
+				    "pm_vbatch", isize + 1);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> pn_vbatch(
+				    "pn_vbatch", isize + 1);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> pk_vbatch(
+				    "pk_vbatch", isize + 1);
 
-				assert(pm_vbatch != nullptr);
-				assert(pn_vbatch != nullptr);
-				assert(pk_vbatch != nullptr);
+				nbytes                   = (1 + isize) * sizeof(T*);
+				KokkosScalar** pa_vbatch = reinterpret_cast<KokkosScalar**>(
+				    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
+				KokkosScalar** pb_vbatch = reinterpret_cast<KokkosScalar**>(
+				    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
+				KokkosScalar** pc_vbatch = reinterpret_cast<KokkosScalar**>(
+				    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
-				nbytes        = (1 + isize) * sizeof(T*);
-				T** pa_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-				T** pb_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-				T** pc_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-
-				assert(pa_vbatch != nullptr);
-				assert(pb_vbatch != nullptr);
-				assert(pc_vbatch != nullptr);
-
-				nbytes                   = (1 + isize) * sizeof(IntegerType);
-				IntegerType* plda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-				IntegerType* pldb_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-				IntegerType* pldc_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
-
-				assert(plda_vbatch != 0);
-				assert(pldb_vbatch != 0);
-				assert(pldc_vbatch != 0);
+				nbytes = (1 + isize) * sizeof(IntegerType);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> plda_vbatch(
+				    "plda_vbatch", isize + 1);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> pldb_vbatch(
+				    "pldb_vbatch", isize + 1);
+				Kokkos::View<IntegerType*, Kokkos::SharedSpace> pldc_vbatch(
+				    "pldc_vbatch", isize + 1);
 
 				{
 					IntegerType i = 0;
@@ -574,10 +501,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 						pm_vbatch[i] = m_vbatch[istart + i];
 						pn_vbatch[i] = n_vbatch[istart + i];
 						pk_vbatch[i] = k_vbatch[istart + i];
-
-						pa_vbatch[i] = a_vbatch[istart + i];
-						pb_vbatch[i] = b_vbatch[istart + i];
-						pc_vbatch[i] = c_vbatch[istart + i];
 
 						plda_vbatch[i] = lda_vbatch[istart + i];
 						pldb_vbatch[i] = ldb_vbatch[istart + i];
@@ -620,17 +543,17 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				 * save poIntegerTypeers
 				 * -------------
 				 */
-				gpm_vbatch[idev] = pm_vbatch;
-				gpn_vbatch[idev] = pn_vbatch;
-				gpk_vbatch[idev] = pk_vbatch;
+				gpm_vbatch[idev] = pm_vbatch.data();
+				gpn_vbatch[idev] = pn_vbatch.data();
+				gpk_vbatch[idev] = pk_vbatch.data();
 
 				gpa_vbatch[idev] = pa_vbatch;
 				gpb_vbatch[idev] = pb_vbatch;
 				gpc_vbatch[idev] = pc_vbatch;
 
-				gplda_vbatch[idev] = plda_vbatch;
-				gpldb_vbatch[idev] = pldb_vbatch;
-				gpldc_vbatch[idev] = pldc_vbatch;
+				gplda_vbatch[idev] = plda_vbatch.data();
+				gpldb_vbatch[idev] = pldb_vbatch.data();
+				gpldc_vbatch[idev] = pldc_vbatch.data();
 
 				gmax_m[idev] = max_m;
 				gmax_n[idev] = max_n;
@@ -658,9 +581,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				assert(pn_vbatch != nullptr);
 				assert(pk_vbatch != nullptr);
 
-				T** pa_vbatch = gpa_vbatch[idev];
-				T** pb_vbatch = gpb_vbatch[idev];
-				T** pc_vbatch = gpc_vbatch[idev];
+				KokkosScalar** pa_vbatch = gpa_vbatch[idev];
+				KokkosScalar** pb_vbatch = gpb_vbatch[idev];
+				KokkosScalar** pc_vbatch = gpc_vbatch[idev];
 
 				assert(pa_vbatch != nullptr);
 				assert(pb_vbatch != nullptr);
@@ -720,31 +643,14 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 			};
 
 			for (idev = 0; idev < ngpu; idev++) {
-				IntegerType* pm_vbatch = gpm_vbatch[idev];
-				IntegerType* pn_vbatch = gpn_vbatch[idev];
-				IntegerType* pk_vbatch = gpk_vbatch[idev];
+				KokkosScalar** pa_vbatch = gpa_vbatch[idev];
+				KokkosScalar** pb_vbatch = gpb_vbatch[idev];
+				KokkosScalar** pc_vbatch = gpc_vbatch[idev];
 
-				T** pa_vbatch = gpa_vbatch[idev];
-				T** pb_vbatch = gpb_vbatch[idev];
-				T** pc_vbatch = gpc_vbatch[idev];
-
-				IntegerType* plda_vbatch = gplda_vbatch[idev];
-				IntegerType* pldb_vbatch = gpldb_vbatch[idev];
-				IntegerType* pldc_vbatch = gpldc_vbatch[idev];
-
-				dmrg_free(pm_vbatch);
-				dmrg_free(pn_vbatch);
-				dmrg_free(pk_vbatch);
-
-				dmrg_free(pa_vbatch);
-				dmrg_free(pb_vbatch);
-				dmrg_free(pc_vbatch);
-
-				dmrg_free(plda_vbatch);
-				dmrg_free(pldb_vbatch);
-				dmrg_free(pldc_vbatch);
-
-			}; /* end for idev */
+				Kokkos::kokkos_free(pa_vbatch);
+				Kokkos::kokkos_free(pb_vbatch);
+				Kokkos::kokkos_free(pc_vbatch);
+			} /* end for idev */
 
 			idev   = 0;
 			device = device_array[idev];
@@ -757,22 +663,18 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		IntegerType i = 0;
 		// #pragma omp parallel for private(i) schedule(dynamic)
 		for (i = 0; i < batch_size; i++) {
-			const IntegerType mm     = m_vbatch[i];
-			const IntegerType nn     = n_vbatch[i];
-			const IntegerType kk     = k_vbatch[i];
-			const char        transa = transa_vbatch[i];
-			const char        transb = transb_vbatch[i];
-			const T           alpha  = alpha_vbatch[i];
-			const T           beta   = beta_vbatch[i];
-			const IntegerType lda    = lda_vbatch[i];
-			const IntegerType ldb    = ldb_vbatch[i];
-			const IntegerType ldc    = ldc_vbatch[i];
-			const T*          pa     = a_vbatch[i];
-			const T*          pb     = b_vbatch[i];
-			T*                pc     = c_vbatch[i];
+			const IntegerType mm  = m_vbatch[i];
+			const IntegerType nn  = n_vbatch[i];
+			const IntegerType kk  = k_vbatch[i];
+			const IntegerType lda = lda_vbatch[i];
+			const IntegerType ldb = ldb_vbatch[i];
+			const IntegerType ldc = ldc_vbatch[i];
+			const T*          pa  = reinterpret_cast<T*>(a_vbatch[i]);
+			const T*          pb  = reinterpret_cast<T*>(b_vbatch[i]);
+			T*                pc  = reinterpret_cast<T*>(c_vbatch[i]);
 
-			Xgemm_(&transa,
-			       &transb,
+			Xgemm_(&ctransa,
+			       &ctransb,
 			       &mm,
 			       &nn,
 			       &kk,
@@ -788,23 +690,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 #endif
 
-	dmrg_free(alpha_vbatch);
-	dmrg_free(beta_vbatch);
-
-	dmrg_free(m_vbatch);
-	dmrg_free(n_vbatch);
-	dmrg_free(k_vbatch);
-
-	dmrg_free(transa_vbatch);
-	dmrg_free(transb_vbatch);
-
-	dmrg_free(lda_vbatch);
-	dmrg_free(ldb_vbatch);
-	dmrg_free(ldc_vbatch);
-
-	dmrg_free(a_vbatch);
-	dmrg_free(b_vbatch);
-	dmrg_free(c_vbatch);
+	Kokkos::kokkos_free(a_vbatch);
+	Kokkos::kokkos_free(b_vbatch);
+	Kokkos::kokkos_free(c_vbatch);
 
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
@@ -821,33 +709,33 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 }
 
-template void dmrg_Xgemm_vbatch<double>(char*,
-                                        char*,
+template void dmrg_Xgemm_vbatch<double>(char,
+                                        char,
                                         IntegerType*,
                                         IntegerType*,
                                         IntegerType*,
-                                        double*,
+                                        double,
                                         double**,
                                         IntegerType*,
                                         double**,
                                         IntegerType*,
-                                        double*,
+                                        double,
                                         double**,
                                         IntegerType*,
                                         SizeType,
                                         IntegerType*);
 
-template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctransa_array,
-                                                      char*                  ctransb_array,
+template void dmrg_Xgemm_vbatch<std::complex<double>>(char                   ctransa_array,
+                                                      char                   ctransb_array,
                                                       IntegerType*           m_array,
                                                       IntegerType*           n_array,
                                                       IntegerType*           k_array,
-                                                      std::complex<double>*  alpha_array,
+                                                      std::complex<double>   alpha,
                                                       std::complex<double>** a_array,
                                                       IntegerType*           lda_array,
                                                       std::complex<double>** b_array,
                                                       IntegerType*           ldb_array,
-                                                      std::complex<double>*  beta_array,
+                                                      std::complex<double>   beta,
                                                       std::complex<double>** c_array,
                                                       IntegerType*           ldc_array,
                                                       SizeType               group_count,

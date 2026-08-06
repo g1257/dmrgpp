@@ -61,8 +61,9 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	IntegerType batch_size     = ngroups * noperator;
 	IntegerType batch_size_dim = ialign * ICEIL(batch_size, ialign);
 
-	std::vector<FpType>  alpha_array_(ngroups_dim);
-	std::vector<FpType>  beta_array_(ngroups_dim);
+	FpType alpha = 1.;
+	FpType beta  = 0.;
+
 	std::vector<FpType*> a_array_(batch_size_dim);
 	std::vector<FpType*> b_array_(batch_size_dim);
 	std::vector<FpType*> c_array_(batch_size_dim);
@@ -74,9 +75,6 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	std::vector<IntegerType> lda_array_(batch_size_dim);
 	std::vector<IntegerType> ldb_array_(batch_size_dim);
 	std::vector<IntegerType> ldc_array_(batch_size_dim);
-
-	std::vector<char> transa_array_(ngroups_dim);
-	std::vector<char> transb_array_(ngroups_dim);
 
 	IntegerType nrowA = left_max_states;
 	IntegerType ncolA = nrowA;
@@ -135,19 +133,14 @@ void apply_Htarget_vbatch(SizeType            noperator,
 			                                     XJ( 1:(R2-R1+1), 1:(L2-L1+1));
 			------------------------------------------------------------------------
 			*/
-			transa_array_[igroup - 1] = 'N';
-			transb_array_[igroup - 1] = 'N';
-			IntegerType mm            = nrowBX;
-			IntegerType nn            = L2 - L1 + 1;
-			IntegerType kk            = R2 - R1 + 1;
-			m_array_[igroup - 1]      = mm;
-			n_array_[igroup - 1]      = nn;
-			k_array_[igroup - 1]      = kk;
+			IntegerType mm       = nrowBX;
+			IntegerType nn       = L2 - L1 + 1;
+			IntegerType kk       = R2 - R1 + 1;
+			m_array_[igroup - 1] = mm;
+			n_array_[igroup - 1] = nn;
+			k_array_[igroup - 1] = kk;
 
 			gflops1 += ((2.0 * mm) * nn) * kk;
-
-			alpha_array_[igroup - 1] = (FpType)1;
-			beta_array_[igroup - 1]  = (FpType)0;
 
 			c_array_[idx - 1]      = &(BX_[indx2f(1, offsetBX + L1, ld_BX)]);
 			ldc_array_[igroup - 1] = ld_BX;
@@ -165,19 +158,20 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	 first vbatch DGEMM
 	 ------------------
 	 */
-
+	char transa     = 'N';
+	char transb     = 'N';
 	time_1st_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch(transa_array_.data(),
-	                  transb_array_.data(),
+	dmrg_Xgemm_vbatch(transa,
+	                  transb,
 	                  m_array_.data(),
 	                  n_array_.data(),
 	                  k_array_.data(),
-	                  alpha_array_.data(),
+	                  alpha,
 	                  a_array_.data(),
 	                  lda_array_.data(),
 	                  b_array_.data(),
 	                  ldb_array_.data(),
-	                  beta_array_.data(),
+	                  beta,
 	                  c_array_.data(),
 	                  ldc_array_.data(),
 	                  ngroups,
@@ -220,24 +214,20 @@ void apply_Htarget_vbatch(SizeType            noperator,
 		                                    transpose( Abatch( L1:L2,1:ncolBX) );
 		   --------------------------------------------------------------------
 		 */
-		group_size_[igroup - 1]   = 1;
-		transa_array_[igroup - 1] = 'N';
-		transb_array_[igroup - 1] = 'T';
-		IntegerType mm            = nrowYI;
-		IntegerType nn            = ncolYI;
-		IntegerType kk            = ncolBX;
-		m_array_[igroup - 1]      = mm;
-		n_array_[igroup - 1]      = nn;
-		k_array_[igroup - 1]      = kk;
+		group_size_[igroup - 1] = 1;
+		IntegerType mm          = nrowYI;
+		IntegerType nn          = ncolYI;
+		IntegerType kk          = ncolBX;
+		m_array_[igroup - 1]    = mm;
+		n_array_[igroup - 1]    = nn;
+		k_array_[igroup - 1]    = kk;
 		gflops2 += ((2.0 * mm) * nn) * kk;
-		alpha_array_[igroup - 1] = (FpType)1;
-		beta_array_[igroup - 1]  = (FpType)0;
-		a_array_[igroup - 1]     = &(BX_[indx2f(R1, 1, ld_BX)]);
-		lda_array_[igroup - 1]   = ld_BX;
-		b_array_[igroup - 1]     = &(Abatch_[indx2f(L1, 1, ld_Abatch)]);
-		ldb_array_[igroup - 1]   = ld_Abatch;
-		c_array_[igroup - 1]     = YI;
-		ldc_array_[igroup - 1]   = ld_YI;
+		a_array_[igroup - 1]   = &(BX_[indx2f(R1, 1, ld_BX)]);
+		lda_array_[igroup - 1] = ld_BX;
+		b_array_[igroup - 1]   = &(Abatch_[indx2f(L1, 1, ld_Abatch)]);
+		ldb_array_[igroup - 1] = ld_Abatch;
+		c_array_[igroup - 1]   = YI;
+		ldc_array_[igroup - 1] = ld_YI;
 	};
 	ngroups = npatches;
 
@@ -246,18 +236,20 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	 second vbatch DGEMM
 	 ------------------
 	 */
+	transa          = 'N';
+	transb          = 'T';
 	time_2nd_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch(transa_array_.data(),
-	                  transb_array_.data(),
+	dmrg_Xgemm_vbatch(transa,
+	                  transb,
 	                  m_array_.data(),
 	                  n_array_.data(),
 	                  k_array_.data(),
-	                  alpha_array_.data(),
+	                  alpha,
 	                  a_array_.data(),
 	                  lda_array_.data(),
 	                  b_array_.data(),
 	                  ldb_array_.data(),
-	                  beta_array_.data(),
+	                  beta,
 	                  c_array_.data(),
 	                  ldc_array_.data(),
 	                  ngroups,
