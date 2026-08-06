@@ -26,9 +26,4 @@ void setup_vbatch(
     const VectorSizeType&  ld_Bmatrix_ /* array of leading dimension of the small Bmat matrices */
 );
 
-void unsetup_vbatch(IntegerType** p_left_patch_start,
-                    IntegerType** p_right_patch_start,
-                    IntegerType** p_xy_patch_start,
-                    FpType**      p_Abatch_,
-                    FpType**      p_Bbatch_);
 #endif

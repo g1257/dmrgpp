@@ -192,9 +192,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
                        IntegerType* n_array,
                        IntegerType* k_array,
                        T            alpha,
-                       T**          a_array,
+                       const T**    a_array,
                        IntegerType* lda_array,
-                       T**          b_array,
+                       const T**    b_array,
                        IntegerType* ldb_array,
                        T            beta,
                        T**          c_array,
@@ -269,13 +269,13 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 
 	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
-	KokkosScalar** a_vbatch
-	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
+	const KokkosScalar** a_vbatch = reinterpret_cast<const KokkosScalar**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
 	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
-	KokkosScalar** b_vbatch
-	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
+	const KokkosScalar** b_vbatch = reinterpret_cast<const KokkosScalar**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(nbytes));
 
 	nbytes = sizeof(KokkosScalar*) * (vbatch_dim);
 	nbytes_total += nbytes;
@@ -293,8 +293,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 			ldb_vbatch[idx] = ldb_array[igroup];
 			ldc_vbatch[idx] = ldc_array[igroup];
 
-			a_vbatch[idx] = reinterpret_cast<KokkosScalar*>(a_array[idx]);
-			b_vbatch[idx] = reinterpret_cast<KokkosScalar*>(b_array[idx]);
+			a_vbatch[idx] = reinterpret_cast<const KokkosScalar*>(a_array[idx]);
+			b_vbatch[idx] = reinterpret_cast<const KokkosScalar*>(b_array[idx]);
 			c_vbatch[idx] = reinterpret_cast<KokkosScalar*>(c_array[idx]);
 
 			idx = idx + 1;
@@ -669,8 +669,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 			const IntegerType lda = lda_vbatch[i];
 			const IntegerType ldb = ldb_vbatch[i];
 			const IntegerType ldc = ldc_vbatch[i];
-			const T*          pa  = reinterpret_cast<T*>(a_vbatch[i]);
-			const T*          pb  = reinterpret_cast<T*>(b_vbatch[i]);
+			const T*          pa  = reinterpret_cast<const T*>(a_vbatch[i]);
+			const T*          pb  = reinterpret_cast<const T*>(b_vbatch[i]);
 			T*                pc  = reinterpret_cast<T*>(c_vbatch[i]);
 
 			Xgemm_(&ctransa,
@@ -715,9 +715,9 @@ template void dmrg_Xgemm_vbatch<double>(char,
                                         IntegerType*,
                                         IntegerType*,
                                         double,
-                                        double**,
+                                        const double**,
                                         IntegerType*,
-                                        double**,
+                                        const double**,
                                         IntegerType*,
                                         double,
                                         double**,
@@ -725,21 +725,21 @@ template void dmrg_Xgemm_vbatch<double>(char,
                                         SizeType,
                                         IntegerType*);
 
-template void dmrg_Xgemm_vbatch<std::complex<double>>(char                   ctransa_array,
-                                                      char                   ctransb_array,
-                                                      IntegerType*           m_array,
-                                                      IntegerType*           n_array,
-                                                      IntegerType*           k_array,
-                                                      std::complex<double>   alpha,
-                                                      std::complex<double>** a_array,
-                                                      IntegerType*           lda_array,
-                                                      std::complex<double>** b_array,
-                                                      IntegerType*           ldb_array,
-                                                      std::complex<double>   beta,
-                                                      std::complex<double>** c_array,
-                                                      IntegerType*           ldc_array,
-                                                      SizeType               group_count,
-                                                      IntegerType*           group_size);
+template void dmrg_Xgemm_vbatch<std::complex<double>>(char                         ctransa_array,
+                                                      char                         ctransb_array,
+                                                      IntegerType*                 m_array,
+                                                      IntegerType*                 n_array,
+                                                      IntegerType*                 k_array,
+                                                      std::complex<double>         alpha,
+                                                      const std::complex<double>** a_array,
+                                                      IntegerType*                 lda_array,
+                                                      const std::complex<double>** b_array,
+                                                      IntegerType*                 ldb_array,
+                                                      std::complex<double>         beta,
+                                                      std::complex<double>**       c_array,
+                                                      IntegerType*                 ldc_array,
+                                                      SizeType                     group_count,
+                                                      IntegerType*                 group_size);
 
 template void
 dmrg_Xgetvector<double>(const IntegerType, double*, const IntegerType, double*, const IntegerType);

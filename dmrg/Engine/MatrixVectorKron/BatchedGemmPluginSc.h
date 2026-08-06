@@ -6,6 +6,10 @@
 #include <PsimagLite/Matrix.h>
 #include <PsimagLite/ProgressIndicator.h>
 #include <PsimagLite/Vector.h>
+
+#include <Kokkos_Core.hpp>
+#include <PsimagLite/KokkosType.h>
+
 #include <cassert>
 #include <complex>
 
@@ -122,9 +126,22 @@ public:
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
 		assert(enabled());
-		ComplexOrRealType* vinptr  = const_cast<ComplexOrRealType*>(&(vin[0]));
-		ComplexOrRealType* voutptr = const_cast<ComplexOrRealType*>(&(vout[0]));
-		batchedGemm_->apply_Htarget(vinptr, voutptr);
+		using KokkosScalar = PsimagLite::KokkosType<ComplexOrRealType>::type;
+		Kokkos::DefaultExecutionSpace exec;
+		Kokkos::SharedSpace           mem;
+
+		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+		     vin_view(reinterpret_cast<const KokkosScalar*>(vin.data()), vin.size());
+		auto vin_view_shared
+		    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), vin_view);
+
+		Kokkos::View<KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> vout_view(
+		    reinterpret_cast<KokkosScalar*>(vout.data()), vout.size());
+		auto vout_view_shared
+		    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), vout_view);
+
+		batchedGemm_->apply_Htarget(vin_view_shared, vout_view_shared);
+		Kokkos::deep_copy(vout_view, vout_view_shared);
 	}
 
 private:

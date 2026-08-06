@@ -3,6 +3,7 @@
 
 #include "GPUPluginConfig.h"
 #include "dmrg_vbatch.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -10,17 +11,19 @@
 #include <cassert>
 #include <vector>
 
-void apply_Htarget_vbatch(SizeType            noperator,
-                          SizeType            npatches,
-                          VectorSizeType      left_patch_start_,
-                          VectorSizeType      right_patch_start_,
-                          VectorSizeType      xy_patch_start_,
-                          std::vector<FpType> Abatch_,
-                          SizeType            ld_Abatch,
-                          std::vector<FpType> Bbatch_,
-                          SizeType            ld_Bbatch,
-                          FpType*             X_,
-                          FpType*             Y_)
+using KokkosScalar = PsimagLite::KokkosType<FpType>::type;
+
+void apply_Htarget_vbatch(SizeType                                               noperator,
+                          SizeType                                               npatches,
+                          VectorSizeType                                         left_patch_start_,
+                          VectorSizeType                                         right_patch_start_,
+                          VectorSizeType                                         xy_patch_start_,
+                          std::vector<FpType>                                    Abatch_,
+                          SizeType                                               ld_Abatch,
+                          std::vector<FpType>                                    Bbatch_,
+                          SizeType                                               ld_Bbatch,
+                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> X_,
+                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Y_)
 {
 	const IntegerType idebug = 1;
 	const IntegerType ialign = 32;
@@ -64,9 +67,9 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	FpType alpha = 1.;
 	FpType beta  = 0.;
 
-	std::vector<FpType*> a_array_(batch_size_dim);
-	std::vector<FpType*> b_array_(batch_size_dim);
-	std::vector<FpType*> c_array_(batch_size_dim);
+	std::vector<const FpType*> a_array_(batch_size_dim);
+	std::vector<const FpType*> b_array_(batch_size_dim);
+	std::vector<FpType*>       c_array_(batch_size_dim);
 
 	std::vector<IntegerType> m_array_(ngroups_dim);
 	std::vector<IntegerType> n_array_(ngroups_dim);
@@ -85,9 +88,8 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	IntegerType ncolBX = (ncolA * noperator);
 	IntegerType ld_BX  = ialign * ICEIL(nrowBX, ialign);
 
-	nbytes_BX   = ((sizeof(FpType) * ld_BX) * (ncolA * noperator));
-	FpType* BX_ = new FpType[ld_BX * ncolA * noperator];
-	assert(BX_ != NULL);
+	nbytes_BX = ((sizeof(FpType) * ld_BX) * (ncolA * noperator));
+	std::vector<FpType> BX_(ld_BX * ncolA * noperator);
 
 	IntegerType idx = 1;
 	for (SizeType jpatch = 1; jpatch <= npatches; jpatch++) {
@@ -106,8 +108,8 @@ void apply_Htarget_vbatch(SizeType            noperator,
 		 XJ = reshape( X(j1:j2), nrowX, ncolX )
 		 --------------------------------------
 		 */
-		FpType*     XJ    = &(X_[j1 - 1]);
-		IntegerType ld_XJ = nrowX;
+		const KokkosScalar* XJ    = &(X_[j1 - 1]);
+		IntegerType         ld_XJ = nrowX;
 
 		IntegerType R1   = right_patch_start_[jpatch - 1];
 		IntegerType R2   = right_patch_start_[jpatch] - 1;
@@ -150,8 +152,8 @@ void apply_Htarget_vbatch(SizeType            noperator,
 			b_array_[idx - 1]      = XJ;
 			ldb_array_[igroup - 1] = ld_XJ;
 			idx                    = idx + 1;
-		};
-	};
+		}
+	}
 	/*
 	 ------------------
 	 first vbatch DGEMM
@@ -270,7 +272,4 @@ void apply_Htarget_vbatch(SizeType            noperator,
 		       (gflops1 + gflops2) / (time_1st_vbatch + time_2nd_vbatch));
 		printf("memory BX(%lf GBytes)\n", (double)nbytes_BX / (giga));
 	};
-
-	// dmrg_free( (void *) BX_ );
-	delete[] BX_;
 }

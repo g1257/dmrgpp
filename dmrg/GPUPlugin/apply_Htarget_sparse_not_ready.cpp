@@ -1,29 +1,30 @@
 #include "GPUPluginConfig.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
+
+#include <Kokkos_Core.hpp>
+#include <PsimagLite/KokkosType.h>
+
 #include <algorithm>
 #include <cassert>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-template <typename T>
-void apply_Htarget_sparse(SizeType                 noperator,
-                          SizeType                 npatches,
-                          VectorSizeType           left_patch_start_,
-                          VectorSizeType           right_patch_start_,
-                          VectorSizeType           xy_patch_start_,
-                          VectorSizeType           nC_,
-                          T**                      gAbatch_,
-                          const VectorIntegerType& ld_gAbatch_,
-                          T**                      gBbatch_,
-                          const VectorIntegerType& ld_gBbatch_,
-                          T*                       Xin_,
-                          T*                       Yout_)
+template <typename T, typename KokkosScalar>
+void apply_Htarget_sparse(SizeType                                               noperator,
+                          SizeType                                               npatches,
+                          VectorSizeType                                         left_patch_start_,
+                          VectorSizeType                                         right_patch_start_,
+                          VectorSizeType                                         xy_patch_start_,
+                          VectorSizeType                                         nC_,
+                          T**                                                    gAbatch_,
+                          const VectorIntegerType&                               ld_gAbatch_,
+                          T**                                                    gBbatch_,
+                          const VectorIntegerType&                               ld_gBbatch_,
+                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> Xin_,
+                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Yout_)
 {
-
-	typedef std::vector<T*> VectorPointerType;
-
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 	const IntegerType idebug = 1;
 	const SizeType    ialign = 32;
@@ -39,14 +40,11 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	double time_1st_vbatch = 0.0;
 	double time_2nd_vbatch = 0.0;
 
-	T* X_ = &(Xin_[0]);
-	T* Y_ = &(Yout_[0]);
-#ifdef USE_MAGMA
-	IntegerType need_allocate_X = !dmrg_is_managed(Xin_);
-	IntegerType need_allocate_Y = !dmrg_is_managed(Yout_);
-#endif
-	assert(X_ != nullptr);
-	assert(Y_ != nullptr);
+	Kokkos::DefaultExecutionSpace exec;
+	Kokkos::SharedSpace           mem;
+
+	auto X_ = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Xin_);
+	auto Y_ = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Yout_);
 
 	/*
 	 ------------------
@@ -85,40 +83,22 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 * allocate unified memory
 	 * -----------------------
 	 */
-	if (need_allocate_X) {
-		nbytes_X = sizeof(T) * xy_size_dim;
-		X_       = dmrg_malloc<T>(nbytes_X, nbytes_X);
-		assert(X_ != nullptr);
 
-#ifdef USE_MAGMA
-		{
-			IntegerType ngpu         = dmrg_get_ngpu();
-			IntegerType igpu         = 0;
-			size_t      X_inc        = xy_size_dim / ngpu;
-			size_t      X_inc_nbytes = sizeof(T) * X_inc;
-			for (igpu = 0; igpu < ngpu; igpu++) {
-				size_t offset = igpu * X_inc;
-				T*     pX     = &(X_[offset]);
-				dmrg_set_readonly((void*)pX, X_inc_nbytes, igpu);
-				dmrg_prefetch_to_device((void*)pX, X_inc_nbytes, igpu);
-			};
-		}
-#endif
-		void*  dest  = (void*)&(X_[0]);
-		void*  src   = (void*)&(Xin_[0]);
-		size_t count = sizeof(T) * xy_size;
-		dmrg_memcpy(dest, src, count);
+	{
+		IntegerType ngpu         = dmrg_get_ngpu();
+		IntegerType igpu         = 0;
+		size_t      X_inc        = xy_size_dim / ngpu;
+		size_t      X_inc_nbytes = sizeof(T) * X_inc;
+		for (igpu = 0; igpu < ngpu; igpu++) {
+			size_t              offset = igpu * X_inc;
+			const KokkosScalar* pX     = &(X_[offset]);
+			dmrg_set_readonly((void*)pX, X_inc_nbytes, igpu);
+			dmrg_prefetch_to_device((void*)pX, X_inc_nbytes, igpu);
+		};
 	}
-
-	if (need_allocate_Y) {
-		nbytes_Y = sizeof(T) * xy_size_dim;
-		Y_       = dmrg_malloc<T>(nbytes_Y, nbytes_Y);
-		assert(Y_ != nullptr);
-	}
-
+	Kokkos::deep_copy(exec, Y_, Xin_);
 #endif
 
-	IntegerType nnz_nC = 0;
 	SizeType    sum_nC = 0;
 	IntegerType max_nC = 0;
 
@@ -155,7 +135,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 
 				sum_nC += nconnector;
 				max_nC = std::max(max_nC, nconnector);
-				nnz_nC++;
 				BX_sizes_[ipatch - 1] += ld_BX * (ncolBX * nconnector);
 			};
 		};
@@ -170,29 +149,14 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 setup gBXbatch
 	 ---------------
 	 */
-	// T* gBXbatch_[npatches];
-	VectorPointerType gBXbatch_(npatches, nullptr);
+	KokkosScalar** gBXbatch_ = reinterpret_cast<KokkosScalar**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(npatches * sizeof(KokkosScalar*)));
 
 	nbytes_BX = sizeof(T) * sum_BX_sizes;
-	T* pBXmem = dmrg_malloc<T>(nbytes_BX, nbytes_BX);
-
-	if (pBXmem == NULL) {
-		printf("apply_Htarget_sparse: sum_BX_sizes=%le\n", (double)sum_BX_sizes);
-		printf("max_nC=%d, sum_nC=%lu, nnz_nC=%d\n", max_nC, sum_nC, nnz_nC);
-
-		SizeType ipatch = 0;
-		for (ipatch = 1; ipatch <= npatches; ipatch++) {
-			printf("ld_gBbatch(%lu)=%d, ld_gAbatch(%lu)=%d\n",
-			       ipatch,
-			       ld_gBbatch_[ipatch - 1],
-			       ipatch,
-			       ld_gAbatch_[ipatch - 1]);
-		};
-	};
-	assert(pBXmem != NULL);
+	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> pBXmem("pBXmem", sum_BX_sizes);
 
 	{
-		T* BXbatch = pBXmem;
+		KokkosScalar* BXbatch = pBXmem.data();
 		for (ipatch = 1; ipatch <= npatches; ipatch++) {
 			gBXbatch_[ipatch - 1] = BXbatch;
 			BXbatch += BX_sizes_[ipatch - 1];
@@ -213,40 +177,30 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	T alpha = 1.;
 	T beta  = 0.;
 
-	T** a_array_ = dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
-	T** b_array_ = dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
-	T** c_array_ = dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
+	KokkosScalar const** a_array_ = reinterpret_cast<KokkosScalar const**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
+	KokkosScalar const** b_array_ = reinterpret_cast<KokkosScalar const**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
+	KokkosScalar** c_array_ = reinterpret_cast<KokkosScalar**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
 	assert(a_array_ != nullptr);
 	assert(b_array_ != nullptr);
 	assert(c_array_ != nullptr);
 
-	IntegerType* m_array_    = dmrg_malloc<IntegerType>(sizeof(IntegerType) * ngroups_dim,
-                                                         sizeof(IntegerType) * ngroups_dim);
-	IntegerType* n_array_    = dmrg_malloc<IntegerType>(sizeof(IntegerType) * ngroups_dim,
-                                                         sizeof(IntegerType) * ngroups_dim);
-	IntegerType* k_array_    = dmrg_malloc<IntegerType>(sizeof(IntegerType) * ngroups_dim,
-                                                         sizeof(IntegerType) * ngroups_dim);
-	IntegerType* group_size_ = dmrg_malloc<IntegerType>(sizeof(IntegerType) * ngroups_dim,
-	                                                    sizeof(IntegerType) * ngroups_dim);
-	IntegerType* lda_array_  = dmrg_malloc<IntegerType>(sizeof(IntegerType) * batch_size_dim,
-                                                           sizeof(IntegerType) * batch_size_dim);
-	IntegerType* ldb_array_  = dmrg_malloc<IntegerType>(sizeof(IntegerType) * batch_size_dim,
-                                                           sizeof(IntegerType) * batch_size_dim);
-	IntegerType* ldc_array_  = dmrg_malloc<IntegerType>(sizeof(IntegerType) * batch_size_dim,
-                                                           sizeof(IntegerType) * batch_size_dim);
-	assert(m_array_ != nullptr);
-	assert(n_array_ != nullptr);
-	assert(k_array_ != nullptr);
-	assert(group_size_ != nullptr);
-	assert(lda_array_ != nullptr);
-	assert(ldb_array_ != nullptr);
-	assert(ldc_array_ != nullptr);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> m_array_("m_array", ngroups_dim);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> n_array_("n_array", ngroups_dim);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> k_array_("k_array", ngroups_dim);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> group_size_("group_size", ngroups_dim);
+
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> lda_array_("lda_array", batch_size_dim);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> ldb_array_("ldb_array", batch_size_dim);
+	Kokkos::View<IntegerType*, Kokkos::SharedSpace> ldc_array_("ldc_array", batch_size_dim);
 
 	IntegerType ibatch = 1;
 	gflops1            = 0;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
-		T* BXbatch = gBXbatch_[ipatch - 1];
-		T* Bbatch  = gBbatch_[ipatch - 1];
+		KokkosScalar* BXbatch = gBXbatch_[ipatch - 1];
+		T*            Bbatch  = gBbatch_[ipatch - 1];
 
 		for (jpatch = 1; jpatch <= npatches; jpatch++) {
 			IntegerType nconnection = nC_[indx2f(ipatch, jpatch, npatches)];
@@ -270,9 +224,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 				IntegerType ld_B  = ld_gBbatch_[ipatch - 1];
 				IntegerType ld_BX = ld_B;
 
-				IntegerType ix1   = xy_patch_start_[jpatch - 1];
-				T*          XJ    = &(X_[ix1 - 1]);
-				IntegerType ld_XJ = nrowX;
+				IntegerType         ix1   = xy_patch_start_[jpatch - 1];
+				const KokkosScalar* XJ    = &(X_[ix1 - 1]);
+				IntegerType         ld_XJ = nrowX;
 
 				assert((1 <= nrowY) && (1 <= ncolY));
 				assert((1 <= nrowX) && (1 <= ncolX));
@@ -292,9 +246,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 					IntegerType nn = ncolBX;
 					IntegerType kk = ncolB;
 
-					T* pA = Bbatch;
-					T* pB = XJ;
-					T* pC = BXbatch;
+					T*                  pA = Bbatch;
+					const KokkosScalar* pB = XJ;
+					KokkosScalar*       pC = BXbatch;
 
 					IntegerType ld1 = ld_B;
 					IntegerType ld2 = ld_XJ;
@@ -308,7 +262,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 					ldb_array_[ibatch - 1] = ld2;
 					ldc_array_[ibatch - 1] = ld3;
 
-					a_array_[ibatch - 1] = pA;
+					a_array_[ibatch - 1]
+					    = reinterpret_cast<const KokkosScalar*>(pA);
 					b_array_[ibatch - 1] = pB;
 					c_array_[ibatch - 1] = pC;
 
@@ -343,32 +298,32 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	time_1st_vbatch = -dmrg_get_wtime();
 	dmrg_Xgemm_vbatch<T>(transA,
 	                     transB,
-	                     m_array_,
-	                     n_array_,
-	                     k_array_,
+	                     m_array_.data(),
+	                     n_array_.data(),
+	                     k_array_.data(),
 	                     alpha,
-	                     a_array_,
-	                     lda_array_,
-	                     b_array_,
-	                     ldb_array_,
+	                     reinterpret_cast<const T**>(a_array_),
+	                     lda_array_.data(),
+	                     reinterpret_cast<const T**>(b_array_),
+	                     ldb_array_.data(),
 	                     beta,
-	                     c_array_,
-	                     ldc_array_,
+	                     reinterpret_cast<T**>(c_array_),
+	                     ldc_array_.data(),
 	                     ngroups,
-	                     group_size_);
+	                     group_size_.data());
 	time_1st_vbatch += dmrg_get_wtime();
 	gflops1 = gflops1 / giga;
 
 #ifdef USE_MAGMA
 	{
-		T*          BX_           = pBXmem;
-		IntegerType ngpu          = dmrg_get_ngpu();
-		IntegerType igpu          = 0;
-		size_t      BX_inc        = sum_BX_sizes / ngpu;
-		size_t      BX_inc_nbytes = sizeof(T) * BX_inc;
+		KokkosScalar* BX_           = pBXmem.data();
+		IntegerType   ngpu          = dmrg_get_ngpu();
+		IntegerType   igpu          = 0;
+		size_t        BX_inc        = sum_BX_sizes / ngpu;
+		size_t        BX_inc_nbytes = sizeof(T) * BX_inc;
 		for (igpu = 0; igpu < ngpu; igpu++) {
-			size_t offset = igpu * BX_inc;
-			T*     pBX    = &(BX_[offset]);
+			size_t        offset = igpu * BX_inc;
+			KokkosScalar* pBX    = BX_ + offset;
 			dmrg_set_readonly((void*)pBX, BX_inc_nbytes, igpu);
 		};
 	}
@@ -382,11 +337,11 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	gflops2 = 0;
 	ibatch  = 1;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
-		T* Abatch  = gAbatch_[ipatch - 1];
-		T* BXbatch = gBXbatch_[ipatch - 1];
+		T*            Abatch  = gAbatch_[ipatch - 1];
+		KokkosScalar* BXbatch = gBXbatch_[ipatch - 1];
 
-		IntegerType iy = xy_patch_start_[ipatch - 1];
-		T*          YI = &(Y_[iy - 1]);
+		IntegerType   iy = xy_patch_start_[ipatch - 1];
+		KokkosScalar* YI = &(Y_[iy - 1]);
 
 		IntegerType nrowA = left_patch_size_[ipatch - 1];
 		IntegerType nrowB = right_patch_size_[ipatch - 1];
@@ -437,9 +392,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		IntegerType nn       = ncolY;
 		IntegerType kk       = ncolumns;
 
-		T* pA = BXbatch;
-		T* pB = Abatch;
-		T* pC = YI;
+		KokkosScalar* pA = BXbatch;
+		T*            pB = Abatch;
+		KokkosScalar* pC = YI;
 
 		IntegerType ld1 = ld_BX;
 		IntegerType ld2 = ld_A;
@@ -449,8 +404,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		n_array_[ibatch - 1] = nn;
 		k_array_[ibatch - 1] = kk;
 
-		a_array_[ibatch - 1] = pA;
-		b_array_[ibatch - 1] = pB;
+		a_array_[ibatch - 1] = reinterpret_cast<KokkosScalar*>(pA);
+		b_array_[ibatch - 1] = reinterpret_cast<KokkosScalar*>(pB);
 		c_array_[ibatch - 1] = pC;
 
 		lda_array_[ibatch - 1] = ld1;
@@ -480,19 +435,19 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	time_2nd_vbatch = -dmrg_get_wtime();
 	dmrg_Xgemm_vbatch<T>(transA,
 	                     transB,
-	                     m_array_,
-	                     n_array_,
-	                     k_array_,
+	                     m_array_.data(),
+	                     n_array_.data(),
+	                     k_array_.data(),
 	                     alpha,
-	                     a_array_,
-	                     lda_array_,
-	                     b_array_,
-	                     ldb_array_,
+	                     reinterpret_cast<const T**>(a_array_),
+	                     lda_array_.data(),
+	                     reinterpret_cast<const T**>(b_array_),
+	                     ldb_array_.data(),
 	                     beta,
-	                     c_array_,
-	                     ldc_array_,
+	                     reinterpret_cast<T**>(c_array_),
+	                     ldc_array_.data(),
 	                     ngroups,
-	                     group_size_);
+	                     group_size_.data());
 	time_2nd_vbatch += dmrg_get_wtime();
 	gflops2 = gflops2 / giga;
 
@@ -510,30 +465,11 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		       (gflops1 + gflops2) / (time_1st_vbatch + time_2nd_vbatch));
 	};
 
-	assert(pBXmem != NULL);
-	dmrg_free(pBXmem);
-	pBXmem = nullptr;
-
-#ifdef USE_MAGMA
-	/*
-	 * -------------------
-	 * free unified memory
-	 * -------------------
-	 */
-
-	if (need_allocate_X) {
-		dmrg_free(X_);
-		X_ = nullptr;
-	};
-	if (need_allocate_Y) {
-		void*  dest  = &(Yout_[0]);
-		void*  src   = &(Y_[0]);
-		size_t count = sizeof(T) * xy_size;
-		dmrg_memcpy(dest, src, count);
-		dmrg_free(Y_);
-		Y_ = nullptr;
-	};
-#endif
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(a_array_);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(b_array_);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(c_array_);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(gBXbatch_);
+	Kokkos::deep_copy(exec, Yout_, Y_);
 
 	total_time += dmrg_get_wtime();
 	if (idebug >= 1) {
@@ -555,18 +491,19 @@ template void apply_Htarget_sparse<double>(SizeType,
                                            const VectorIntegerType&,
                                            double**,
                                            const VectorIntegerType&,
-                                           double*,
-                                           double*);
+                                           Kokkos::View<const double*, Kokkos::SharedSpace>,
+                                           Kokkos::View<double*, Kokkos::SharedSpace>);
 
-template void apply_Htarget_sparse<std::complex<double>>(SizeType,
-                                                         SizeType,
-                                                         VectorSizeType,
-                                                         VectorSizeType,
-                                                         VectorSizeType,
-                                                         VectorSizeType,
-                                                         std::complex<double>**,
-                                                         const VectorIntegerType&,
-                                                         std::complex<double>**,
-                                                         const VectorIntegerType&,
-                                                         std::complex<double>*,
-                                                         std::complex<double>*);
+template void apply_Htarget_sparse<std::complex<double>>(
+    SizeType,
+    SizeType,
+    VectorSizeType,
+    VectorSizeType,
+    VectorSizeType,
+    VectorSizeType,
+    std::complex<double>**,
+    const VectorIntegerType&,
+    std::complex<double>**,
+    const VectorIntegerType&,
+    Kokkos::View<const Kokkos::complex<double>*, Kokkos::SharedSpace>,
+    Kokkos::View<Kokkos::complex<double>*, Kokkos::SharedSpace>);
