@@ -1,5 +1,8 @@
 #include "BatchedGemmCpu.h"
+#include "DMRGConfig.h"
+#ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
+#endif
 #include <Kokkos_Core.hpp>
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/Matrix.h>
@@ -192,7 +195,7 @@ TEST_CASE("BatchedGemm matrixVector", "[BatchedGemm]")
 	fk.yc0.set(0, 0, FakeMatrixDenseOrSparse(B));
 
 	using VectorType = PsimagLite::Vector<double>::Type;
-	VectorType vin(6), v_c(6), v_p(6);
+	VectorType vin(6);
 	for (size_t i = 0; i < 6; i++)
 		vin[i] = dist(rng);
 
@@ -220,14 +223,21 @@ TEST_CASE("BatchedGemm matrixVector", "[BatchedGemm]")
 		for (size_t row = 0; row < 3; row++)
 			expected[row + col * 3] = Y(row, col);
 
-	Dmrg::BatchedGemmCpu<FakeInitKron>      bgc(fk);
-	Dmrg::BatchedGemmPluginSc<FakeInitKron> bgp(fk);
-
-	bgc.matrixVector(v_c, vin);
-	bgp.matrixVector(v_p, vin);
-
-	for (size_t i = 0; i < 6; i++) {
-		CHECK(v_p[i] == Catch::Approx(expected[i]).epsilon(1e-12));
-		CHECK(v_c[i] == Catch::Approx(expected[i]).epsilon(1e-12));
+	{
+		VectorType                         v_c(6);
+		Dmrg::BatchedGemmCpu<FakeInitKron> bgc(fk);
+		bgc.matrixVector(v_c, vin);
+		for (size_t i = 0; i < 6; i++)
+			CHECK(v_c[i] == Catch::Approx(expected[i]).epsilon(1e-12));
 	}
+
+#ifdef PLUGIN_SC
+	{
+		VectorType                              v_p(6);
+		Dmrg::BatchedGemmPluginSc<FakeInitKron> bgp(fk);
+		bgp.matrixVector(v_p, vin);
+		for (size_t i = 0; i < 6; i++)
+			CHECK(v_p[i] == Catch::Approx(expected[i]).epsilon(1e-12));
+	}
+#endif
 }

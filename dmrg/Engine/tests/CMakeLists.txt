@@ -4,10 +4,11 @@ target_include_directories(test_LastKrylovSlots PRIVATE ${CMAKE_SOURCE_DIR}/dmrg
 catch_discover_tests(test_LastKrylovSlots)
 
 # BatchedGemm test
-if(DMRG_BUILD_BATCHED)
-  add_executable(test_BatchedGemm test_BatchedGemm.cpp)
-  target_link_libraries(test_BatchedGemm PRIVATE Catch2::Catch2WithMain dmrgpp_utils psimaglite gpuplugin)
-  target_include_directories(test_BatchedGemm PRIVATE ${CMAKE_SOURCE_DIR}/dmrg/Engine
-                                                      ${CMAKE_SOURCE_DIR}/dmrg/Engine/MatrixVectorKron)
-  catch_discover_tests(test_BatchedGemm)
+add_executable(test_BatchedGemm test_BatchedGemm.cpp)
+target_link_libraries(test_BatchedGemm PRIVATE Catch2::Catch2WithMain dmrgpp_utils psimaglite)
+if(PLUGIN_SC)
+  target_link_libraries(test_BatchedGemm PRIVATE gpuplugin)
 endif()
+target_include_directories(test_BatchedGemm PRIVATE ${CMAKE_SOURCE_DIR}/dmrg/Engine
+                                                    ${CMAKE_SOURCE_DIR}/dmrg/Engine/MatrixVectorKron)
+catch_discover_tests(test_BatchedGemm)
