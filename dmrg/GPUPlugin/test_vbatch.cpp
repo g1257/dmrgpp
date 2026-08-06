@@ -23,7 +23,6 @@
 #endif
 
 #ifdef USE_MAGMA
-#include "cuda.h"
 #include "magma_v2.h"
 #endif
 

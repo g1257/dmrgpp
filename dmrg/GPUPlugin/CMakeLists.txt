@@ -2,7 +2,6 @@ set(SRC_FILES
     apply_Htarget_vbatch.cpp
     cal_kron_flops.cpp
     dmrg_lapack.cpp
-    dmrg_malloc.cpp
     dmrg_vbatch.cpp
     gen_patches_comb.cpp
     setup_matrix.cpp
@@ -20,6 +19,16 @@ if(DMRG_BUILD_BATCHED_MAGMA)
   find_package(PkgConfig REQUIRED)
 
   pkg_check_modules(MAGMA REQUIRED IMPORTED_TARGET magma)
+
+  if(Kokkos_ENABLE_HIP)
+    list(APPEND SRC_FILES "dmrg_malloc_hip.cpp")
+  elseif(Kokkos_ENABLE_CUDA)
+    list(APPEND SRC_FILES "dmrg_malloc_cuda.cpp")
+  else()
+    message(FATAL_ERROR "MAGMA requires either the HIP or CUDA backend!")
+  endif()
+else()
+  list(APPEND SRC_FILES "dmrg_malloc.cpp")
 endif()
 
 set(FpType "double")
