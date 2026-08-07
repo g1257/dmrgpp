@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
-#include "VectorWithOffset.h"
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/Io/IoSelector.h>
 #include <PsimagLite/ParametersForSolver.h>

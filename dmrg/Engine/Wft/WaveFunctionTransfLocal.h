@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "MatrixVectorKron/KronMatrix.h"
 #include "ParallelWftOne.h"
-#include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
 #include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "WftAccelBlocks.h"
