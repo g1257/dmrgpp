@@ -398,19 +398,31 @@ public:
 		return data_[j][i - offsets_[j]];
 	}
 
-	ComplexOrRealType& slowAccess(SizeType i)
+	PairSizeType sectorAndOffset() const
 	{
-		int j = index2Sector_[i];
-		if (j < 0) {
-			PsimagLite::String msg("VectorWithOffsets");
-			std::cerr << msg << " can't build itself dynamically yet (sorry!)\n";
-			return data_[0][0];
+		if (nzMsAndQns_.size() != 1) {
+			err("sectorAndOffset() cannot be called if there are more than one "
+			    "non trivial sector\n");
 		}
 
-		assert(static_cast<SizeType>(j) < data_.size());
-		assert(i - offsets_[j] < data_[j].size());
-		return data_[j][i - offsets_[j]];
+		SizeType sector = nzMsAndQns_[0].first;
+		assert(sector < offsets_.size());
+		return PairSizeType(sector, offsets_[sector]);
 	}
+
+	// ComplexOrRealType& slowAccess(SizeType i)
+	// {
+	// 	int j = index2Sector_[i];
+	// 	if (j < 0) {
+	// 		PsimagLite::String msg("VectorWithOffsets");
+	// 		std::cerr << msg << " can't build itself dynamically yet (sorry!)\n";
+	// 		return data_[0][0];
+	// 	}
+
+	// 	assert(static_cast<SizeType>(j) < data_.size());
+	// 	assert(i - offsets_[j] < data_[j].size());
+	// 	return data_[j][i - offsets_[j]];
+	// }
 
 	template <typename SparseVectorType> void toSparse(SparseVectorType& sv) const
 	{
