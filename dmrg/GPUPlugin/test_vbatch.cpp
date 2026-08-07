@@ -295,7 +295,7 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 		    xy_size,
 		    KOKKOS_LAMBDA(const int i, KokkosScalar& partial_sum) { partial_sum += Y_[i]; },
 		    Y_avg);
-		Y_avg /= static_cast<FpType>(xy_size);
+		Y_avg /= static_cast<KokkosScalar>(xy_size);
 
 		Kokkos::MinMax<KokkosScalar>::value_type Result;
 		Kokkos::parallel_reduce(
