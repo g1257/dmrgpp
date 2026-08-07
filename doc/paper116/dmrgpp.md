@@ -230,8 +230,22 @@ with block-sparse matrices. Lanczos accesses the Hamiltonian through a common
 matrix-vector interface. DMRG++ can store the sparse Hamiltonian, apply it
 on-the-fly through the model, or evaluate its Kronecker-product decomposition
 without constructing the full superblock matrix. The conventional numerical
-path uses threaded execution, BLAS, and LAPACK. Through PsimagLite, Kokkos and
-Kokkos Kernels will provide portable kernels in the future. For now, an optional integrated batched path can
+path uses threaded execution, BLAS, and LAPACK.
+To address the growing heterogeneity of high-performance computing platforms, 
+DMRG++ is being ported to use Kokkos and Kokkos Kernels [@KokkosCore2022; 
+@KokkosKernels2021; @KokkosEcosystem2021] through the PsimagLite library. 
+Kokkos is a performance-portability ecosystem that enables a single C++ 
+source code implementation to run efficiently across diverse architectures—
+from laptop CPUs to GPU-accelerated nodes on leadership-class supercomputers—
+by abstracting parallel execution patterns and memory layout management. 
+Kokkos Kernels complements this by providing an extensive suite of 
+performance-portable linear algebra primitives, including sparse matrix-vector 
+operations, dense linear solvers, and batched kernels that are critical for 
+DMRG++'s computationally intensive operations. This approach will allow 
+DMRG++ to leverage current and future hardware architectures without 
+maintaining separate code paths for different platforms, while preserving 
+the numerical accuracy and convergence properties that users depend on.
+For now, an optional integrated batched path can
 use MAGMA as an accelerator backend.
 
 The targeting layer determines which states contribute to the reduced density
@@ -270,11 +284,18 @@ run.
 
 # Project Infrastructure
 
-A CMake build system organizes common implementation code into internal
-library targets linked by the command-line executables. The shared model,
-targeting, and matrix-vector interfaces provide compiled extension points
-within the source tree while retaining common solver, input, and test
-infrastructure; they are not presented as a stable public library API.
+DMRG++ uses a CMake-based build system to organize its modular architecture. 
+Common implementation code is structured as internal library targets that are 
+linked into multiple command-line executables, promoting code reuse while 
+maintaining clear separation between components. The shared interfaces for 
+models, targeting methods, and matrix-vector operations serve as compiled 
+extension points within the source tree—new physics models or numerical 
+methods can be added by implementing these interfaces and registering them 
+with the appropriate selectors. This design preserves unified solver, input 
+parsing, and testing infrastructure across all extensions. These internal 
+interfaces are not exposed as a stable public library API; instead, they 
+provide structured development pathways for contributors working within the 
+DMRG++ source tree.
 
 Regression tests are based on actual previous scientific applications of
 DMRG++ using representative input files and compare
