@@ -647,9 +647,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 				KokkosScalar** pb_vbatch = gpb_vbatch[idev];
 				KokkosScalar** pc_vbatch = gpc_vbatch[idev];
 
-				Kokkos::kokkos_free(pa_vbatch);
-				Kokkos::kokkos_free(pb_vbatch);
-				Kokkos::kokkos_free(pc_vbatch);
+				Kokkos::kokkos_free<Kokkos::SharedSpace>(pa_vbatch);
+				Kokkos::kokkos_free<Kokkos::SharedSpace>(pb_vbatch);
+				Kokkos::kokkos_free<Kokkos::SharedSpace>(pc_vbatch);
 			} /* end for idev */
 
 			idev   = 0;
@@ -690,9 +690,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 	};
 #endif
 
-	Kokkos::kokkos_free(a_vbatch);
-	Kokkos::kokkos_free(b_vbatch);
-	Kokkos::kokkos_free(c_vbatch);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(a_vbatch);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(b_vbatch);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(c_vbatch);
 
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
