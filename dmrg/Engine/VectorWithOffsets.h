@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 // forward declaration for friendship
-template<typename T>
-class OffsetVectorAny;
+template <typename T> class OffsetVectorAny;
 
 template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 

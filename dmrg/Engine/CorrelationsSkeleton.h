@@ -82,10 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "Braket.h"
 #include "ObserverHelper.h"
+#include "OffsetVector.hpp"
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/Matrix.h>
 #include <PsimagLite/PackIndices.h>
-#include "OffsetVector.hpp"
 #include <numeric>
 
 namespace Dmrg {
@@ -107,8 +107,8 @@ public:
 	using FieldType              = typename VectorType::value_type;
 	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
 	using SparseMatrixType       = PsimagLite::CrsMatrix<FieldType>;
-	using OffsetVectorType = OffsetVector<FieldType>;
-	using OffsetVectorBaseType = OffsetVectorBase<FieldType>;
+	using OffsetVectorType       = OffsetVector<FieldType>;
+	using OffsetVectorBaseType   = OffsetVectorBase<FieldType>;
 
 	enum class GrowDirection
 	{
@@ -536,6 +536,9 @@ private:
 	                         const VectorWithOffsetType& vec2,
 	                         SizeType                    ptr) const
 	{
+		OffsetVectorType vec2proxy;
+		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
+
 		FieldType       sum = 0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
@@ -554,7 +557,7 @@ private:
 					                  .permutationInverse(r2 + eta * A.cols());
 					sum += A.getValue(k)
 					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
-					    * vec2.slowAccess(t2);
+					    * vec2opt.slowAccess(t2);
 				}
 			}
 		}
@@ -572,6 +575,9 @@ private:
 		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
 		RealType sign = fermionSignBasis(fermionicSign, helper_.leftRightSuper(ptr).left());
+
+		OffsetVectorType vec2proxy;
+		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
 
 		FieldType       sum = 0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
@@ -594,7 +600,7 @@ private:
 					                  .permutationInverse(r + eta2 * leftSize);
 					sum += A.getValue(k)
 					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
-					    * vec2.slowAccess(t2) * sign;
+					    * vec2opt.slowAccess(t2) * sign;
 				}
 			}
 		}
@@ -642,6 +648,9 @@ private:
 		if (ni != Acrs.rows())
 			err("Observe::brRghtCrnrSystem_(...)\n");
 
+		OffsetVectorType vec2proxy;
+		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
+
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
@@ -677,7 +686,7 @@ private:
 						sum += Acrs.getValue(k) * Bcrs.getValue(k2)
 						    * PsimagLite::conj(
 						           vec1.fastAccess(sector, t - offset))
-						    * vec2.slowAccess(t2) * sign;
+						    * vec2opt.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -706,6 +715,9 @@ private:
 			err("Observe::brLftCrnrEnviron_(...)\n");
 		if (helper_.leftRightSuper(ptr).right().size() / Bcrs.rows() != Acrs.rows())
 			err("Observe::brLftCrnrEnviron_(...)\n");
+
+		OffsetVectorType vec2proxy;
+		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
@@ -746,7 +758,7 @@ private:
 						    * Bcrs.getValue(k2)
 						    * PsimagLite::conj(
 						           vec1.fastAccess(sector, t - offset))
-						    * vec2.slowAccess(t2) * sign;
+						    * vec2opt.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -792,7 +804,7 @@ private:
 		assert(ni == A1crs.rows());
 
 		OffsetVectorType vec2proxy;
-		const auto& vec2opt = vec2proxy.makeOffsetVector(vec2);
+		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());

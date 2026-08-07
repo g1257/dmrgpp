@@ -1,19 +1,19 @@
 #ifndef OFFSETVECTOR_HPP
 #define OFFSETVECTOR_HPP
-#include "VectorWithOffsets.h"
 #include "Qn.h"
+#include "VectorWithOffsets.h"
 
 namespace Dmrg {
 
-template<typename ComplexOrRealType>
-class OffsetVectorBase {
+template <typename ComplexOrRealType> class OffsetVectorBase {
 public:
+
 	virtual ~OffsetVectorBase() { }
 
 	virtual const ComplexOrRealType& slowAccess(SizeType) const = 0;
 };
 
-template<typename ComplexOrRealType>
+template <typename ComplexOrRealType>
 class OffsetVectorAny : public OffsetVectorBase<ComplexOrRealType> {
 public:
 
@@ -23,27 +23,27 @@ public:
 	    : v_(v)
 	{
 		if (v_.sectors() == 1)
-			std::cerr<<"Use OffsetVectorOne instead of OffsetVectorAny for performance\n";
+			std::cerr
+			    << "Use OffsetVectorOne instead of OffsetVectorAny for performance\n";
 	}
 
-	const ComplexOrRealType& slowAccess(SizeType ind) const final
-	{
-		return v_.slowAccess(ind);
-	}
+	const ComplexOrRealType& slowAccess(SizeType ind) const final { return v_.slowAccess(ind); }
 
 private:
-	const VectorWithOffsetsType& v_;
 
+	const VectorWithOffsetsType& v_;
 };
 
-template<typename ComplexOrRealType>
-class OffsetVectorOne :  public OffsetVectorBase<ComplexOrRealType> {
+template <typename ComplexOrRealType>
+class OffsetVectorOne : public OffsetVectorBase<ComplexOrRealType> {
 public:
 
 	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
 
 	OffsetVectorOne(const VectorWithOffsetsType& v)
-	    : v_(v),sector_(0),offset_(0)
+	    : v_(v)
+	    , sector_(0)
+	    , offset_(0)
 	{
 		if (v_.sectors() != 1)
 			err("OffsetVectorOne can only be used when sectors==1\n");
@@ -57,36 +57,42 @@ public:
 	}
 
 private:
-	const VectorWithOffsetsType& v_;
-	SizeType sector_;
-	SizeType offset_;
 
+	const VectorWithOffsetsType& v_;
+	SizeType                     sector_;
+	SizeType                     offset_;
 };
 
-template<typename ComplexOrRealType>
-class OffsetVector {
+template <typename ComplexOrRealType> class OffsetVector {
 public:
+
 	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
 
-        const OffsetVectorBase<ComplexOrRealType>& makeOffsetVector(const VectorWithOffsetsType& v)
+	const OffsetVectorBase<ComplexOrRealType>& makeOffsetVector(const VectorWithOffsetsType& v)
 	{
+		OffsetVectorBase<ComplexOrRealType>* base_ptr = nullptr;
 		if (v.sectors() == 1) {
-			base_ptr_ = new OffsetVectorOne<ComplexOrRealType>(v);
+			base_ptr = new OffsetVectorOne<ComplexOrRealType>(v);
 		} else {
-			base_ptr_ = new OffsetVectorAny<ComplexOrRealType>(v);
+			base_ptr = new OffsetVectorAny<ComplexOrRealType>(v);
 		}
 
-		return *base_ptr_;
+		base_ptrs_.push_back(base_ptr); // for garbage collection
+
+		return *base_ptr;
 	}
 
 	~OffsetVector()
 	{
-		delete base_ptr_;
-		base_ptr_ = 0;
+		for (SizeType i = 0; i < base_ptrs_.size(); ++i) {
+			delete base_ptrs_[i];
+			base_ptrs_[i] = nullptr;
+		}
 	}
 
 private:
-	OffsetVectorBase<ComplexOrRealType>* base_ptr_ = nullptr;
+
+	std::vector<OffsetVectorBase<ComplexOrRealType>*> base_ptrs_;
 };
 
 }
