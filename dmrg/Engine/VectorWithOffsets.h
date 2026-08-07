@@ -89,6 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
 namespace Dmrg {
+
+// forward declaration for friendship
+template<typename T>
+class OffsetVectorAny;
+
 template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 
 	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
@@ -389,15 +394,6 @@ public:
 		return data_[i][j];
 	}
 
-	const ComplexOrRealType& slowAccess(SizeType i) const
-	{
-		assert(i < index2Sector_.size());
-		int j = index2Sector_[i];
-		if (j < 0)
-			return zero_;
-		return data_[j][i - offsets_[j]];
-	}
-
 	PairSizeType sectorAndOffset() const
 	{
 		if (nzMsAndQns_.size() != 1) {
@@ -409,20 +405,6 @@ public:
 		assert(sector < offsets_.size());
 		return PairSizeType(sector, offsets_[sector]);
 	}
-
-	// ComplexOrRealType& slowAccess(SizeType i)
-	// {
-	// 	int j = index2Sector_[i];
-	// 	if (j < 0) {
-	// 		PsimagLite::String msg("VectorWithOffsets");
-	// 		std::cerr << msg << " can't build itself dynamically yet (sorry!)\n";
-	// 		return data_[0][0];
-	// 	}
-
-	// 	assert(static_cast<SizeType>(j) < data_.size());
-	// 	assert(i - offsets_[j] < data_[j].size());
-	// 	return data_[j][i - offsets_[j]];
-	// }
 
 	template <typename SparseVectorType> void toSparse(SparseVectorType& sv) const
 	{
@@ -640,7 +622,19 @@ public:
 		return w;
 	}
 
+	friend class OffsetVectorAny<ComplexOrRealType>;
+
 private:
+
+	// Don't use directly; Use via OffsetVector which is a friend
+	const ComplexOrRealType& slowAccess(SizeType i) const
+	{
+		assert(i < index2Sector_.size());
+		int j = index2Sector_[i];
+		if (j < 0)
+			return zero_;
+		return data_[j][i - offsets_[j]];
+	}
 
 	void setIndex2Sector()
 	{
