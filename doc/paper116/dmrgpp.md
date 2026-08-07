@@ -231,7 +231,8 @@ matrix-vector interface. DMRG++ can store the sparse Hamiltonian, apply it
 on-the-fly through the model, or evaluate its Kronecker-product decomposition
 without constructing the full superblock matrix. The conventional numerical
 path uses threaded execution, BLAS, and LAPACK. Through PsimagLite, Kokkos and
-Kokkos Kernels will provide portable kernels in the future. For now, an optional integrated batched path can
+Kokkos Kernels [@KokkosCore2022; @KokkosKernels2021; @KokkosEcosystem2021]
+will provide portable kernels in the future. For now, an optional integrated batched path can
 use MAGMA as an accelerator backend.
 
 The targeting layer determines which states contribute to the reduced density
