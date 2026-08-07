@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // the non-zero structure to basis
 namespace Dmrg {
 
+<<<<<<< HEAD
 /*!
  * \brief Stores a vector as independently addressable symmetry-sector blocks.
  *
@@ -96,6 +97,11 @@ namespace Dmrg {
  * \tparam ComplexOrRealType Scalar type stored by the vector.
  * \tparam QnType_ Quantum-number type associated with each populated sector.
  */
+
+// forward declaration for friendship
+template<typename T>
+class OffsetVectorAny;
+
 template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 
 	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
@@ -490,25 +496,6 @@ public:
 		return data_[i][j];
 	}
 
-	/*!
-	 * \brief Returns an element using its full-vector index.
-	 *
-	 * Returns a reference to zero when the index belongs to an unpopulated sector.
-	 * \param[in] i Full-vector index.
-	 */
-	const ComplexOrRealType& slowAccess(SizeType i) const
-	{
-		assert(i < index2Sector_.size());
-		int j = index2Sector_[i];
-		if (j < 0)
-			return zero_;
-		return data_[j][i - offsets_[j]];
-	}
-
-	/*!
-	 * \brief Returns a mutable element reference using its full-vector index.
-	 * \param[in] i Full-vector index.
-	 */
 	PairSizeType sectorAndOffset() const
 	{
 		if (nzMsAndQns_.size() != 1) {
@@ -796,7 +783,19 @@ public:
 		return w;
 	}
 
+	friend class OffsetVectorAny<ComplexOrRealType>;
+
 private:
+
+	// Don't use directly; Use via OffsetVector which is a friend
+	const ComplexOrRealType& slowAccess(SizeType i) const
+	{
+		assert(i < index2Sector_.size());
+		int j = index2Sector_[i];
+		if (j < 0)
+			return zero_;
+		return data_[j][i - offsets_[j]];
+	}
 
 	void setIndex2Sector()
 	{

@@ -208,16 +208,18 @@ private:
 		FieldType                   sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1  = dest;
 		const VectorWithOffsetType& v2  = src2;
+
 		for (SizeType ii = 0; ii < v1.sectors(); ii++) {
 			SizeType i = v1.sector(ii);
-			for (SizeType jj = 0; jj < v1.sectors(); jj++) {
+			for (SizeType jj = 0; jj < v2.sectors(); jj++) {
 				SizeType j = v2.sector(jj);
 				if (i != j)
 					continue;
 				SizeType offset = v1.offset(i);
+				assert(offset == v2.offset(j));
 				for (SizeType k = 0; k < v1.effectiveSize(i); k++)
-					sum += v1.slowAccess(k + offset)
-					    * PsimagLite::conj(v2.slowAccess(k + offset));
+					sum += v1.fastAccess(i, k)
+					    * PsimagLite::conj(v2.fastAccess(j, k));
 			}
 		}
 
