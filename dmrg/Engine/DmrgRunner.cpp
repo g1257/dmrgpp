@@ -109,7 +109,7 @@ void DmrgRunner<RealType>::doOneRun3(const OptionsForIntrospect& op_options) con
 	using ComplexOrRealType = typename MatrixVectorType::ComplexOrRealType;
 	using SuperGeometryType
 	    = SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>;
-	using VectorWithOffsetsType =  VectorWithOffsets<ComplexOrRealType, Qn>;
+	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
 
 	assert(io_);
 	assert(dmrg_solver_params_);
