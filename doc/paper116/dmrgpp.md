@@ -17,7 +17,7 @@ authors:
     affiliation: "1" # (Multiple affiliations must be quoted)
   - name: Damien Lebrun-Grandie
     orcid: 0000-0003-1952-7219
-    affiliation: "1"
+    affiliation: "1, 2"
   - name: Peter Doak
     orcid: 0000-0001-6039-9752
     affiliation: 1
@@ -34,6 +34,9 @@ affiliations:
  - name: Oak Ridge National Laboratory
    index: 1
    ror: 01qz5mb56
+ - name: Los Alamos National Laboratory
+   index: 2
+   ror: 01e41cf67
 date: 13 August 2026
 bibliography: dmrgpp.bib
 
