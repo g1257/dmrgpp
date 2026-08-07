@@ -236,7 +236,7 @@ without constructing the full superblock matrix. The conventional numerical
 path uses threaded execution, BLAS, and LAPACK.
 To address the growing heterogeneity of high-performance computing platforms, 
 DMRG++ is being ported to use Kokkos and Kokkos Kernels [@KokkosCore2022; 
-@KokkosKernels2021; @KokkosEcosystem2021] through the PsimagLite library. 
+@KokkosKernels2021; @KokkosEcosystem2021]. 
 Kokkos is a performance-portability ecosystem that enables a single C++ 
 source code implementation to run efficiently across diverse architectures—
 from laptop CPUs to GPU-accelerated nodes on leadership-class supercomputers—
