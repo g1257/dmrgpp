@@ -3,10 +3,8 @@
 namespace Dmrg {
 
 using QnType                = Qn;
-using VectorWithOffset1Type = VectorWithOffset<RealType, QnType>;
-using VectorWithOffset2Type = VectorWithOffset<ComplexType, QnType>;
-using VectorWithOffset3Type = VectorWithOffsets<RealType, QnType>;
-using VectorWithOffset4Type = VectorWithOffsets<ComplexType, QnType>;
+using VectorWithOffset1Type = VectorWithOffsets<RealType, QnType>;
+using VectorWithOffset2Type = VectorWithOffsets<ComplexType, QnType>;
 
 using Geometry1Type = Dmrg::SuperGeometry<RealType, InputNgType::Readable, ProgramGlobals>;
 

@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef ONE_POINT_H
 #define ONE_POINT_H
-#include "VectorWithOffset.h" // for operator*
 #include "VectorWithOffsets.h" // for operator*
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/GetBraOrKet.h>
