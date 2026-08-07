@@ -230,9 +230,22 @@ with block-sparse matrices. Lanczos accesses the Hamiltonian through a common
 matrix-vector interface. DMRG++ can store the sparse Hamiltonian, apply it
 on-the-fly through the model, or evaluate its Kronecker-product decomposition
 without constructing the full superblock matrix. The conventional numerical
-path uses threaded execution, BLAS, and LAPACK. Through PsimagLite, Kokkos and
-Kokkos Kernels [@KokkosCore2022; @KokkosKernels2021; @KokkosEcosystem2021]
-will provide portable kernels in the future. For now, an optional integrated batched path can
+path uses threaded execution, BLAS, and LAPACK.
+To address the growing heterogeneity of high-performance computing platforms, 
+DMRG++ is being ported to use Kokkos and Kokkos Kernels [@KokkosCore2022; 
+@KokkosKernels2021; @KokkosEcosystem2021] through the PsimagLite library. 
+Kokkos is a performance-portability ecosystem that enables a single C++ 
+source code implementation to run efficiently across diverse architectures—
+from laptop CPUs to GPU-accelerated nodes on leadership-class supercomputers—
+by abstracting parallel execution patterns and memory layout management. 
+Kokkos Kernels complements this by providing an extensive suite of 
+performance-portable linear algebra primitives, including sparse matrix-vector 
+operations, dense linear solvers, and batched kernels that are critical for 
+DMRG++'s computationally intensive operations. This approach will allow 
+DMRG++ to leverage current and future hardware architectures without 
+maintaining separate code paths for different platforms, while preserving 
+the numerical accuracy and convergence properties that users depend on.
+For now, an optional integrated batched path can
 use MAGMA as an accelerator backend.
 
 The targeting layer determines which states contribute to the reduced density
