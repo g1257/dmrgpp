@@ -261,33 +261,26 @@ post-processes saved results, `manyOmegas` coordinates calculations at
 multiple frequencies, and `introspect` examines model bases,
 operators, and Hamiltonian terms.
 
-<!-- Not completely sure what to do here, I don't think it's as simple -->
-<!-- as `dmrg` write the hdf5 file as I believe they are produced as a -->
-<!-- result of some or all of the other executables as well. it seems -->
-<!-- a bit easier in practice that to describe. -->
-DMRG++ writes model and solver parameters, the geometry, an encoded copy of the
-input, energies, target states, renormalized bases, and checkpoint data to HDF5.
-These records support restart and recovery as well as post-processing without
-repeating the full simulation. Program and source-revision information is also
-reported with each run.
+The DMRG++ workflow uses HDF5 to store model and solver parameters, the
+geometry, an encoded copy of the input, energies, target states, renormalized
+bases, and checkpoint data. These records support restart and recovery and
+provide saved simulation data for subsequent analysis by tools such as
+`observe`. Program and source-revision information is also reported with each
+run.
 
 # Project Infrastructure
 
 A CMake build system organizes common implementation code into internal
-library targets linked by the command-line executables; formalizing
-code shared between executables and making this code more visible for
-additional reuse.
+library targets linked by the command-line executables. The shared model,
+targeting, and matrix-vector interfaces provide compiled extension points
+within the source tree while retaining common solver, input, and test
+infrastructure; they are not presented as a stable public library API.
 
 Regression tests are based on actual previous scientific applications of
 DMRG++ using representative input files and compare
 selected energies and observables with expected results. For new code
 the Catch2 testing framework has been adopted to support unit testing
 and tests are being added for existing code when possible.
-
-<!-- not sure what to do with this line -->
-The model,
-targeting, and matrix-vector interfaces provide compiled extension
-points while retaining the same solver, input, and test infrastructure.
 
 # Research impact statement
 
