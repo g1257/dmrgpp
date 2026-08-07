@@ -279,7 +279,7 @@ private:
 
 		resizeSavedVectors(energySaved, vecSaved, numberOfExcited);
 
-		const bool       isVwoS = (VectorWithOffsetType::name() == "vectorwithoffsets");
+		const bool       isVwoS = (parameters_.options.isSet("vectorwithoffsets"));
 		VectorVectorType onlyForVwoS;
 		if (isVwoS) {
 			target.initialGuess(onlyForVwoS,

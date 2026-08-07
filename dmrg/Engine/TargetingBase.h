@@ -238,7 +238,7 @@ public:
 	                          const VectorSizeType&    sectors,
 	                          const BasisType&         basis) const
 	{
-		if (VectorWithOffsetType::name() != "vectorwithoffsets")
+		if (!model_.params().options.isSet("vectorwithoffsets"))
 			err("FATAL: Wrong execution path\n");
 
 		const VectorWithOffsetType& psi00
@@ -260,7 +260,8 @@ public:
 	                          SizeType                 excited,
 	                          const BasisType&         basis) const
 	{
-		if (VectorWithOffsetType::name() == "vectorwithoffsets")
+
+		if (model_.params().options.isSet("vectorwithoffsets"))
 			err("FATAL: Wrong execution path\n");
 
 		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psiConst();
