@@ -223,8 +223,7 @@ private:
 				SizeType j = v2.sector(jj);
 				if (i != j)
 					continue;
-				SizeType offset = v1.offset(i);
-				assert(offset == v2.offset(j));
+				assert(v1.offset(i) == v2.offset(j));
 				for (SizeType k = 0; k < v1.effectiveSize(i); k++)
 					sum += v1.fastAccess(i, k)
 					    * PsimagLite::conj(v2.fastAccess(j, k));
