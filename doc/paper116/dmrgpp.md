@@ -284,11 +284,18 @@ run.
 
 # Project Infrastructure
 
-A CMake build system organizes common implementation code into internal
-library targets linked by the command-line executables. The shared model,
-targeting, and matrix-vector interfaces provide compiled extension points
-within the source tree while retaining common solver, input, and test
-infrastructure; they are not presented as a stable public library API.
+DMRG++ uses a CMake-based build system to organize its modular architecture. 
+Common implementation code is structured as internal library targets that are 
+linked into multiple command-line executables, promoting code reuse while 
+maintaining clear separation between components. The shared interfaces for 
+models, targeting methods, and matrix-vector operations serve as compiled 
+extension points within the source tree—new physics models or numerical 
+methods can be added by implementing these interfaces and registering them 
+with the appropriate selectors. This design preserves unified solver, input 
+parsing, and testing infrastructure across all extensions. These internal 
+interfaces are not exposed as a stable public library API; instead, they 
+provide structured development pathways for contributors working within the 
+DMRG++ source tree.
 
 Regression tests are based on actual previous scientific applications of
 DMRG++ using representative input files and compare
