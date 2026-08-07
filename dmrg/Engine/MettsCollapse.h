@@ -298,6 +298,12 @@ private:
 	                        SizeType                    indexFixed, // <--- m1
 	                        SizeType nk) const // <-- size of the Hilbert sp. of one site
 	{
+		std::pair<SizeType, SizeType> w_sector_offset = w.sectorAndOffset();
+		std::pair<SizeType, SizeType> v_sector_offset = v.sectorAndOffset();
+		SizeType                      w_sector        = w_sector_offset.first;
+		SizeType                      v_sector        = v_sector_offset.first;
+		SizeType                      v_offset        = v_sector_offset.second;
+
 		SizeType offset = lrs_.super().partition(m);
 		int      total  = lrs_.super().partition(m + 1) - offset;
 
@@ -316,7 +322,9 @@ private:
 				    alpha0, alpha1Prime, lrs_.left().permutationInverse());
 				SizeType iprime = packSuper.pack(
 				    alphaPrime, beta, lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				assert(iprime >= v_offset);
+				w.fastAccess(w_sector, i)
+				    += v.fastAccess(v_sector, iprime - v_offset)
 				    * collapseBasis_(alpha1Prime, indexFixed)
 				    * collapseBasis_(alpha1, indexFixed);
 			}
@@ -336,6 +344,12 @@ private:
 		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
+		std::pair<SizeType, SizeType> w_sector_offset = w.sectorAndOffset();
+		std::pair<SizeType, SizeType> v_sector_offset = v.sectorAndOffset();
+		SizeType                      w_sector        = w_sector_offset.first;
+		SizeType                      v_sector        = v_sector_offset.first;
+		SizeType                      v_offset        = v_sector_offset.second;
+
 		for (SizeType i = 0; i < SizeType(total); i++) {
 			SizeType alpha, beta;
 			packSuper.unpack(alpha, beta, lrs_.super().permutation(i + offset));
@@ -343,7 +357,9 @@ private:
 			for (SizeType betaPrime = 0; betaPrime < nk; betaPrime++) {
 				SizeType iprime = packSuper.pack(
 				    alpha, betaPrime, lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				assert(iprime >= v_offset);
+				w.fastAccess(w_sector, i)
+				    += v.fastAccess(v_sector, iprime - v_offset)
 				    * collapseBasis_(betaPrime, indexFixed)
 				    * collapseBasis_(beta, indexFixed);
 			}
@@ -372,6 +388,12 @@ private:
 		SizeType offset = lrs_.super().partition(m);
 		int      total  = lrs_.super().partition(m + 1) - offset;
 
+		std::pair<SizeType, SizeType> w_sector_offset = w.sectorAndOffset();
+		std::pair<SizeType, SizeType> v_sector_offset = v.sectorAndOffset();
+		SizeType                      w_sector        = w_sector_offset.first;
+		SizeType                      v_sector        = v_sector_offset.first;
+		SizeType                      v_offset        = v_sector_offset.second;
+
 		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 		PackIndicesType packRight(nk);
@@ -387,7 +409,9 @@ private:
 				    beta0Prime, beta1, lrs_.right().permutationInverse());
 				SizeType iprime = packSuper.pack(
 				    alpha, betaPrime, lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				assert(iprime >= v_offset);
+				w.fastAccess(w_sector, i)
+				    += v.fastAccess(v_sector, iprime - v_offset)
 				    * collapseBasis_(beta0Prime, indexFixed)
 				    * collapseBasis_(beta0, indexFixed);
 			}
@@ -404,6 +428,12 @@ private:
 		SizeType offset = lrs_.super().partition(m);
 		int      total  = lrs_.super().partition(m + 1) - offset;
 
+		std::pair<SizeType, SizeType> w_sector_offset = w.sectorAndOffset();
+		std::pair<SizeType, SizeType> v_sector_offset = v.sectorAndOffset();
+		SizeType                      w_sector        = w_sector_offset.first;
+		SizeType                      v_sector        = v_sector_offset.first;
+		SizeType                      v_offset        = v_sector_offset.second;
+
 		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
@@ -414,7 +444,9 @@ private:
 			for (SizeType alphaPrime = 0; alphaPrime < nk; alphaPrime++) {
 				SizeType iprime = packSuper.pack(
 				    alphaPrime, beta, lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				assert(iprime >= v_offset);
+				w.fastAccess(w_sector, i)
+				    += v.fastAccess(v_sector, iprime - v_offset)
 				    * collapseBasis_(alphaPrime, indexFixed)
 				    * collapseBasis_(alpha, indexFixed);
 			}
