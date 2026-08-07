@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "MatrixOrIdentity.h"
 #include "MatrixVectorKron/KronMatrix.h"
+#include "OffsetVector.hpp"
 #include "ParallelWftOne.h"
 #include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
@@ -131,6 +132,8 @@ public:
 	using WftAccelPatchesType  = WftAccelPatches<BaseType>;
 	using WftSparseTwoSiteType = WftSparseTwoSite<BaseType, MatrixOrIdentityType>;
 	using WftAccelSvdType      = WftAccelSvd<BaseType>;
+	using OffsetVectorType     = OffsetVector<SparseElementType>;
+	using OffsetVectorBaseType = OffsetVectorBase<SparseElementType>;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptionsType&     wftOptions)
@@ -367,6 +370,9 @@ private:
 	                    const OneSiteSpacesType&    oneSiteSpaces,
 	                    const MatrixOrIdentityType& wsRef) const
 	{
+		OffsetVectorType src_proxy;
+		const auto&      psiSrc_opt = src_proxy.makeOffsetVector(psiSrc);
+
 		SizeType nip = lrs.super().permutationInverse().size()
 		    / lrs.right().permutationInverse().size();
 
@@ -398,7 +404,7 @@ private:
 				SizeType y = dmrgWaveStruct_.lrs().super().permutationInverse(
 				    ipkp + jp * nalpha);
 				psiDest.fastAccess(i0, x)
-				    += psiSrc.slowAccess(y) * wsRef.getValue(k);
+				    += psiSrc_opt.slowAccess(y) * wsRef.getValue(k);
 			}
 		}
 	}
@@ -426,6 +432,9 @@ private:
 	                    const OneSiteSpacesType&    oneSiteSpaces,
 	                    const MatrixOrIdentityType& weRef) const
 	{
+		OffsetVectorType src_proxy;
+		const auto&      psiSrc_opt = src_proxy.makeOffsetVector(psiSrc);
+
 		SizeType sizeOfHilbertForSiteAdded = oneSiteSpaces.hilbertMain();
 		SizeType nip = lrs.left().permutationInverse().size() / sizeOfHilbertForSiteAdded;
 		SizeType nalpha = lrs.left().permutationInverse().size();
@@ -454,7 +463,7 @@ private:
 				SizeType y = dmrgWaveStruct_.lrs().super().permutationInverse(
 				    ip + kpjp * nip);
 				psiDest.fastAccess(i0, x)
-				    += psiSrc.slowAccess(y) * weRef.getValue(k);
+				    += psiSrc_opt.slowAccess(y) * weRef.getValue(k);
 			}
 		}
 	}

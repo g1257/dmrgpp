@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef ONE_POINT_H
 #define ONE_POINT_H
+#include "OffsetVector.hpp"
 #include "VectorWithOffsets.h" // for operator*
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/GetBraOrKet.h>
@@ -96,6 +97,8 @@ template <typename ObserverHelperType, typename ModelType> class OnePointCorrela
 	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
 	using FieldType              = typename VectorType::value_type;
 	using RealType               = typename BasisWithOperatorsType::RealType;
+	using OffsetVectorType       = OffsetVector<FieldType>;
+	using OffsetVectorBaseType   = OffsetVectorBase<FieldType>;
 
 public:
 
@@ -172,6 +175,11 @@ private:
 		FieldType                   sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1  = dest;
 		const VectorWithOffsetType& v2  = src2;
+		OffsetVectorType            v1proxy;
+		const auto&                 v1opt = v1proxy.makeOffsetVector(v1);
+		OffsetVectorType            v2proxy;
+		const auto&                 v2opt = v2proxy.makeOffsetVector(v2);
+
 		for (SizeType ii = 0; ii < v1.sectors(); ii++) {
 			SizeType i = v1.sector(ii);
 			for (SizeType jj = 0; jj < v1.sectors(); jj++) {
@@ -180,8 +188,8 @@ private:
 					continue;
 				SizeType offset = v1.offset(i);
 				for (SizeType k = 0; k < v1.effectiveSize(i); k++)
-					sum += v1.slowAccess(k + offset)
-					    * PsimagLite::conj(v2.slowAccess(k + offset));
+					sum += v1opt.slowAccess(k + offset)
+					    * PsimagLite::conj(v2opt.slowAccess(k + offset));
 			}
 		}
 
