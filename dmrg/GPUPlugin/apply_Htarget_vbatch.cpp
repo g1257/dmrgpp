@@ -85,8 +85,7 @@ void apply_Htarget_vbatch(SizeType            noperator,
 	IntegerType ncolBX = (ncolA * noperator);
 	IntegerType ld_BX  = ialign * ICEIL(nrowBX, ialign);
 
-	nbytes_BX = ((sizeof(FpType) * ld_BX) * (ncolA * noperator));
-	// FpType *BX_ = (FpType *) dmrg_malloc( nbytes_BX );
+	nbytes_BX   = ((sizeof(FpType) * ld_BX) * (ncolA * noperator));
 	FpType* BX_ = new FpType[ld_BX * ncolA * noperator];
 	assert(BX_ != NULL);
 

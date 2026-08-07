@@ -3,6 +3,8 @@
 #include "dmrg_lapack.h"
 #include "setup_nC.h"
 
+#include <Kokkos_Core.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -221,8 +223,10 @@ void setup_sparse_batch(
   -----------------------------------
   */
 
-	T** gAbatch_ = dmrg_malloc<T*>(sizeof(T*) * npatches, sizeof(T*) * npatches);
-	T** gBbatch_ = dmrg_malloc<T*>(sizeof(T*) * npatches, sizeof(T*) * npatches);
+	T** gAbatch_ = reinterpret_cast<T**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(T*) * npatches));
+	T** gBbatch_ = reinterpret_cast<T**>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(T*) * npatches));
 	assert(gAbatch_ != nullptr);
 	assert(gBbatch_ != nullptr);
 
@@ -231,8 +235,10 @@ void setup_sparse_batch(
 	nbytes_Abatch = sizeof(T) * sum_Abatch_sizes;
 	nbytes_Bbatch = sizeof(T) * sum_Bbatch_sizes;
 
-	T* pAmem = dmrg_malloc<T>(sizeof(T) * sum_Abatch_sizes, sizeof(T) * sum_Abatch_sizes);
-	T* pBmem = dmrg_malloc<T>(sizeof(T) * sum_Bbatch_sizes, sizeof(T) * sum_Bbatch_sizes);
+	T* pAmem = reinterpret_cast<T*>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(T) * sum_Abatch_sizes));
+	T* pBmem = reinterpret_cast<T*>(
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(T) * sum_Bbatch_sizes));
 	assert(pAmem != nullptr);
 	assert(pBmem != nullptr);
 
@@ -241,10 +247,8 @@ void setup_sparse_batch(
 		SizeType ipA    = 0;
 		SizeType ipB    = 0;
 		for (ipatch = 1; ipatch <= npatches; ipatch++) {
-			// gAbatch_[ipatch-1] = &(pAmem[ipA]);
 			gAbatch_[ipatch - 1] = pAmem + ipA;
 			ipA += Abatch_sizes_[ipatch - 1];
-			// gBbatch_[ipatch-1] = &(pBmem[ipB]);
 			gBbatch_[ipatch - 1] = pBmem + ipB;
 			ipB += Bbatch_sizes_[ipatch - 1];
 		};
@@ -339,14 +343,14 @@ void setup_sparse_batch(
 						} else {
 							dmrg_lacpy(
 							    uplo, m, n, Bsrc, ld1, Bdest, ld2);
-						};
+						}
 
 						Bdest += (ld2 * n);
-					};
-				}; /* end for ioperator */
-			}; /* end for jpatch */
+					}
+				} /* end for ioperator */
+			} /* end for jpatch */
 
-		}; /* end for ipatch */
+		} /* end for ipatch */
 #ifdef USE_MAGMA
 		{
 			IntegerType ngpu              = dmrg_get_ngpu();
@@ -367,8 +371,8 @@ void setup_sparse_batch(
 
 				dmrg_set_readonly((void*)pB, Bbatch_inc_nbytes, igpu);
 				dmrg_prefetch_to_device((void*)pB, Bbatch_inc_nbytes, igpu);
-			};
-		};
+			}
+		}
 #endif
 	};
 
@@ -442,23 +446,23 @@ template void setup_sparse_batch<std::complex<double>>(
 
 template <typename T> void unsetup_sparse_batch(T*** pgAbatch, T*** pgBbatch)
 {
-	assert(pgAbatch != NULL);
-	assert(pgBbatch != NULL);
+	assert(pgAbatch != nullptr);
+	assert(pgBbatch != nullptr);
 	T** gAbatch = *pgAbatch;
 	T** gBbatch = *pgBbatch;
 	T*  pAmem   = gAbatch[0];
 	T*  pBmem   = gBbatch[0];
-	assert(pAmem != NULL);
-	assert(pBmem != NULL);
+	assert(pAmem != nullptr);
+	assert(pBmem != nullptr);
 
-	dmrg_free(pAmem);
-	dmrg_free(pBmem);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(pAmem);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(pBmem);
 
 	pAmem = nullptr;
 	pBmem = nullptr;
 
-	dmrg_free(gAbatch);
-	dmrg_free(gBbatch);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(gAbatch);
+	Kokkos::kokkos_free<Kokkos::SharedSpace>(gBbatch);
 
 	gAbatch = nullptr;
 	gBbatch = nullptr;
