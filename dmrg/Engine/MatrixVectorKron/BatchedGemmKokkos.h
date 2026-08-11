@@ -48,10 +48,10 @@ template <typename InitKronType> class BatchedGemmKokkos {
 	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
 
 	// Kokkos types
-	using KS           = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
+	using KokkosScalar = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
 	using DevExecSpace = Kokkos::DefaultExecutionSpace;
 	using DevMemSpace  = typename DevExecSpace::memory_space;
-	using DevScalView  = Kokkos::View<KS*, DevMemSpace>;
+	using DevScalView  = Kokkos::View<KokkosScalar*, DevMemSpace>;
 
 	// Compact struct holding all parameters for one batched GEMM call.
 	// Stored in device memory and accessed inside the kernel.
@@ -100,15 +100,15 @@ public:
 
 		// --- H2D: copy vin to device -----------------------------------------------
 		{
-			using HV
-			    = Kokkos::View<const KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
-			HV hv(reinterpret_cast<const KS*>(vin.data()), totalXY);
+			using HV = Kokkos::
+			    View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
+			HV hv(reinterpret_cast<const KokkosScalar*>(vin.data()), totalXY);
 			Kokkos::deep_copy(exec, d_vin_, hv);
 		}
 
 		// --- Zero output and work buffers -------------------------------------------
-		Kokkos::deep_copy(exec, d_vout_, KS(0));
-		Kokkos::deep_copy(exec, d_flatBXbatch_, KS(0));
+		Kokkos::deep_copy(exec, d_vout_, KokkosScalar(0));
+		Kokkos::deep_copy(exec, d_flatBXbatch_, KokkosScalar(0));
 
 		// --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp]  (NoT x NoT) ----------------
 		{
@@ -126,7 +126,7 @@ public:
 				    const int       i  = member.league_rank();
 				    const GemmArgs& ag = args(i);
 
-				    using UV = Kokkos::View<KS**,
+				    using UV = Kokkos::View<KokkosScalar**,
 				                            Kokkos::LayoutLeft,
 				                            DevMemSpace,
 				                            Kokkos::MemoryUnmanaged>;
@@ -151,10 +151,10 @@ public:
 				        KokkosBatched::Trans::NoTranspose,
 				        KokkosBatched::Trans::NoTranspose,
 				        KokkosBatched::Algo::Gemm::Blocked>::invoke(member,
-				                                                    KS(1),
+				                                                    KokkosScalar(1),
 				                                                    A,
 				                                                    B,
-				                                                    KS(0),
+				                                                    KokkosScalar(0),
 				                                                    C);
 			    });
 		}
@@ -179,7 +179,7 @@ public:
 					    return; // no connections for this ipatch; Y[ip] already
 					            // zero
 
-				    using UV = Kokkos::View<KS**,
+				    using UV = Kokkos::View<KokkosScalar**,
 				                            Kokkos::LayoutLeft,
 				                            DevMemSpace,
 				                            Kokkos::MemoryUnmanaged>;
@@ -203,18 +203,19 @@ public:
 				        KokkosBatched::Trans::NoTranspose,
 				        KokkosBatched::Trans::Transpose,
 				        KokkosBatched::Algo::Gemm::Blocked>::invoke(member,
-				                                                    KS(1),
+				                                                    KokkosScalar(1),
 				                                                    A,
 				                                                    B,
-				                                                    KS(0),
+				                                                    KokkosScalar(0),
 				                                                    C);
 			    });
 		}
 
 		// --- D2H: copy vout back to host -------------------------------------------
 		{
-			using HV = Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
-			HV hv(reinterpret_cast<KS*>(vout.data()), totalXY);
+			using HV = Kokkos::
+			    View<KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
+			HV hv(reinterpret_cast<KokkosScalar*>(vout.data()), totalXY);
 			Kokkos::deep_copy(exec, hv, d_vout_);
 			exec.fence();
 		}

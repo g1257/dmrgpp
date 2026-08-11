@@ -19,9 +19,7 @@ class BatchedGemmInclude {
 
 public:
 
-	static void failIfNotSupported()
-	{
-	}
+	static void failIfNotSupported() { }
 
 	static std::string info()
 	{
