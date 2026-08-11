@@ -361,7 +361,7 @@ void csr_kron_mult_method(const int  imethod,
 		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({ 0, 0 },
 		                                                           { nnzB, nnzA }),
 		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
-			    const bool is_complex
+			    constexpr bool is_complex
 			        = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 			    const int isConjTransA = (transA == 'C') || (transA == 'c');
 			    const int isConjTransB = (transB == 'C') || (transB == 'c');
