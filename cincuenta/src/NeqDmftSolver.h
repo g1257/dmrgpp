@@ -19,6 +19,10 @@ namespace Dmft {
  *   1. Compute G_imp(n, j) from the impurity solver (fixed bath).
  *   2. Update the hybridization Δ(n, j) = t*² G_imp(n, j) (Bethe self-consistency).
  *   3. Advance the Weiss field G_0(n, j) via the Volterra integro-differential equation.
+ *
+ * ImpSolverTemplate selects the impurity solver:
+ *   ImpuritySolverNeqExactDiag — full Lehmann (default, exact for small baths)
+ *   ImpuritySolverNeqGBEK      — two-bath Cholesky scheme (GBEK PRB 88, 235106)
  */
 template <typename ComplexOrRealType,
           template <typename> class ImpSolverTemplate = ImpuritySolverNeqExactDiag>
@@ -67,6 +71,10 @@ public:
 		// Populate t=0 (equilibrium) boundary conditions.
 		impSolver_.computeGimp(gimp_, 0);
 		latticeGf_.initialize(gimp_);
+		// Seed the Cholesky decomposition for step 0.
+		// prepareTimeStep(n) is called in the n>=1 loop; n=0 must be primed here.
+		latticeGf_.updateDelta(0, gimp_);
+		impSolver_.prepareTimeStep(0, latticeGf_.delta());
 
 		std::cout << "NeqDmftSolver: starting time propagation to t_max=" << params_.tMax
 		          << " with nT=" << params_.nT << " steps\n";
@@ -101,32 +109,44 @@ public:
 		const std::string& p = params_.neqOutputPrefix;
 		gimp_.dump(p.empty() ? "green" : p + "-green");
 		latticeGf_.g0().dump(p.empty() ? "weiss-green" : p + "-weiss-green");
+		latticeGf_.delta().dump(p.empty() ? "weiss-delta" : p + "-weiss-delta");
+		impSolver_.dumpPlusBath(p.empty() ? "plus-bath-lesser" : p + "-plus-bath-lesser");
+		impSolver_.dumpV(p.empty() ? "cholesky-V" : p + "-cholesky-V");
+		impSolver_.dumpDoccAndEnergy(p.empty() ? "docc-energy" : p + "-docc-energy");
 	}
 
 private:
 
-	/*!
-	 * \brief Advance all KB components by one time step n.
-	 *
-	 * Inner DMFT iterations are performed until convergence or maxIter is reached.
-	 */
+	// Advance all KB components by one time step n.
+	//
+	// Self-consistency following GBEK Fig. 2(b) progressive scheme (PRB 88, 235106):
+	//   Predictor: computeGimp uses V[n] from the previous step (extrapolation).
+	//   Corrector iterations: updateDelta fills row n of Delta, prepareTimeStep updates
+	//   the Cholesky bath V[n] from the complete row, then computeGimp re-evaluates.
+	//   For ExactDiag prepareTimeStep is a no-op, so this reduces to the single
+	//   exact-bath evaluation it always was.
+	//   advance(n) runs after the final corrector so G^< is consistent with final V[n].
 	void timeStep(int n)
 	{
-		// Step 1: compute G_imp(n, j) for j ≤ n from the Lehmann representation.
+		// Predictor: G_imp(n,j) with V[n] inherited from the previous step.
 		impSolver_.computeGimp(gimp_, n);
 
-		// Self-consistency at each time step. With the fixed-bath ExactDiag solver
-		// one iteration is exact; neqDmftIter is retained for interface uniformity.
 		for (SizeType iter = 0; iter < params_.neqDmftIter; ++iter) {
-
-			// Step 2: Δ(n, j) = t*² G_imp(n, j)
+			// Δ(n, j) = t*² G_imp(n, j) — fills delta row n
 			latticeGf_.updateDelta(n, gimp_);
 
-			// Step 3: advance G_0(n, j) via Volterra integro-differential equation.
-			latticeGf_.advance(n);
+			// Update bath for step n using the now-complete delta row n.
+			// No-op for ExactDiag; updates Cholesky V[n] for GBEK.
+			impSolver_.prepareTimeStep(n, latticeGf_.delta());
 
-			break;
+			// Corrector: re-evaluate G_imp with the updated bath.
+			// Always called so that advance(n) sees G^< computed with the
+			// final V[n], not the penultimate one.
+			impSolver_.computeGimp(gimp_, n);
 		}
+
+		// Advance G_0(n, j) via Volterra integro-differential equation.
+		latticeGf_.advance(n);
 	}
 
 	const ParamsNeqType& params_;

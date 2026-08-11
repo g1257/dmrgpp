@@ -99,6 +99,19 @@ public:
 		const SizeType nsites  = nBath + 1;
 		const SizeType impSite = 0; // star center
 
+		// NeqAtomicLimit (see cincuenta.cpp): the true GBEK atomic limit passes
+		// an empty bath, nBath=0. The general Lehmann machinery below cannot
+		// handle this (LanczosPlusPlus/Ainur reject a literal single-site
+		// system, and a single-spin-seeded impurity has a Pauli-forbidden
+		// N+1 or N-1 sector), so bypass it entirely with the closed-form
+		// atom Green's functions instead -- see
+		// cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py for
+		// the from-scratch derivation and its ED cross-check.
+		if (nBath == 0) {
+			solveAtomicLimit();
+			return;
+		}
+
 		// This solver sets mu_imp = -U/2, which is correct only at half filling.
 		// Reject inputs where the requested electron count is not half filling.
 		if (nup_ + ndown_ != nsites)
@@ -219,6 +232,11 @@ public:
 	 */
 	void computeGimp(KBType& gimp, int n) const override
 	{
+		if (atomicLimit_) {
+			computeGimpAtomicLimit(gimp, n);
+			return;
+		}
+
 		// Retarded: G^R(n,j) = G^>(n,j) - G^<(n,j),  j <= n
 		for (int j = 0; j <= n; ++j)
 			gimp.retarded(n, j) = gGreater(n, j) - gLesser(n, j);
@@ -261,8 +279,12 @@ public:
 			uStr += ", 0.";
 		uStr += "]";
 
-		// star geometry connectors
-		std::string connStr = "[";
+		// star geometry connectors. A single site (no bath) has no bonds at
+		// all; the Ainur vector grammar cannot parse an empty "[]" literal,
+		// so NumberOfTerms=0 is used instead to skip the Connectors read
+		// entirely rather than trying to serialize a zero-length vector.
+		const bool  hasHoppings = (hoppings.size() > 0);
+		std::string connStr     = "[";
 		for (SizeType i = 0; i < hoppings.size(); ++i) {
 			if (i > 0)
 				connStr += ",";
@@ -287,7 +309,7 @@ public:
 
 		std::string s = "##Ainur1.0\n\n";
 		s += "TotalNumberOfSites=" + ttos(nsites) + ";\n";
-		s += "NumberOfTerms=1;\n";
+		s += "NumberOfTerms=" + std::string(hasHoppings ? "1" : "0") + ";\n";
 		s += "DegreesOfFreedom=1;\n";
 		s += "GeometryKind=star;\n";
 		s += "GeometryOptions=none;\n";
@@ -300,12 +322,95 @@ public:
 		s += "FiniteLoops=0 0 0;\n";
 		s += "TargetElectronsUp=" + ttos(nup) + ";\n";
 		s += "TargetElectronsDown=" + ttos(ndown) + ";\n";
-		s += "dir0:Connectors=" + connStr + ";\n";
+		if (hasHoppings)
+			s += "dir0:Connectors=" + connStr + ";\n";
 		s += "potentialV=" + potStr + ";\n";
 		return s;
 	}
 
 private:
+
+	/*!
+	 * \brief Atomic-limit (nBath=0) closed-form solve(): a single Hubbard
+	 * atom, H = U*(n_up-1/2)*(n_dn-1/2), U fixed (no interaction quench --
+	 * the atomic limit here is only the equilibrium starting point for a
+	 * real-time hopping quench carried entirely by the second GBEK bath).
+	 *
+	 * The impurity is seeded in a single spin sector (nup_+ndown_==1, same
+	 * half-filling convention as the general path with nsites=1), but the
+	 * physical (spin-averaged) Green's function requires averaging the
+	 * seeded spin's contribution with the Pauli-blocked opposite-spin
+	 * seed (Galpha/Gbeta averaging, GBEK paper Sec. VI). That averaging is
+	 * already baked into the closed forms below -- both spin channels
+	 * appear in the derivation, not just the one this class happens to be
+	 * seeded with -- so no extra runtime symmetrization is needed here.
+	 *
+	 * Formulas independently derived and cross-checked to machine
+	 * precision against a direct 4-state ED diagonalization in
+	 * cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py (see
+	 * that file's docstring for the full derivation, including why the
+	 * G^Left decay rate is U/4, not the naively-expected gap U/2).
+	 */
+	void solveAtomicLimit()
+	{
+		if (nup_ + ndown_ != 1)
+			err("ImpuritySolverNeqExactDiag (NeqAtomicLimit): expected "
+			    "nup+ndown==1 (single spin-seeded atom, nsites=1); got nup="
+			    + ttos(nup_) + " ndown=" + ttos(ndown_) + "\n");
+		if (params_.uInitial != params_.uFinal)
+			err("ImpuritySolverNeqExactDiag (NeqAtomicLimit): U must be fixed "
+			    "(the atomic limit here is a hopping quench carried by the "
+			    "bath, not an interaction quench); got uInitial="
+			    + ttos(params_.uInitial) + " uFinal=" + ttos(params_.uFinal) + "\n");
+
+		atomicLimit_ = true;
+		uAtomic_     = params_.uFinal;
+
+		const RealType beta = nTau_ * dtau_;
+
+		// G^M(tau) = -(1/2) * exp(-(U/2)*tau),  tau in [0, beta)
+		for (SizeType j = 0; j <= nTau_; ++j) {
+			const RealType tau = j * dtau_;
+			gimp_.matsubara_t[j]
+			    = ComplexType(-RealType(0.5) * std::exp(-(uAtomic_ / 2) * tau));
+		}
+
+		// G^M(iw_k) = (1/2) / (i*w_k - U/2), Fourier transform of the same
+		// single-pole T=0 Lehmann sum used for matsubara_t above.
+		for (SizeType k = 0; k < nTau_; ++k) {
+			const int      kInt   = static_cast<int>(k);
+			const int      nInt   = static_cast<int>(nTau_);
+			const RealType omegaK = RealType(2 * kInt - nInt + 1) * M_PI / beta;
+			gimp_.matsubara_w[k]
+			    = ComplexType(RealType(0.5)) / (ComplexType(0, omegaK) - uAtomic_ / 2);
+		}
+	}
+
+	/*!
+	 * \brief Fill time-slice n of gimp using the atomic-limit closed forms
+	 * (see solveAtomicLimit() docstring). Matsubara components were already
+	 * filled once in solveAtomicLimit().
+	 */
+	void computeGimpAtomicLimit(KBType& gimp, int n) const
+	{
+		const RealType tn = n * params_.dt;
+
+		for (int j = 0; j <= n; ++j) {
+			const RealType tau  = tn - j * params_.dt;
+			gimp.retarded(n, j) = ComplexType(0, -1) * std::cos(uAtomic_ * tau / 2);
+			gimp.lesser(n, j)   = ComplexType(0, RealType(0.5))
+			    * std::exp(ComplexType(0, uAtomic_ * tau / 2));
+		}
+		for (int j = 0; j < n; ++j)
+			gimp.lesser(j, n) = -std::conj(gimp.lesser(n, j));
+
+		for (SizeType j = 0; j <= nTau_; ++j) {
+			const RealType tauJ    = j * dtau_;
+			gimp.left_mixing(n, j) = ComplexType(0, -RealType(0.5))
+			    * std::exp(ComplexType(0, uAtomic_ * tn / 4))
+			    * std::exp(-(uAtomic_ / 4) * tauJ);
+		}
+	}
 
 	/*!
 	 * \brief Full diagonalization of the Hamiltonian restricted to basis.
@@ -679,6 +784,8 @@ private:
 	SizeType                        nTau_;
 	RealType                        dtau_;
 	KBType                          gimp_;
+	bool                            atomicLimit_ = false;
+	RealType                        uAtomic_     = 0;
 
 	/// Pre-quench N+1 spectrum and operator amplitudes
 	VectorRealType    energiesN1_pre_;

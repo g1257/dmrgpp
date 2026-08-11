@@ -141,16 +141,16 @@ void setup_nC(SizeType noperator,
 	};
 }
 
-template void setup_nC<MYTYPE>(SizeType,
+template void setup_nC<double>(SizeType,
                                SizeType,
                                /*
                                 * ---------
                                 * Intent(in)
                                 * ---------
                                 */
-                               const std::vector<MYTYPE*>&,
+                               const std::vector<double*>&,
                                const VectorSizeType&,
-                               const std::vector<MYTYPE*>&,
+                               const std::vector<double*>&,
                                const VectorSizeType&,
                                const VectorSizeType&,
                                const VectorSizeType&,
@@ -162,3 +162,25 @@ template void setup_nC<MYTYPE>(SizeType,
                                VectorSizeType&,
                                VectorSizeType&,
                                VectorSizeType&);
+
+template void setup_nC<std::complex<double>>(SizeType,
+                                             SizeType,
+                                             /*
+                                              * ---------
+                                              * Intent(in)
+                                              * ---------
+                                              */
+                                             const std::vector<std::complex<double>*>&,
+                                             const VectorSizeType&,
+                                             const std::vector<std::complex<double>*>&,
+                                             const VectorSizeType&,
+                                             const VectorSizeType&,
+                                             const VectorSizeType&,
+                                             /*
+                                              * --------------------------------
+                                              * Intent(out) but assume storage already allocated
+                                              * --------------------------------
+                                              */
+                                             VectorSizeType&,
+                                             VectorSizeType&,
+                                             VectorSizeType&);

@@ -47,11 +47,10 @@ void csr_kron_mult_method(const int  imethod,
 {
 	Kokkos::Profiling::ScopedRegion region("PsimagLite::csr_kron_mult_method");
 
-	const bool is_complex   = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	const int  isTransA     = (transA == 'T') || (transA == 't');
-	const int  isTransB     = (transB == 'T') || (transB == 't');
-	const int  isConjTransA = (transA == 'C') || (transA == 'c');
-	const int  isConjTransB = (transB == 'C') || (transB == 'c');
+	const int isTransA     = (transA == 'T') || (transA == 't');
+	const int isTransB     = (transB == 'T') || (transB == 't');
+	const int isConjTransA = (transA == 'C') || (transA == 'c');
+	const int isConjTransB = (transB == 'C') || (transB == 'c');
 
 	const int nrow_A = a.rows();
 	const int ncol_A = a.cols();
@@ -362,6 +361,11 @@ void csr_kron_mult_method(const int  imethod,
 		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({ 0, 0 },
 		                                                           { nnzB, nnzA }),
 		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
+			    constexpr bool is_complex
+			        = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+			    const int isConjTransA = (transA == 'C') || (transA == 'c');
+			    const int isConjTransB = (transB == 'C') || (transB == 'c');
+
 			    int          ia  = A_row_dev(ia_idx);
 			    int          ja  = A_col_dev(ia_idx);
 			    KokkosScalar aij = A_val_dev(ia_idx);

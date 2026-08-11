@@ -5,13 +5,7 @@
 
 #include "dmrg_types.h"
 
-typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-
-#if defined(USE_COMPLEX_Z)
-std::complex<double> makeFloat(double zr, double zi);
-#else
-double makeFloat(double zr, double zi);
-#endif
+using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
 
 template <typename T>
 void setup_matrix(SizeType              noperator,

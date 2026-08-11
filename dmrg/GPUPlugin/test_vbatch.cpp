@@ -8,6 +8,9 @@
 #include "setup_sparse_batch.h"
 #include "setup_vbatch.h"
 
+#include "PsimagLite/KokkosType.h"
+#include <Kokkos_Core.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -30,70 +33,11 @@
  ---------------------------------------
 */
 
-IntegerType main(IntegerType argc, char* argv[])
+void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep_states)
 {
-	const IntegerType ialign          = 32;
-	const IntegerType idebug          = 1;
-	SizeType          noperator       = 2;
-	IntegerType       left_size       = 8;
-	IntegerType       max_keep_states = 2000;
-
-	const double giga = 1000.0 * 1000.0 * 1000.0;
-
-	size_t nbytes_X = 0;
-	size_t nbytes_Y = 0;
-
-	/*
-	 -----------------------------------------------------------
-	 ./test_vbatch -o noperator -n left_sites -m max_keep_states
-	 -----------------------------------------------------------
-	 */
-#ifdef USE_MAGMA
-	const char* getopt_string = "g:o:n:m:";
-#else
-	const char* getopt_string = "o:n:m:";
-#endif
-
-	IntegerType opt = 0;
-	while ((opt = getopt(argc, argv, getopt_string)) != -1) {
-		switch (opt) {
-		case 'n':
-			left_size = atoi(optarg);
-			break;
-		case 'o':
-			noperator = atoi(optarg);
-			break;
-		case 'm':
-			max_keep_states = atoi(optarg);
-			break;
-#ifdef USE_MAGMA
-		case 'g':
-		{
-			IntegerType max_gpus = atoi(optarg);
-			if (max_gpus <= 0) {
-				max_gpus = 1;
-			};
-			printf("calling dmrg_set_max_gpus(%d)\n", max_gpus);
-			dmrg_set_max_gpus(max_gpus);
-			break;
-		}
-#endif
-		default: /* '?' */
-#ifdef USE_MAGMA
-			fprintf(stderr,
-			        "Usage: %s [-g max_gpus] [-o noperator] [-n left_size] [-m "
-			        "max_states]\n",
-			        argv[0]);
-#else
-			fprintf(stderr,
-			        "Usage: %s [-o noperator] [-n left_size] [-m max_states]\n",
-			        argv[0]);
-#endif
-			exit(EXIT_FAILURE);
-		};
-	};
-
-	dmrg_init();
+	const IntegerType ialign = 32;
+	const IntegerType idebug = 1;
+	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 
 	IntegerType right_size  = left_size;
 	IntegerType target_up   = (left_size + right_size) / 2;
@@ -110,15 +54,6 @@ IntegerType main(IntegerType argc, char* argv[])
 	const IntegerType max_patches_dim = ialign * ICEIL(max_patches + 1, ialign);
 
 	fprintf(stderr, "max_patches_dim=%i\n", max_patches_dim);
-#ifdef USE_STACK
-	IntegerType left_patch_size_[max_patches_dim];
-	IntegerType left_patch_up_[max_patches_dim];
-	IntegerType left_patch_down_[max_patches_dim];
-
-	IntegerType right_patch_size_[max_patches_dim];
-	IntegerType right_patch_up_[max_patches_dim];
-	IntegerType right_patch_down_[max_patches_dim];
-#else
 
 	std::vector<SizeType> left_patch_size_(max_patches_dim + 1);
 	std::vector<SizeType> left_patch_up_(max_patches_dim);
@@ -127,23 +62,6 @@ IntegerType main(IntegerType argc, char* argv[])
 	std::vector<SizeType> right_patch_size_(max_patches_dim + 1);
 	std::vector<SizeType> right_patch_up_(max_patches_dim);
 	std::vector<SizeType> right_patch_down_(max_patches_dim);
-
-#endif
-
-	// #define left_patch_size(i) left_patch_size_[(i)-1]
-	// #define right_patch_size(i) right_patch_size_[(i)-1]
-
-	/*
-	  {
-	   IntegerType nthreads = 1;
-	#ifdef _OPENMP
-	   #pragma omp parallel
-	   #pragma omp master
-	   { nthreads =  omp_get_num_threads(); }
-	#endif
-	   printf("using %d threads\n", nthreads );
-	   }
-	*/
 
 	SizeType npatches = gen_patches_comb(left_size,
 	                                     right_size,
@@ -220,12 +138,8 @@ IntegerType main(IntegerType argc, char* argv[])
 	std::vector<SizeType> ld_Bmatrix(npatches * npatches * noperator, 0);
 
 	setup_matrix(noperator, npatches, Abatch_, left_patch_size_, Amatrix, ld_Amatrix);
-	// assert( Amatrix != NULL );
-	// assert( ld_Amatrix != NULL );
 
 	setup_matrix(noperator, npatches, Bbatch_, right_patch_size_, Bmatrix, ld_Bmatrix);
-	// assert( Bmatrix != NULL );
-	// assert( ld_Bmatrix != NULL );
 
 	const IntegerType use_sparse = (1 == 1);
 
@@ -268,7 +182,7 @@ IntegerType main(IntegerType argc, char* argv[])
 		             ld_Amatrix,
 		             Bmatrix,
 		             ld_Bmatrix);
-	};
+	}
 
 	double total_gflops = 0;
 	{
@@ -312,43 +226,22 @@ IntegerType main(IntegerType argc, char* argv[])
 		       (double)total_memory_in_nbytes / giga);
 	}
 
-#define Abatch(i, j) Abatch_[indx2f(i, j, ld_Abatch)]
-#define Bbatch(i, j) Bbatch_[indx2f(i, j, ld_Bbatch)]
+	// Determine Kokkos scalar type
+	using KokkosScalar = PsimagLite::KokkosType<FpType>::type;
+	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> X_("X_", xy_size);
+	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> Y_("Y_", xy_size);
 
-	size_t xy_size_dim = ialign * ICEIL(xy_size, ialign);
-
-	nbytes_X   = (sizeof(FpType) * xy_size_dim);
-	FpType* X_ = (FpType*)dmrg_malloc<FpType>(nbytes_X, nbytes_X);
-	assert(X_ != nullptr);
-
-	nbytes_Y   = (sizeof(FpType) * xy_size_dim);
-	FpType* Y_ = (FpType*)dmrg_malloc<FpType>(nbytes_Y, nbytes_Y);
-	assert(Y_ != nullptr);
-
-#define X(i) X_[(i) - 1]
-#define Y(i) Y_[(i) - 1]
-
-#define hX(i) hX_[(i) - 1]
-#define hY(i) hY_[(i) - 1]
-
+	Kokkos::parallel_for(
+	    "test_vbatch", xy_size, KOKKOS_LAMBDA(const IntegerType i) {
+		    X_[i] = static_cast<KokkosScalar>(i + 1) / static_cast<KokkosScalar>(xy_size);
+	    });
+	Kokkos::fence();
 	{
-		FpType* hX_ = X_;
-
-		IntegerType i = 0;
-		for (i = 1; i <= xy_size; i++) {
-			hX(i) = ((FpType)i) / ((FpType)xy_size);
-		}
-	}
-
-	{
-		IntegerType       itimes = 0;
-		const IntegerType ntimes = 3;
-
-		double total_time = -dmrg_get_wtime();
-		for (itimes = 1; itimes <= ntimes; itimes++) {
+		const IntegerType ntimes     = 3;
+		double            total_time = -dmrg_get_wtime();
+		for (IntegerType itimes = 1; itimes <= ntimes; itimes++) {
 			double ttime = -dmrg_get_wtime();
 			if (use_sparse) {
-
 				apply_Htarget_sparse(noperator,
 				                     npatches,
 				                     left_patch_start_,
@@ -359,9 +252,8 @@ IntegerType main(IntegerType argc, char* argv[])
 				                     ld_pAbatch_,
 				                     pBbatch_,
 				                     ld_pBbatch_,
-				                     X_,
-				                     Y_);
-
+				                     X_.data(),
+				                     Y_.data());
 			} else {
 				apply_Htarget_vbatch(noperator,
 				                     npatches,
@@ -372,52 +264,58 @@ IntegerType main(IntegerType argc, char* argv[])
 				                     ld_Abatch,
 				                     Bbatch_,
 				                     ld_Bbatch,
-				                     X_,
-				                     Y_);
-			};
+				                     X_.data(),
+				                     Y_.data());
+			}
 			ttime += dmrg_get_wtime();
 			printf("itimes=%d, time=%lf sec, gflops/sec=%lf\n",
 			       itimes,
 			       ttime,
 			       total_gflops / ttime);
-		};
+		}
 		total_time += dmrg_get_wtime();
 		printf("total_time = %lf sec, ntimes = %d, averaged gflops = %lf\n",
 		       total_time,
 		       ntimes,
 		       ntimes * total_gflops / total_time);
 		printf("test_vbatch: memory X (%f GBytes) Y (%f GBytes)\n",
-		       (double)nbytes_X / (giga),
-		       (double)nbytes_Y / (giga));
+		       static_cast<double>(sizeof(KokkosScalar) * xy_size) / giga,
+		       static_cast<double>(sizeof(KokkosScalar) * xy_size) / giga);
 	}
 
-	FpType* hY_ = Y_;
-#
 	/*
 	 * ---------------------------------
 	 * generate summary statistics for Y
 	 * ---------------------------------
 	 */
 	{
-		IntegerType i     = 0;
-		FpType      Y_avg = 0;
-		double      Y_max = std::abs(hY(1));
-		double      Y_min = std::abs(hY(1));
+		KokkosScalar Y_avg = 0.;
+		Kokkos::parallel_reduce(
+		    "SumReduction",
+		    xy_size,
+		    KOKKOS_LAMBDA(const int i, KokkosScalar& partial_sum) { partial_sum += Y_[i]; },
+		    Y_avg);
+		Y_avg /= static_cast<KokkosScalar>(xy_size);
 
-		for (i = 1; i <= xy_size; i++) {
-			Y_avg += hY(i);
-			Y_max = std::max(Y_max, std::abs(hY(i)));
-			Y_min = std::min(Y_min, std::abs(hY(i)));
-		};
-		Y_avg = Y_avg / ((double)xy_size);
+		Kokkos::MinMax<KokkosScalar>::value_type Result;
+		Kokkos::parallel_reduce(
+		    "MinMaxReduction",
+		    xy_size,
+		    KOKKOS_LAMBDA(const int                                          i,
+		                  typename Kokkos::MinMax<KokkosScalar>::value_type& update) {
+			    auto abs_Y     = Kokkos::abs(Y_[i]);
+			    update.min_val = Kokkos::min(update.min_val, abs_Y);
+			    update.max_val = Kokkos::max(update.max_val, abs_Y);
+		    },
+		    Kokkos::MinMax<KokkosScalar>(Result));
+
 		printf("std::abs(Y_avg) = %le, Y_max = %le Y_min = %le \n",
 		       std::abs(Y_avg),
-		       Y_max,
-		       Y_min);
-	};
+		       Result.max_val,
+		       Result.min_val);
+	}
 
 	if (use_sparse) {
-
 		unsetup_sparse_batch(&pAbatch_, &pBbatch_);
 
 	} else {
@@ -428,18 +326,71 @@ IntegerType main(IntegerType argc, char* argv[])
 		                Abatch_,
 		                Bbatch_
 		              );*/
-	};
-	assert(X_ != nullptr);
-	dmrg_free(X_);
-	assert(Y_ != nullptr);
-	dmrg_free(Y_);
-	dmrg_finalize();
+	}
+}
 
+int main(int argc, char* argv[])
+{
+
+	SizeType    noperator       = 2;
+	IntegerType left_size       = 8;
+	IntegerType max_keep_states = 2000;
+
+	/*
+	 -----------------------------------------------------------
+	 ./test_vbatch -o noperator -n left_sites -m max_keep_states
+	 -----------------------------------------------------------
+	 */
 #ifdef USE_MAGMA
-	magma_finalize();
+	const char* getopt_string = "g:o:n:m:";
+#else
+	const char* getopt_string = "o:n:m:";
 #endif
-	// free(ld_pAbatch_);
-	// free(pBbatch_);
-	exit(0);
-	return (0);
+
+	IntegerType opt = 0;
+	while ((opt = getopt(argc, argv, getopt_string)) != -1) {
+		switch (opt) {
+		case 'n':
+			left_size = atoi(optarg);
+			break;
+		case 'o':
+			noperator = atoi(optarg);
+			break;
+		case 'm':
+			max_keep_states = atoi(optarg);
+			break;
+#ifdef USE_MAGMA
+		case 'g':
+		{
+			IntegerType max_gpus = atoi(optarg);
+			if (max_gpus <= 0) {
+				max_gpus = 1;
+			};
+			printf("calling dmrg_set_max_gpus(%d)\n", max_gpus);
+			dmrg_set_max_gpus(max_gpus);
+			break;
+		}
+#endif
+		default: /* '?' */
+#ifdef USE_MAGMA
+			fprintf(stderr,
+			        "Usage: %s [-g max_gpus] [-o noperator] [-n left_size] [-m "
+			        "max_states]\n",
+			        argv[0]);
+#else
+			fprintf(stderr,
+			        "Usage: %s [-o noperator] [-n left_size] [-m max_states]\n",
+			        argv[0]);
+#endif
+			exit(EXIT_FAILURE);
+		};
+	};
+
+	Kokkos::initialize(argc, argv);
+	dmrg_init();
+
+	test_vbatch(noperator, left_size, max_keep_states);
+
+	dmrg_finalize();
+	Kokkos::finalize();
 }

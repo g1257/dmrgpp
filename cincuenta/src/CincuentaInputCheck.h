@@ -62,9 +62,17 @@ public:
 		str += "integer NtNeq;\n";
 		str += "integer NeqDmftIter;\n";
 		str += "real NeqDmftTolerance;\n";
-		str += "string NeqSolver;\n"; // "tdmrg" to select ImpuritySolverNeqTdmrg
+		str += "string NeqSolver;\n"; // "tdmrg" or "gbek" to select solver
+		// GBEK two-bath scheme (Gramsch, Balzer, Eckstein, Kollar PRB 88, 235106)
+		str += "integer NeqBathRank;\n"; // L: rank of Cholesky second bath (0 = first bath
+		                                 // only)
 		str += "real BandwidthFinal;\n"; // W_f for hopping quench; default 0 = no quench
+		str += "string QuenchShape;\n"; // "step" (default), "cosine", "tanh"
+		str += "real QuenchDuration;\n"; // ramp duration t_q in real time; 0 = step quench
 		str += "string NeqOutputPrefix;\n"; // prefix for output Green's function files
+		str += "integer NeqAtomicLimit;\n"; // 1 = start neq run from the atomic limit:
+		                                    // no first bath (Delta^- = 0 exactly),
+		                                    // per GBEK Sec. VI setup
 
 		return str;
 	}

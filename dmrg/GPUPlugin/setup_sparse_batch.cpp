@@ -384,7 +384,7 @@ void setup_sparse_batch(
 	};
 }
 
-template void setup_sparse_batch<MYTYPE>(
+template void setup_sparse_batch<double>(
     SizeType noperator,
     SizeType npatches,
     /*
@@ -394,9 +394,9 @@ template void setup_sparse_batch<MYTYPE>(
                                             */
     const VectorSizeType&, /* sizes of left patches (INPUT) */
     const VectorSizeType&, /* sizes of right patches (INPUT) */
-    const std::vector<MYTYPE*>&, /* array of pointers to small Amat matrices */
+    const std::vector<double*>&, /* array of pointers to small Amat matrices */
     const VectorSizeType&, /* array of leading dimension of the small Amat matrices */
-    const std::vector<MYTYPE*>&, /* array of pointers to small Bmat matrices */
+    const std::vector<double*>&, /* array of pointers to small Bmat matrices */
     const VectorSizeType&, /* array of leading dimension of the small Bmat matrices */
     /*
                                             -----------
@@ -407,9 +407,37 @@ template void setup_sparse_batch<MYTYPE>(
     VectorSizeType&, /* cumulative sum of right_patch_size (OUTPUT) */
     VectorSizeType&, /* cumulative sum of product patch size (OUTPUT) */
     VectorSizeType&,
-    MYTYPE***,
+    double***,
     VectorIntegerType&,
-    MYTYPE***,
+    double***,
+    VectorIntegerType&);
+
+template void setup_sparse_batch<std::complex<double>>(
+    SizeType noperator,
+    SizeType npatches,
+    /*
+                                            ----------
+                                            IntegerTypeent(in)
+                                            ----------
+                                            */
+    const VectorSizeType&, /* sizes of left patches (INPUT) */
+    const VectorSizeType&, /* sizes of right patches (INPUT) */
+    const std::vector<std::complex<double>*>&, /* array of pointers to small Amat matrices */
+    const VectorSizeType&, /* array of leading dimension of the small Amat matrices */
+    const std::vector<std::complex<double>*>&, /* array of pointers to small Bmat matrices */
+    const VectorSizeType&, /* array of leading dimension of the small Bmat matrices */
+    /*
+                                            -----------
+                                            IntegerTypeent(out)
+                                            -----------
+                                            */
+    VectorSizeType&, /* cumulative sum  of left_patch_size (OUTPUT) */
+    VectorSizeType&, /* cumulative sum of right_patch_size (OUTPUT) */
+    VectorSizeType&, /* cumulative sum of product patch size (OUTPUT) */
+    VectorSizeType&,
+    std::complex<double>***,
+    VectorIntegerType&,
+    std::complex<double>***,
     VectorIntegerType&);
 
 template <typename T> void unsetup_sparse_batch(T*** pgAbatch, T*** pgBbatch)
@@ -435,10 +463,8 @@ template <typename T> void unsetup_sparse_batch(T*** pgAbatch, T*** pgBbatch)
 	gAbatch = nullptr;
 	gBbatch = nullptr;
 }
-template void unsetup_sparse_batch<MYTYPE>(MYTYPE***, MYTYPE***);
-#if defined(USE_COMPLEX_Z)
+
 template void unsetup_sparse_batch<double>(double***, double***);
-#else
+
 template void unsetup_sparse_batch<std::complex<double>>(std::complex<double>***,
                                                          std::complex<double>***);
-#endif

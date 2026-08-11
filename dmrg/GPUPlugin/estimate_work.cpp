@@ -46,15 +46,26 @@ void get_total_memory(SizeType               noperator,
 	ptotal_memory_in_nbytes = sizeof(T) * (gmemA + gmemB + gmemBX + gmemXY);
 }
 
-template void get_total_memory<MYTYPE>(SizeType                    noperator,
+template void get_total_memory<double>(SizeType                    noperator,
                                        SizeType                    npatches,
-                                       const std::vector<MYTYPE*>& Amatrix_,
+                                       const std::vector<double*>& Amatrix_,
                                        const VectorSizeType&       ld_Amatrix_,
-                                       const std::vector<MYTYPE*>& Bmatrix_,
+                                       const std::vector<double*>& Bmatrix_,
                                        const VectorSizeType&       ld_Bmatrix_,
                                        const VectorSizeType&       left_patch_size_,
                                        const VectorSizeType&       right_patch_size_,
                                        SizeType&                   ptotal_memory_in_nbytes);
+
+template void
+get_total_memory<std::complex<double>>(SizeType                                  noperator,
+                                       SizeType                                  npatches,
+                                       const std::vector<std::complex<double>*>& Amatrix_,
+                                       const VectorSizeType&                     ld_Amatrix_,
+                                       const std::vector<std::complex<double>*>& Bmatrix_,
+                                       const VectorSizeType&                     ld_Bmatrix_,
+                                       const VectorSizeType&                     left_patch_size_,
+                                       const VectorSizeType&                     right_patch_size_,
+                                       SizeType& ptotal_memory_in_nbytes);
 
 void estimate_work(SizeType              npatches,
                    const VectorSizeType& left_patch_size_,
