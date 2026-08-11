@@ -1,7 +1,7 @@
 #ifndef BATCHEDGEMMINCLUDE_HH
 #define BATCHEDGEMMINCLUDE_HH
 #include "DMRGConfig.h"
-#if 1 // KOKKOS_BATCHED
+#if defined(KOKKOS_BATCHED)
 #include "BatchedGemmKokkos.h"
 #define BATCHED_GEMM BatchedGemmKokkos
 #elif defined(PLUGIN_SC)
@@ -21,20 +21,16 @@ public:
 
 	static void failIfNotSupported()
 	{
-#if defined(KOKKOS_BATCHED) || defined(PLUGIN_SC)
-		return;
-#endif
-		err("BatchedGemm needs DMRG_BUILD_BATCHED_KOKKOS=ON or -DPLUGIN_SC\n");
 	}
 
 	static std::string info()
 	{
-#if 1 // KOKKOS_BATCHED
-		return "KokkosKernels";
+#if defined(KOKKOS_BATCHED)
+		return "KOKKOS_BATCHED";
 #elif defined(PLUGIN_SC)
 		return "PLUGIN_SC";
 #else
-		return "";
+		return "CPU";
 #endif
 	}
 };

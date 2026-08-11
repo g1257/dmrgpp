@@ -14,10 +14,14 @@ if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   endif()
 endif()
 
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
+  set(KOKKOS_BATCHED ON)
+endif()
+
 add_subdirectory(KronUtil)
 
 # Generate configuration header for PsimagLite
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/GPUPlugin/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin/DMRGConfig.h
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h
                @ONLY)
 
 # DMRG++ as a library so cincuenta can use it

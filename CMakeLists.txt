@@ -67,9 +67,9 @@ endif()
 
 if(NOT DMRG_BATCHED_GEMM_TYPE)
   set(DMRG_BATCHED_GEMM_TYPE
-      "Plugin"
+      "Kokkos"
       CACHE STRING "Choose the batched gemm implementation" FORCE)
-  set_property(CACHE DMRG_BATCHED_GEMM_TYPE PROPERTY STRINGS "CPU" "Plugin")
+  set_property(CACHE DMRG_BATCHED_GEMM_TYPE PROPERTY STRINGS "CPU" "Plugin" "Kokkos")
 endif()
 
 include(CMakeDependentOption)
