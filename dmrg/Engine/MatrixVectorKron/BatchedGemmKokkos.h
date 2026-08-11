@@ -14,6 +14,8 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Profiling_ScopedRegion.hpp>
 
+#include <memory>
+
 namespace Dmrg {
 
 /*
@@ -44,8 +46,8 @@ template <typename InitKronType> class BatchedGemmKokkos {
 	using VectorType              = typename MatrixDenseOrSparseType::VectorType;
 	using ComplexOrRealType       = typename VectorType::value_type;
 	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
-	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType*>::Type;
-	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using VectorMatrixType = typename PsimagLite::Vector<std::unique_ptr<MatrixType>>::Type;
+	using VectorSizeType   = PsimagLite::Vector<SizeType>::Type;
 
 	// Kokkos types
 	using KokkosScalar   = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
@@ -74,14 +76,6 @@ public:
 		if (!enabled())
 			return;
 		setup_();
-	}
-
-	~BatchedGemmKokkos()
-	{
-		for (SizeType i = 0; i < garbage_.size(); ++i) {
-			delete garbage_[i];
-			garbage_[i] = nullptr;
-		}
 	}
 
 	bool enabled() const { return initKron_.params().options.isSet("BatchedGemm"); }
@@ -240,7 +234,7 @@ private:
 		if (!mat.isDense()) {
 			MatrixType* dense = new MatrixType();
 			crsMatrixToFullMatrix(*dense, mat.sparse());
-			garbage_.push_back(dense);
+			garbage_.emplace_back(dense);
 			return { &(*dense)(0, 0),
 				 static_cast<int>(dense->rows()),
 				 static_cast<int>(dense->cols()) };
