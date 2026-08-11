@@ -65,10 +65,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   add_compile_options(-Wall -Wextra -Wno-unused-parameter)
 endif()
 
-option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
+if(NOT DMRG_BATCHED_GEMM_TYPE)
+  set(DMRG_BATCHED_GEMM_TYPE
+      "Plugin"
+      CACHE STRING "Choose the batched gemm implementation" FORCE)
+  set_property(CACHE DMRG_BATCHED_GEMM_TYPE PROPERTY STRINGS "CPU" "Plugin")
+endif()
 
 include(CMakeDependentOption)
-cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF "DMRG_BUILD_BATCHED" OFF)
+cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF
+                       "DMRG_BATCHED_GEMM_TYPE STREQUAL \"Plugin\"" OFF)
 
 add_subdirectory(util)
 
