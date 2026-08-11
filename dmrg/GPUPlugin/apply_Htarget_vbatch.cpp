@@ -1,7 +1,7 @@
 
 #include "dmrg_types.h"
 
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "dmrg_vbatch.h"
 #ifdef _OPENMP
 #include <omp.h>

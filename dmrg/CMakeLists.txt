@@ -8,17 +8,11 @@ add_custom_command(
 if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   add_subdirectory(GPUPlugin)
   set(PLUGIN_SC ON)
-  set(FpType "double")
-  if(DMRG_BUILD_BATCHED_MAGMA)
-    set(USE_MAGMA ON)
-  endif()
 endif()
 
 add_subdirectory(KronUtil)
 
-# Generate configuration header for PsimagLite
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/GPUPlugin/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin/DMRGConfig.h
-               @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h @ONLY)
 
 # DMRG++ as a library so cincuenta can use it
 add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)

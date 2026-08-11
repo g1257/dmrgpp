@@ -1,4 +1,4 @@
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "analysis.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"

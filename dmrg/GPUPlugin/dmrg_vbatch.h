@@ -1,7 +1,7 @@
 #ifndef DMRG_VBATCH_H
 #define DMRG_VBATCH_H
 
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "dmrg_types.h"
 #include <PsimagLite/Vector.h>
 #include <cassert>
