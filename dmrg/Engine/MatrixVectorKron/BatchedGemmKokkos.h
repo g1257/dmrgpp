@@ -48,10 +48,10 @@ template <typename InitKronType> class BatchedGemmKokkos {
 	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
 
 	// Kokkos types
-	using KokkosScalar = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
-	using DevExecSpace = Kokkos::DefaultExecutionSpace;
-	using DevMemSpace  = typename DevExecSpace::memory_space;
-	using DevScalView  = Kokkos::View<KokkosScalar*, DevMemSpace>;
+	using KokkosScalar   = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
+	using ExecutionSpace = Kokkos::DefaultExecutionSpace;
+	using MemorySpace    = typename ExecutionSpace::memory_space;
+	using ScalarView     = Kokkos::View<KokkosScalar*, MemorySpace>;
 
 	// Compact struct holding all parameters for one batched GEMM call.
 	// Stored in device memory and accessed inside the kernel.
@@ -61,7 +61,7 @@ template <typename InitKronType> class BatchedGemmKokkos {
 		long long a_off, b_off, c_off; // element offsets into device flat arrays
 	};
 
-	using DevArgsView = Kokkos::View<GemmArgs*, DevMemSpace>;
+	using DevArgsView = Kokkos::View<GemmArgs*, MemorySpace>;
 
 	static const int ialign_ = 32;
 
@@ -96,7 +96,7 @@ public:
 		assert(vout.size() == totalXY);
 		assert(d_vin_.extent(0) == totalXY);
 
-		DevExecSpace exec;
+		ExecutionSpace exec;
 
 		// --- H2D: copy vin to device -----------------------------------------------
 		{
@@ -112,15 +112,15 @@ public:
 
 		// --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp]  (NoT x NoT) ----------------
 		{
-			const DevScalView flatBbatch  = d_flatBbatch_;
-			const DevScalView vin_dev     = d_vin_;
-			const DevScalView flatBXbatch = d_flatBXbatch_;
+			const ScalarView  flatBbatch  = d_flatBbatch_;
+			const ScalarView  vin_dev     = d_vin_;
+			const ScalarView  flatBXbatch = d_flatBXbatch_;
 			const DevArgsView args        = d_pass1_;
 
-			using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
+			using MemberType = typename Kokkos::TeamPolicy<ExecutionSpace>::member_type;
 			Kokkos::parallel_for(
 			    "BatchedGemmKokkos_Pass1",
-			    Kokkos::TeamPolicy<DevExecSpace>(
+			    Kokkos::TeamPolicy<ExecutionSpace>(
 			        exec, static_cast<int>(nbatch1_), Kokkos::AUTO, Kokkos::AUTO),
 			    KOKKOS_LAMBDA(const MemberType& member) {
 				    const int       i  = member.league_rank();
@@ -128,7 +128,7 @@ public:
 
 				    using UV = Kokkos::View<KokkosScalar**,
 				                            Kokkos::LayoutLeft,
-				                            DevMemSpace,
+				                            MemorySpace,
 				                            Kokkos::MemoryUnmanaged>;
 
 				    // A = Bbatch[ip] block: (lda, k) padded -> subview (m, k)
@@ -161,15 +161,15 @@ public:
 
 		// --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T  (NoT x T) ---------------
 		{
-			const DevScalView flatBXbatch = d_flatBXbatch_;
-			const DevScalView flatAbatch  = d_flatAbatch_;
-			const DevScalView vout_dev    = d_vout_;
+			const ScalarView  flatBXbatch = d_flatBXbatch_;
+			const ScalarView  flatAbatch  = d_flatAbatch_;
+			const ScalarView  vout_dev    = d_vout_;
 			const DevArgsView args        = d_pass2_;
 
-			using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
+			using MemberType = typename Kokkos::TeamPolicy<ExecutionSpace>::member_type;
 			Kokkos::parallel_for(
 			    "BatchedGemmKokkos_Pass2",
-			    Kokkos::TeamPolicy<DevExecSpace>(
+			    Kokkos::TeamPolicy<ExecutionSpace>(
 			        exec, static_cast<int>(nbatch2_), Kokkos::AUTO, Kokkos::AUTO),
 			    KOKKOS_LAMBDA(const MemberType& member) {
 				    const int       i  = member.league_rank();
@@ -181,7 +181,7 @@ public:
 
 				    using UV = Kokkos::View<KokkosScalar**,
 				                            Kokkos::LayoutLeft,
-				                            DevMemSpace,
+				                            MemorySpace,
 				                            Kokkos::MemoryUnmanaged>;
 
 				    // A = BXbatch[ip]: (lda, k) padded -> subview (m, k)
@@ -347,17 +347,17 @@ private:
 		const SizeType totalBXbatch = BXbatchOff[npatches];
 
 		// Allocate device buffers early and create host mirrors for efficient H2D
-		DevExecSpace exec_for_alloc;
-		d_flatAbatch_ = DevScalView(
+		ExecutionSpace exec_for_alloc;
+		d_flatAbatch_ = ScalarView(
 		    Kokkos::view_alloc(exec_for_alloc, Kokkos::WithoutInitializing, "d_flatAbatch"),
 		    totalAbatch);
-		d_flatBbatch_ = DevScalView(
+		d_flatBbatch_ = ScalarView(
 		    Kokkos::view_alloc(exec_for_alloc, Kokkos::WithoutInitializing, "d_flatBbatch"),
 		    totalBbatch);
 		d_flatBXbatch_
-		    = DevScalView(Kokkos::view_alloc(
-		                      exec_for_alloc, Kokkos::WithoutInitializing, "d_flatBXbatch"),
-		                  totalBXbatch);
+		    = ScalarView(Kokkos::view_alloc(
+		                     exec_for_alloc, Kokkos::WithoutInitializing, "d_flatBXbatch"),
+		                 totalBXbatch);
 
 		// Create host mirrors (likely pinned) to pack data into and then do a single
 		// deep_copy
@@ -507,14 +507,14 @@ private:
 		{
 			Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::rest");
 
-			DevExecSpace exec;
+			ExecutionSpace exec;
 
 			// d_flatAbatch_, d_flatBbatch_, d_flatBXbatch_ were allocated above as
 			// device views.
-			d_vin_ = DevScalView(
+			d_vin_ = ScalarView(
 			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vin"),
 			    xyStart[npatches]);
-			d_vout_ = DevScalView(
+			d_vout_ = ScalarView(
 			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vout"),
 			    xyStart[npatches]);
 
@@ -566,13 +566,13 @@ private:
 	SizeType nbatch1_ = 0; // number of pass-1 GEMMs
 	SizeType nbatch2_ = 0; // number of pass-2 GEMMs (== npatches)
 
-	DevScalView         d_flatAbatch_; // left-operator matrices, device, persistent
-	DevScalView         d_flatBbatch_; // right-operator matrices, device, persistent
-	mutable DevScalView d_flatBXbatch_; // intermediate BX work buffer, per-call
-	mutable DevScalView d_vin_; // input vector on device, per-call
-	mutable DevScalView d_vout_; // output vector on device, per-call
-	DevArgsView         d_pass1_; // pass-1 GEMM parameters, persistent
-	DevArgsView         d_pass2_; // pass-2 GEMM parameters, persistent
+	ScalarView         d_flatAbatch_; // left-operator matrices, device, persistent
+	ScalarView         d_flatBbatch_; // right-operator matrices, device, persistent
+	mutable ScalarView d_flatBXbatch_; // intermediate BX work buffer, per-call
+	mutable ScalarView d_vin_; // input vector on device, per-call
+	mutable ScalarView d_vout_; // output vector on device, per-call
+	DevArgsView        d_pass1_; // pass-1 GEMM parameters, persistent
+	DevArgsView        d_pass2_; // pass-2 GEMM parameters, persistent
 };
 
 } // namespace Dmrg
