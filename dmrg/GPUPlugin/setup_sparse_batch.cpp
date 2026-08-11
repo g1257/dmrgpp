@@ -1,5 +1,5 @@
 #include "setup_sparse_batch.h"
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "dmrg_lapack.h"
 #include "setup_nC.h"
 
