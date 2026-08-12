@@ -22,8 +22,8 @@ void apply_Htarget_sparse(SizeType                                              
                           const VectorIntegerType&                               ld_gAbatch_,
                           T**                                                    gBbatch_,
                           const VectorIntegerType&                               ld_gBbatch_,
-                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> Xin_,
-                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Yout_)
+                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> X_,
+                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Y_)
 {
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 	const IntegerType idebug = 1;
@@ -40,12 +40,6 @@ void apply_Htarget_sparse(SizeType                                              
 	double time_1st_vbatch = 0.0;
 	double time_2nd_vbatch = 0.0;
 
-	Kokkos::DefaultExecutionSpace exec;
-	Kokkos::SharedSpace           mem;
-
-	auto X_ = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Xin_);
-	auto Y_ = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Yout_);
-
 	/*
 	 ------------------
 	 compute  Y = H * X
@@ -56,8 +50,6 @@ void apply_Htarget_sparse(SizeType                                              
 
 	VectorSizeType left_patch_size_(npatches, 0);
 	VectorSizeType right_patch_size_(npatches, 0);
-	// IntegerType left_patch_size_[npatches];
-	// IntegerType right_patch_size_[npatches];
 
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		IntegerType L1 = left_patch_start_[ipatch - 1];
@@ -96,7 +88,6 @@ void apply_Htarget_sparse(SizeType                                              
 			dmrg_prefetch_to_device((void*)pX, X_inc_nbytes, igpu);
 		};
 	}
-	Kokkos::deep_copy(exec, Y_, Xin_);
 #endif
 
 	SizeType    sum_nC = 0;
@@ -469,7 +460,6 @@ void apply_Htarget_sparse(SizeType                                              
 	Kokkos::kokkos_free<Kokkos::SharedSpace>(b_array_);
 	Kokkos::kokkos_free<Kokkos::SharedSpace>(c_array_);
 	Kokkos::kokkos_free<Kokkos::SharedSpace>(gBXbatch_);
-	Kokkos::deep_copy(exec, Yout_, Y_);
 
 	total_time += dmrg_get_wtime();
 	if (idebug >= 1) {

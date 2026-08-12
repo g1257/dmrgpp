@@ -3,7 +3,6 @@
 
 #include "GPUPluginConfig.h"
 #include "dmrg_vbatch.h"
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif
