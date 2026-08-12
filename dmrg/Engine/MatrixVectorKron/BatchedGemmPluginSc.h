@@ -3,12 +3,12 @@
 // Don't include this file directly; use BatchedGemmInclude.hh
 
 #include "BatchedGemm.h"
+#include <PsimagLite/KokkosType.h>
 #include <PsimagLite/Matrix.h>
 #include <PsimagLite/ProgressIndicator.h>
 #include <PsimagLite/Vector.h>
 
 #include <Kokkos_Core.hpp>
-#include <PsimagLite/KokkosType.h>
 
 #include <cassert>
 #include <complex>
@@ -139,6 +139,7 @@ public:
 		    reinterpret_cast<KokkosScalar*>(vout.data()), vout.size());
 		auto vout_view_shared
 		    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), vout_view);
+		exec.fence();
 
 		batchedGemm_->apply_Htarget(vin_view_shared, vout_view_shared);
 		Kokkos::deep_copy(vout_view, vout_view_shared);
