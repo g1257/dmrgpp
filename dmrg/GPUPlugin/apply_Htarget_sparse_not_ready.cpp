@@ -26,9 +26,9 @@ void apply_Htarget_sparse(
     Kokkos::View<const typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace> X_,
     Kokkos::View<typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace>       Y_)
 {
-	using KokkosScalar       = typename PsimagLite::KokkosType<T>::type;
+	using KokkosScalar = typename PsimagLite::KokkosType<T>::type;
 
-    auto gAbatch_ = reinterpret_cast<KokkosScalar**>(gAbatch);
+	auto gAbatch_ = reinterpret_cast<KokkosScalar**>(gAbatch);
 	auto gBbatch_ = reinterpret_cast<KokkosScalar**>(gBbatch);
 
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
