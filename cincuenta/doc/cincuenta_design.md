@@ -242,6 +242,13 @@ reader at startup.  All solver components receive a const reference to it.
 
 ## Input File Reference
 
+This table was completed 2026-08-13 against `ParamsDmftSolver.h`, `MinParams.h`,
+`Fit.h`, and `ImpuritySolverBase.h` — see
+[`neq_dmft_ed_input.md`](neq_dmft_ed_input.md) for the non-equilibrium
+extension on top of this.
+
+### Core equilibrium parameters (`ParamsDmftSolver`), all required
+
 | Keyword | Type | Description |
 |---------|------|-------------|
 | `FicticiousBeta` | real | Inverse fictitious temperature β; sets Matsubara grid spacing |
@@ -252,9 +259,54 @@ reader at startup.  All solver components receive a const reference to it.
 | `DmftNumberOfIterations` | int | Maximum self-consistency iterations |
 | `DmftTolerance` | real | Convergence threshold for Σ error |
 | `ImpuritySolver` | string | `dmrg` or `exactdiag` |
-| `FitMethod` | string | `conjugate_gradient` or `simplex` |
-| `FitOptions` | string | Optional: `ParticleHoleSymmetric` |
-| `MinParamsMaxIter` | int | Maximum iterations for bath parameter minimiser |
+
+Optional, with defaults:
+
+| Keyword | Type | Default | Description |
+|---------|------|---------|-------------|
+| `Precision` | int | (command-line `-p`, default 12) | Digits of output precision. In practice almost always overridden by the `-p` command-line flag, which `cincuenta.cpp` applies after construction whenever it's greater than 0 — the input keyword only takes effect if you also pass `-p 0`. |
+| `FitOptions` | string | *(none)* | e.g. `ParticleHoleSymmetric`: constrain bath energies to ±ε pairs, halving the free energy unknowns (see particle-hole symmetry note above). |
+
+### Bath-fit minimizer (`MinParams`), all optional with defaults
+
+| Keyword | Type | Default | Description |
+|---------|------|---------|-------------|
+| `MinParamsDelta` | real | 1e-3 | Initial step size for one minimizer parameter group |
+| `MinParamsDelta2` | real | 1e-3 | Initial step size for the other minimizer parameter group |
+| `MinParamsTolerance` | real | 1e-3 | Minimizer convergence tolerance |
+| `MinParamsMaxIter` | int | 100 | Maximum minimizer iterations |
+| `MinParamsVerbose` | int (0/1) | 0 | Print minimizer progress |
+| `FitMethod` | string | `"conjugate_gradient"` | or `"simplex"` |
+
+Initial bath guess (`Fit::InitResults`, all optional — pick **one** family, not both):
+
+| Keyword | Type | Description |
+|---------|------|-------------|
+| `InitBathRa` | real | Constant initial value for the hopping (V) half of the bath-parameter vector |
+| `InitBathRb` | real | Constant initial value for the on-site-energy (ε) half |
+| `InitBathVector` | vector | Explicit initial bath-parameter vector (length `NumberOfBathPoints` or `2*NumberOfBathPoints`) — mutually exclusive with `InitBathRa`/`InitBathRb` |
+| `InitBathReset` | int (0/1) | Reset behavior between DMFT iterations |
+
+If none of these are given, `InitBathRa` defaults to 1.
+
+### Impurity-solver / DMRG-omega-scan block, required regardless of `ImpuritySolver=`
+
+These are read directly by `ImpuritySolverBase`/`ImpuritySolverDmrg`/
+`ImpuritySolverExactDiag` and by the underlying DMRG++ input grammar that
+cincuenta's own grammar chains onto (`Dmrg::InputCheck().import()`) — they
+parse unconditionally, so they're required even when
+`ImpuritySolver="exactdiag"` and the DMRG-specific ones go unused:
+`TargetElectronsUp=`, `TargetElectronsDown=` (target electron-count sector),
+`ImpuritySite=` (which site is the correlated impurity in the star geometry;
+almost always `0`), `HubbardU=` (the interaction U — shared with the neq
+quench's U_i, see `neq_dmft_ed_input.md`), `RootOutputname=`,
+`InfiniteLoopKeptStates=`, `FiniteLoopsGs=`, `FiniteLoopsOmega=`,
+`OmegaBegin=`, `OmegaTotal=`, `OmegaStep=`, `OmegaDelta=`, `TridiagSteps=`,
+`TridiagEps=`, `TruncationTolerance=`, `CorrectionVectorEta=`, `GsWeight=`.
+These are standard DMRG++ keywords (documented in DMRG++'s own manual, not
+duplicated here) — copy the block from a working example
+(`cincuenta/TestSuite/inputs/inputCincuenta0.ain` or any `inputNeq*.ain`)
+rather than constructing it from scratch.
 
 ---
 
