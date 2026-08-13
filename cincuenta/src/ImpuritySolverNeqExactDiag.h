@@ -73,14 +73,12 @@ public:
 	    , nup_(0)
 	    , ndown_(0)
 	    , nT_(params.nT)
-	    , nTau_(params.eqParams.nMatsubaras)
-	    , dtau_(params.eqParams.ficticiousBeta
-	            / static_cast<RealType>(params.eqParams.nMatsubaras))
+	    , nTau_(params.grid.nMatsubaras)
+	    , dtau_(params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	    , gimp_(params.nT,
-	            params.eqParams.nMatsubaras,
+	            params.grid.nMatsubaras,
 	            params.dt,
-	            params.eqParams.ficticiousBeta
-	                / static_cast<RealType>(params.eqParams.nMatsubaras))
+	            params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	    , E0_pre_(0)
 	{
 		io.readline(nup_, "TargetElectronsUp=");
@@ -695,7 +693,7 @@ private:
 		const SizeType dimNm1pre = energiesNm1_pre_.size();
 		const SizeType nTauSteps = nTau_ + 1;
 		const SizeType nFreqs    = nTau_;
-		const RealType beta      = params_.eqParams.ficticiousBeta;
+		const RealType beta      = params_.grid.ficticiousBeta;
 
 		for (SizeType j = 0; j < nTauSteps; ++j) {
 			const RealType tau = j * dtau_;

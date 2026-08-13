@@ -26,6 +26,26 @@ void usage(const std::string& name)
 	std::cerr << "USAGE is " << name << " -f filename [-p precision] [-V]\n";
 }
 
+// Reject presence of an equilibrium-bath-fit-only key under NeqAtomicLimit=1,
+// where the equilibrium DMFT stage never runs at all, so the key would
+// otherwise be silently parsed and ignored. T must match the key's declared
+// Ainur type (see CincuentaInputCheck::import()).
+template <typename T, typename ReadableType>
+void rejectUnderAtomicLimit(ReadableType& io, const std::string& key)
+{
+	T    tmp {};
+	bool present = true;
+	try {
+		io.readline(tmp, key);
+	} catch (std::exception&) {
+		present = false;
+	}
+	if (present)
+		err(key
+		    + " has no effect when NeqAtomicLimit=1 (the equilibrium bath "
+		      "fit is skipped entirely); remove it from the input\n");
+}
+
 /* PSIDOC DmrgDriver
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
@@ -155,47 +175,59 @@ int main(int argc, char** argv)
 	InputNgType::Writeable    ioWriteable(input_path.findFirst(inputfile), inputCheck);
 	InputNgType::Readable     io(ioWriteable);
 
-	ParamsDmftSolverType params(io);
-	// BEGIN adjust params
-	if (precision > 0) {
-		params.precision = precision;
-	}
-
-	params.echoInput = echoInput;
-
-	// END adjust params
-	DmftSolverType::FitType::InitResults initResults(io);
-
-	DmftSolverType dmftSolver(params, initResults, application, io);
-
-	// NeqAtomicLimit=1 (see below) discards the equilibrium bath fit entirely
-	// -- the neq stage starts from an empty bath instead. Peek the flag here,
-	// before running the fit, so that case can skip selfConsistencyLoop()
-	// (and its GSL minimizer, which errors out for NumberOfBathPoints=0)
-	// rather than requiring a placeholder bath just to keep it well-posed.
-	bool skipEquilibriumFit = false;
+	// NeqAtomicLimit=1 means there is no equilibrium DMFT stage at all: the
+	// neq run starts from an empty bath instead of a fitted one. Peek it
+	// before touching anything equilibrium-specific, so that case can skip
+	// *constructing* (not just running) the equilibrium machinery, and
+	// reject equilibrium-only keywords that would otherwise silently do
+	// nothing (see cincuenta/doc/neq_dmft_ed_input.md).
+	bool neqAtomicLimit = false;
 	{
 		int tmp = 0;
 		try {
 			io.readline(tmp, "NeqAtomicLimit=");
-			skipEquilibriumFit = (tmp > 0);
+			neqAtomicLimit = (tmp > 0);
 		} catch (std::exception&) { }
 	}
 
-	if (skipEquilibriumFit) {
-		std::cout << "\nNeqAtomicLimit=1: skipping the equilibrium bath fit "
-		             "(its result would be discarded; the neq stage starts "
-		             "from an empty bath instead).\n";
+	PsimagLite::Vector<RealType>::Type equilibriumBathResult;
+
+	if (neqAtomicLimit) {
+		// These configure the equilibrium bath fit, which never runs in this
+		// mode -- reject them outright rather than silently ignoring them.
+		// (LatticeGf= is rejected inside ParamsMatsubaraGrid, constructed
+		// below as part of ParamsNeqDmftSolver.)
+		rejectUnderAtomicLimit<SizeType>(io, "NumberOfBathPoints=");
+		rejectUnderAtomicLimit<std::string>(io, "ImpuritySolver=");
+		rejectUnderAtomicLimit<std::string>(io, "FitOptions=");
+
+		std::cout << "\nNeqAtomicLimit=1: no equilibrium DMFT stage -- the neq "
+		             "run starts from an empty bath.\n";
 	} else {
+		ParamsDmftSolverType params(io);
+		// BEGIN adjust params
+		if (precision > 0) {
+			params.precision = precision;
+		}
+
+		params.echoInput = echoInput;
+
+		// END adjust params
+		DmftSolverType::FitType::InitResults initResults(io);
+
+		DmftSolverType dmftSolver(params, initResults, application, io);
+
 		dmftSolver.selfConsistencyLoop();
 
 		dmftSolver.print(std::cout);
+
+		equilibriumBathResult = dmftSolver.bathResult();
 	}
 
 	// Non-equilibrium DMFT mode: triggered when TmaxNeq is present in input.
-	// The equilibrium DMFT run above supplies the bath parameters (fixed bath
-	// approximation for the interaction quench U_i -> U_f), unless
-	// NeqAtomicLimit=1 (see skipEquilibriumFit above).
+	// The equilibrium DMFT stage above supplies the bath parameters (fixed
+	// bath approximation for the interaction quench U_i -> U_f), unless
+	// NeqAtomicLimit=1, in which case equilibriumBathResult is empty.
 	{
 		using ParamsNeqType = Dmft::ParamsNeqDmftSolver<std::complex<RealType>>;
 
@@ -210,20 +242,11 @@ int main(int argc, char** argv)
 			std::cout << "\n=== Non-equilibrium DMFT (interaction quench) ===\n";
 			ParamsNeqType neqParams(io);
 
-			// NeqAtomicLimit=true: start the neq run from the atomic limit
-			// (no bath coupled at t=0), so the first bath is empty and
-			// Delta^- is identically zero, matching the setup of Gramsch,
-			// Balzer, Eckstein, Kollar, PRB 88, 235106 (2013), Sec. VI.
-			const PsimagLite::Vector<RealType>::Type emptyBathParams;
-			const auto&                              neqBathParams
-			    = neqParams.neqAtomicLimit ? emptyBathParams : dmftSolver.bathResult();
-
 			// NeqSolver= selects the neq propagation method: "ed" (default,
 			// also selected by omitting NeqSolver= entirely) or "tdmrg".
 			// "ed" always uses the GBEK-capable exact-diagonalization solver:
 			// NeqBathRank=0 (default) reduces exactly to a fixed equilibrium
-			// bath with no time-dependent second bath (the only case that
-			// existed before this solver was unified); NeqBathRank>0 adds the
+			// bath with no time-dependent second bath; NeqBathRank>0 adds the
 			// low-rank Cholesky second bath (Gramsch/Balzer/Eckstein/Kollar,
 			// PRB 88, 235106 (2013)) so the bath can respond to the quench.
 			std::string neqSolverType;
@@ -239,7 +262,7 @@ int main(int argc, char** argv)
 				using TdmrgImpType
 				    = Dmft::ImpuritySolverNeqTdmrg<std::complex<RealType>>;
 				TdmrgImpType tdmrgSolver(neqParams, application, io);
-				tdmrgSolver.solve(dmftSolver.bathResult());
+				tdmrgSolver.solve(equilibriumBathResult);
 				const std::string& p = neqParams.neqOutputPrefix;
 				tdmrgSolver.gimp().dump(p.empty() ? "green" : p + "-green");
 			} else if (neqSolverType == "" || neqSolverType == "ed") {
@@ -250,7 +273,7 @@ int main(int argc, char** argv)
 				    = Dmft::NeqDmftSolver<std::complex<RealType>,
 				                          Dmft::ImpuritySolverNeqGBEK>;
 				EdNeqSolverType neqSolver(neqParams, io);
-				neqSolver.solve(neqBathParams);
+				neqSolver.solve(equilibriumBathResult);
 				neqSolver.dumpGreenFunctions();
 			} else {
 				err("Unknown NeqSolver=\"" + neqSolverType

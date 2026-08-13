@@ -46,10 +46,9 @@ public:
 	    , impSolver_(params, io)
 	    , latticeGf_(params)
 	    , gimp_(params.nT,
-	            params.eqParams.nMatsubaras,
+	            params.grid.nMatsubaras,
 	            params.dt,
-	            params.eqParams.ficticiousBeta
-	                / static_cast<RealType>(params.eqParams.nMatsubaras))
+	            params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	{ }
 
 	/*!

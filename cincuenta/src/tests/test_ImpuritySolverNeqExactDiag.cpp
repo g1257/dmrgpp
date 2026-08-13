@@ -50,10 +50,10 @@ static const std::string kConfig = "##Ainur1.0\n\n"
 static KBType makeSlice(const ParamsType& solverParams)
 {
 	return KBType(solverParams.nT,
-	              solverParams.eqParams.nMatsubaras,
+	              solverParams.grid.nMatsubaras,
 	              solverParams.dt,
-	              solverParams.eqParams.ficticiousBeta
-	                  / static_cast<RealType>(solverParams.eqParams.nMatsubaras));
+	              solverParams.grid.ficticiousBeta
+	                  / static_cast<RealType>(solverParams.grid.nMatsubaras));
 }
 
 // ---- buildLanczosInput -------------------------------------------------

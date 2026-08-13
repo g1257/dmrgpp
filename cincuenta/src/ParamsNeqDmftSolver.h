@@ -1,24 +1,31 @@
 #ifndef PARAMS_NEQ_DMFT_SOLVER_H
 #define PARAMS_NEQ_DMFT_SOLVER_H
 #include "CincuentaInputCheck.h"
-#include "ParamsDmftSolver.h"
+#include "ParamsMatsubaraGrid.h"
 
 namespace Dmft {
 
 /*!
  * \brief ParamsNeqDmftSolver
- * Parameters for the non-equilibrium DMFT extension.
- * Contains all equilibrium parameters (via composition) plus the
- * interaction-quench and real-time grid parameters.
+ * Parameters for the non-equilibrium DMFT extension: the interaction-quench
+ * and real-time grid parameters, plus (via composition) the Matsubara-grid
+ * parameters shared with the equilibrium stage.
+ *
+ * Deliberately does NOT compose the full equilibrium ParamsDmftSolver: under
+ * NeqAtomicLimit=1 there is no equilibrium DMFT stage at all (see
+ * cincuenta.cpp), so equilibrium-bath-fit-only parameters (bath size,
+ * impurity solver choice, fit options, minimizer settings) have no meaning
+ * here and are never parsed by this class.
  */
 template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 
-	using RealType     = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using InputNgType  = PsimagLite::InputNg<CincuentaInputCheck>;
-	using EqParamsType = ParamsDmftSolver<ComplexOrRealType>;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using InputNgType    = PsimagLite::InputNg<CincuentaInputCheck>;
+	using GridParamsType = ParamsMatsubaraGrid<ComplexOrRealType>;
 
 	ParamsNeqDmftSolver(typename InputNgType::Readable& io)
-	    : eqParams(io)
+	    : neqAtomicLimit(peekNeqAtomicLimit(io))
+	    , grid(io, neqAtomicLimit)
 	{
 		io.readline(uInitial, "HubbardU=");
 		io.readline(uFinal, "HubbardUFinal=");
@@ -28,15 +35,11 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 
 		try {
 			io.readline(neqDmftIter, "NeqDmftIter=");
-		} catch (std::exception&) {
-			neqDmftIter = eqParams.dmftIter;
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(neqDmftError, "NeqDmftTolerance=");
-		} catch (std::exception&) {
-			neqDmftError = eqParams.dmftError;
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(neqBathRank, "NeqBathRank=");
@@ -57,15 +60,17 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 		try {
 			io.readline(neqOutputPrefix, "NeqOutputPrefix=");
 		} catch (std::exception&) { }
-
-		try {
-			int tmp = 0;
-			io.readline(tmp, "NeqAtomicLimit=");
-			neqAtomicLimit = (tmp > 0);
-		} catch (std::exception&) { }
 	}
 
-	EqParamsType eqParams; ///< Equilibrium DMFT parameters (beta, mu, nBath, etc.)
+	/// True atomic limit start (GBEK PRB 88, 235106 (2013), Sec. VI): no
+	/// equilibrium bath at all, so the lattice hopping t*(t) ramp starts
+	/// from exactly 0 (see NeqLatticeGf's tStar_ construction) and the
+	/// impurity solver starts from an empty bath (see cincuenta.cpp).
+	/// Read before `grid` (declaration order) so `grid` knows whether
+	/// LatticeGf= is even meaningful.
+	const bool neqAtomicLimit;
+
+	GridParamsType grid; ///< Matsubara-grid parameters shared with the equilibrium stage.
 
 	RealType uInitial = 0; ///< Interaction quench: U_i -> U_f at t = 0
 	RealType uFinal   = 0; ///<
@@ -96,14 +101,18 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 	/// Empty (default) → "green-retarded" etc.  Non-empty → "{prefix}-green-retarded" etc.
 	std::string neqOutputPrefix = "";
 
-	/// True atomic limit start (GBEK PRB 88, 235106 (2013), Sec. VI): no
-	/// hopping at all at t=0, so the lattice hopping t*(t) ramp must start
-	/// from exactly 0, not from whatever small-but-nonzero bandwidth the
-	/// LatticeGf= equilibrium spec happens to use (that spec is only kept
-	/// non-degenerate to keep the discarded equilibrium bath-fit minimizer
-	/// well-posed; it should not leak into the real-time quench ramp's
-	/// baseline -- see NeqLatticeGf's tStar_ construction).
-	bool neqAtomicLimit = false;
+private:
+
+	static bool peekNeqAtomicLimit(typename InputNgType::Readable& io)
+	{
+		int tmp = 0;
+		try {
+			io.readline(tmp, "NeqAtomicLimit=");
+		} catch (std::exception&) {
+			return false;
+		}
+		return tmp > 0;
+	}
 };
 
 } // namespace Dmft

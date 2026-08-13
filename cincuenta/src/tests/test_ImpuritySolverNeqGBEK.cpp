@@ -457,10 +457,9 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 
 	using KBType = SolverType::KBType;
 	KBType slice(params.nT,
-	             params.eqParams.nMatsubaras,
+	             params.grid.nMatsubaras,
 	             params.dt,
-	             params.eqParams.ficticiousBeta
-	                 / static_cast<RealType>(params.eqParams.nMatsubaras));
+	             params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras));
 
 	for (int n = 0; n <= static_cast<int>(params.nT); ++n) {
 		solver.computeGimp(slice, n);
