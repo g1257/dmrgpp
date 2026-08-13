@@ -250,16 +250,6 @@ private:
 			 static_cast<int>(d.cols()) };
 	}
 
-	// Column-major copy: src(m, n) with lds -> dst(m, n) with ldd.
-	static void
-	lacpy(const ComplexOrRealType* src, int m, int n, int lds, ComplexOrRealType* dst, int ldd)
-	{
-		for (int j = 0; j < n; ++j)
-			std::memcpy(dst + static_cast<long long>(j) * ldd,
-			            src + static_cast<long long>(j) * lds,
-			            m * sizeof(ComplexOrRealType));
-	}
-
 	// Needs to be public so we can use lambdas with Cuda.
 public:
 
@@ -548,13 +538,6 @@ public:
 				      << "elems"
 				      << " Bbatch=" << totalBbatch << "elems"
 				      << " BXbatch=" << totalBXbatch << "elems";
-				std::cerr
-				    << "setup done: npatches=" << npatches
-				    << " noperator=" << noperator << " pass1_batches=" << nbatch1_
-				    << " pass2_batches=" << nbatch2_ << " Abatch=" << totalAbatch
-				    << "elems"
-				    << " Bbatch=" << totalBbatch << "elems"
-				    << " BXbatch=" << totalBXbatch << "elems";
 				progress_.printline(msg, std::cout);
 			}
 		}
