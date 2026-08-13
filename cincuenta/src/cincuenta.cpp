@@ -168,13 +168,34 @@ int main(int argc, char** argv)
 
 	DmftSolverType dmftSolver(params, initResults, application, io);
 
-	dmftSolver.selfConsistencyLoop();
+	// NeqAtomicLimit=1 (see below) discards the equilibrium bath fit entirely
+	// -- the neq stage starts from an empty bath instead. Peek the flag here,
+	// before running the fit, so that case can skip selfConsistencyLoop()
+	// (and its GSL minimizer, which errors out for NumberOfBathPoints=0)
+	// rather than requiring a placeholder bath just to keep it well-posed.
+	bool skipEquilibriumFit = false;
+	{
+		int tmp = 0;
+		try {
+			io.readline(tmp, "NeqAtomicLimit=");
+			skipEquilibriumFit = (tmp > 0);
+		} catch (std::exception&) { }
+	}
 
-	dmftSolver.print(std::cout);
+	if (skipEquilibriumFit) {
+		std::cout << "\nNeqAtomicLimit=1: skipping the equilibrium bath fit "
+		             "(its result would be discarded; the neq stage starts "
+		             "from an empty bath instead).\n";
+	} else {
+		dmftSolver.selfConsistencyLoop();
+
+		dmftSolver.print(std::cout);
+	}
 
 	// Non-equilibrium DMFT mode: triggered when TmaxNeq is present in input.
 	// The equilibrium DMFT run above supplies the bath parameters (fixed bath
-	// approximation for the interaction quench U_i -> U_f).
+	// approximation for the interaction quench U_i -> U_f), unless
+	// NeqAtomicLimit=1 (see skipEquilibriumFit above).
 	{
 		using ParamsNeqType = Dmft::ParamsNeqDmftSolver<std::complex<RealType>>;
 
@@ -193,19 +214,28 @@ int main(int argc, char** argv)
 			// (no bath coupled at t=0), so the first bath is empty and
 			// Delta^- is identically zero, matching the setup of Gramsch,
 			// Balzer, Eckstein, Kollar, PRB 88, 235106 (2013), Sec. VI.
-			// This bypasses the equilibrium bath fit for the neq stage
-			// instead of forcing it to fit a near-zero bandwidth.
 			const PsimagLite::Vector<RealType>::Type emptyBathParams;
 			const auto&                              neqBathParams
 			    = neqParams.neqAtomicLimit ? emptyBathParams : dmftSolver.bathResult();
 
-			// Check for tDMRG solver selection
+			// NeqSolver= selects the neq propagation method: "ed" (default,
+			// also selected by omitting NeqSolver= entirely) or "tdmrg".
+			// "ed" always uses the GBEK-capable exact-diagonalization solver:
+			// NeqBathRank=0 (default) reduces exactly to a fixed equilibrium
+			// bath with no time-dependent second bath (the only case that
+			// existed before this solver was unified); NeqBathRank>0 adds the
+			// low-rank Cholesky second bath (Gramsch/Balzer/Eckstein/Kollar,
+			// PRB 88, 235106 (2013)) so the bath can respond to the quench.
 			std::string neqSolverType;
 			try {
 				io.readline(neqSolverType, "NeqSolver=");
 			} catch (std::exception&) { }
 
 			if (neqSolverType == "tdmrg") {
+				if (neqParams.neqAtomicLimit)
+					err("NeqSolver=\"tdmrg\" does not support NeqAtomicLimit=1 "
+					    "(untested combination; see CLAUDE.md's tDMRG "
+					    "quarantine note)\n");
 				std::cout << "  using ImpuritySolverNeqTdmrg (tDMRG)\n";
 				using TdmrgImpType
 				    = Dmft::ImpuritySolverNeqTdmrg<std::complex<RealType>>;
@@ -213,20 +243,19 @@ int main(int argc, char** argv)
 				tdmrgSolver.solve(dmftSolver.bathResult());
 				const std::string& p = neqParams.neqOutputPrefix;
 				tdmrgSolver.gimp().dump(p.empty() ? "green" : p + "-green");
-			} else if (neqSolverType == "gbek") {
-				std::cout << "  using ImpuritySolverNeqGBEK (two-bath GBEK)\n";
-				using GbekNeqSolverType
+			} else if (neqSolverType == "" || neqSolverType == "ed") {
+				std::cout << "  using ImpuritySolverNeqGBEK (exact "
+				             "diagonalization, NeqBathRank="
+				          << neqParams.neqBathRank << ")\n";
+				using EdNeqSolverType
 				    = Dmft::NeqDmftSolver<std::complex<RealType>,
 				                          Dmft::ImpuritySolverNeqGBEK>;
-				GbekNeqSolverType neqSolver(neqParams, io);
+				EdNeqSolverType neqSolver(neqParams, io);
 				neqSolver.solve(neqBathParams);
 				neqSolver.dumpGreenFunctions();
 			} else {
-				using ExactNeqSolverType
-				    = Dmft::NeqDmftSolver<std::complex<RealType>>;
-				ExactNeqSolverType neqSolver(neqParams, io);
-				neqSolver.solve(dmftSolver.bathResult());
-				neqSolver.dumpGreenFunctions();
+				err("Unknown NeqSolver=\"" + neqSolverType
+				    + "\"; expected \"ed\" (default) or \"tdmrg\"\n");
 			}
 		}
 	}
