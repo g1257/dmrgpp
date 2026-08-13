@@ -9,12 +9,14 @@
 # ImpuritySolverNeqExactDiag::solveAtomicLimit() and
 # cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py).
 #
-# NumberOfBathPoints=1 keeps the (discarded) equilibrium self-consistency
-# loop's minimizer well-posed (it needs >=1 bath parameter pair; 0 makes
-# GSL's simplex minimizer error out). TargetElectronsUp=1/Down=0 is read
-# by both the eq loop (no half-filling constraint there) and the neq
-# solver (which requires nup_+ndown_==1 for the atomic-limit bypass) from
-# the same keys -- the eq fit result itself is discarded by NeqAtomicLimit.
+# NeqAtomicLimit=1 makes cincuenta.cpp skip the equilibrium self-consistency
+# loop (and its GSL minimizer) entirely, so NumberOfBathPoints=0 here is
+# fine -- there is no bath fit to keep well-posed. LatticeGf='s bandwidth is
+# likewise unused (NeqLatticeGf forces tStar_=0 whenever NeqAtomicLimit=1,
+# regardless of what LatticeGf= says); it's still required syntactically
+# because ParamsDmftSolver parses it unconditionally. TargetElectronsUp=1/
+# Down=0 is required by the neq solver itself (nup_+ndown_==1 for the
+# atomic-limit bypass).
 #
 # GBEK Fig. 3 parameters: U=2, 100 steps, dt=0.04 (tmax=4),
 # quench to Bethe bandwidth W_f=4 (t*=1), L=3 second bath rank.
@@ -23,7 +25,7 @@ FicticiousBeta=16;
 ChemicalPotential=0.;
 Matsubaras=200;
 LatticeGf="energy,semicircular,0.1";
-NumberOfBathPoints=1;
+NumberOfBathPoints=0;
 
 DmftNumberOfIterations=1;
 DmftTolerance=0.001;
@@ -68,8 +70,9 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-# GBEK two-bath solver, second bath rank L=3
-NeqSolver="gbek";
+# ED solver with GBEK second bath, rank L=3 (NeqSolver="ed" is the default;
+# written here for clarity)
+NeqSolver="ed";
 NeqBathRank=3;
 NeqAtomicLimit=1;
 

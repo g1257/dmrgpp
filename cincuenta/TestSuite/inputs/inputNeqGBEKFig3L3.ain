@@ -59,8 +59,9 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-# GBEK two-bath solver, second bath rank L=3
-NeqSolver="gbek";
+# ED solver with GBEK second bath, rank L=3 (NeqSolver="ed" is the default;
+# written here for clarity)
+NeqSolver="ed";
 NeqBathRank=3;
 
 # BandwidthFinal=4 -> t*_f = 1 -> tStarFinalSq_ = 1.
