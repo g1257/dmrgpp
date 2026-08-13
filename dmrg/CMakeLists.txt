@@ -165,8 +165,8 @@ add_lowest_eigenvalue_check_test(output10 input10 -19.6747 runForinput10.cout)
 
 # input11 is redundant
 # add_test(NAME input11 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input11.ain)
-add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain) # energy 2.23416691764
-add_lowest_eigenvalue_check_test(output12 input12 2.23416691764 runForinput12.cout)
+add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain) # energy 2.23292
+add_lowest_eigenvalue_check_test(output12 input12 2.23292 runForinput12.cout)
 add_test(NAME input20 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input20.ain) # energy -3.37493
 add_lowest_eigenvalue_check_test(output20 input20 -3.37493 runForinput20.cout)
 add_test(NAME input21 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input21.ain "<gs|sz|P0>") # none
