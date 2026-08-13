@@ -234,8 +234,7 @@ int main(int argc, char** argv)
 			if (neqSolverType == "tdmrg") {
 				if (neqParams.neqAtomicLimit)
 					err("NeqSolver=\"tdmrg\" does not support NeqAtomicLimit=1 "
-					    "(untested combination; see CLAUDE.md's tDMRG "
-					    "quarantine note)\n");
+					    "(untested combination)\n");
 				std::cout << "  using ImpuritySolverNeqTdmrg (tDMRG)\n";
 				using TdmrgImpType
 				    = Dmft::ImpuritySolverNeqTdmrg<std::complex<RealType>>;
