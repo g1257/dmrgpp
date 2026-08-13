@@ -141,7 +141,7 @@ void apply_Htarget_sparse(SizeType                                              
 	 ---------------
 	 */
 	KokkosScalar** gBXbatch_ = reinterpret_cast<KokkosScalar**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(npatches * sizeof(KokkosScalar*)));
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("gBXbatch_", npatches * sizeof(KokkosScalar*)));
 
 	nbytes_BX = sizeof(T) * sum_BX_sizes;
 	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> pBXmem("pBXmem", sum_BX_sizes);
@@ -169,14 +169,11 @@ void apply_Htarget_sparse(SizeType                                              
 	T beta  = 0.;
 
 	KokkosScalar const** a_array_ = reinterpret_cast<KokkosScalar const**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("a_array_", sizeof(KokkosScalar*) * batch_size_dim));
 	KokkosScalar const** b_array_ = reinterpret_cast<KokkosScalar const**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("b_array_", sizeof(KokkosScalar*) * batch_size_dim));
 	KokkosScalar** c_array_ = reinterpret_cast<KokkosScalar**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>(sizeof(KokkosScalar*) * batch_size_dim));
-	assert(a_array_ != nullptr);
-	assert(b_array_ != nullptr);
-	assert(c_array_ != nullptr);
+	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("c_array_", sizeof(KokkosScalar*) * batch_size_dim));
 
 	Kokkos::View<IntegerType*, Kokkos::SharedSpace> m_array_("m_array", ngroups_dim);
 	Kokkos::View<IntegerType*, Kokkos::SharedSpace> n_array_("n_array", ngroups_dim);
