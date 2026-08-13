@@ -1,59 +1,73 @@
-# Non-equilibrium DMFT input, exact-diagonalization (ED) solver
+# Non-equilibrium DMFT input: the exact-diagonalization (ED) solver
 
 This guide is for someone running `cincuenta` to do a non-equilibrium DMFT
-(neq-DMFT) interaction-quench calculation, using the exact-diagonalization
-(ED) impurity solver, **without** needing to read the C++. It assumes you can
-already run an equilibrium `cincuenta` job (see
-[`cincuenta_design.md`](cincuenta_design.md) and `cincuenta/README.md`).
+(neq-DMFT) interaction-quench calculation, without needing to read the C++.
+It assumes you can already run an equilibrium `cincuenta` job — see
+[`cincuenta_design.md`](cincuenta_design.md) for that, including the
+completed equilibrium **Input File Reference** table.
 
 If you only need to get a run going quickly, skip to
-[Worked example](#worked-example) and come back to the parameter tables as
+[Worked examples](#worked-examples) and come back to the parameter tables as
 needed.
 
 ## The physical picture
 
-`cincuenta` first solves the **equilibrium** DMFT problem at U = U₀ to get a
-converged bath (the `{V_α, ε_α}` in `cincuenta_design.md`'s Anderson model).
-Then, in a second stage, it quenches the interaction from `U_i` to `U_f` at
-t = 0 and follows the resulting real-time dynamics on the Keldysh contour,
-**with the bath held fixed at its equilibrium value** — this is the "fixed
-bath" approximation described in the paper this input format is modeled on,
-Aoki, Tsuji et al., PRB **88**, 235106 (2013). (A local copy of this paper
-is available to developers via the repo's `CLAUDE.md` overlay; it is not
-part of the git-tracked repo itself.)
+`cincuenta` first solves the **equilibrium** DMFT problem to get a converged
+bath (the `{V_α, ε_α}` in `cincuenta_design.md`'s Anderson model). Then, in a
+second stage, it quenches the interaction from `U_i` to `U_f` at t = 0 and
+follows the resulting real-time dynamics on the Keldysh contour. This second
+stage is set up by adding a `TmaxNeq=` line (with a positive value) below
+your usual equilibrium input — its presence is what turns on neq mode at all.
 
-Non-equilibrium mode is switched on simply by the presence of `TmaxNeq=` in
-the input file with a positive value. Everything above `TmaxNeq=` in your
-`.ain` file is the ordinary equilibrium input (same keywords you already
-know: `FicticiousBeta=`, `NumberOfBathPoints=`, `ImpuritySolver=`, etc.).
-Everything below is neq-specific.
+There are two neq **methods**, chosen by `NeqSolver=`:
 
-There are three neq **solvers**, chosen by `NeqSolver=`:
+| `NeqSolver=` | Meaning |
+|---|---|
+| `"ed"` (or omit the line — this is the default) | **This guide's subject.** Exact diagonalization. |
+| `"tdmrg"` | Time-dependent DMRG instead of ED. Not covered here — ask a developer. |
 
-| `NeqSolver=` | Solver class | What it does |
-|---|---|---|
-| *(omitted)* | `ImpuritySolverNeqExactDiag` | **This guide's subject.** Exact diagonalization on the fixed equilibrium bath. |
-| `"tdmrg"` | `ImpuritySolverNeqTdmrg` | Time-dependent DMRG instead of ED. Not covered here — ask a developer, or see the class itself. |
-| `"gbek"` | `ImpuritySolverNeqGBEK` | Adds a second, low-rank ("Cholesky") bath on top of ED, per Gramsch/Balzer/Eckstein/Kollar, PRB **88**, 235106 (2013). |
+### How much bath does the quench see? `NeqBathRank=`
 
-This guide covers the default (no `NeqSolver=` line) **ED** path. The GBEK
-scheme reuses several of the same keywords (`NeqBathRank=`, `NeqAtomicLimit=`)
-but has its own subtleties documented in
-`cincuenta/TestSuite/gbek_reference/README.md` — read that if you set
-`NeqSolver="gbek"`.
+This is the physically important choice inside the ED method, and it's worth
+understanding before you pick a value:
+
+The equilibrium bath fit gives you a bath that's correct **for the
+pre-quench system**. After the quench, the true non-equilibrium bath should
+respond — its effective hybridization Λ(t,t′) changes in time. `NeqBathRank=`
+(default 0) controls how much of that response the calculation captures:
+
+- **`NeqBathRank=0`** (default): the bath stays exactly as fitted at
+  equilibrium for the entire real-time run — no time-dependent response at
+  all. This is a real approximation, not just a numerically cheap special
+  case: it drops the back-reaction of the quench on the effective medium
+  entirely. It is only trustworthy when the quench is small enough that the
+  bath wouldn't need to change much anyway (e.g. quenching away from U = 0,
+  or a small ΔU) — it is not a generally valid non-equilibrium DMFT method.
+- **`NeqBathRank=L>0`**: adds a second, low-rank ("Cholesky") bath that
+  *does* evolve with the quench, following Gramsch, Balzer, Eckstein, Kollar,
+  PRB **88**, 235106 (2013) ("GBEK"). This is the physically meaningful way
+  to run neq-DMFT ED here — larger L captures the bath's time-dependent
+  response for longer before finite-rank truncation error takes over (see
+  `cincuenta/TestSuite/gbek_reference/README.md` for how much `L` you need
+  and for how long, for a given system).
+
+**Recommendation: unless you have a specific reason to check the
+`NeqBathRank=0` limit (e.g. as a small-quench sanity check), set
+`NeqBathRank=` to a positive value.** `NeqBathRank=0` is not a "simpler
+version of the same method" — it's a different, more restrictive
+approximation that happens to be what you get if you don't set the parameter
+at all.
 
 ## Required equilibrium input (recap)
 
-The neq stage is bolted onto an ordinary equilibrium run, so all the usual
-required equilibrium keywords still apply and are still required:
-`FicticiousBeta=`, `ChemicalPotential=`, `Matsubaras=`, `LatticeGf=`,
-`NumberOfBathPoints=`, `DmftNumberOfIterations=`, `DmftTolerance=`,
-`ImpuritySolver=` (must be `"exactdiag"` for the neq-ED path to make sense —
-the equilibrium bath fit is what the neq stage's bath comes from).
+The neq stage is bolted onto an ordinary equilibrium run, so the usual
+required equilibrium keywords still apply — see
+[`cincuenta_design.md`](cincuenta_design.md#input-file-reference) for the
+full table. `ImpuritySolver=` should be `"exactdiag"` (the equilibrium bath
+fit is what the neq stage's bath comes from).
 
-Two keywords used by the ED solver itself, read directly (not through
-`ParamsDmftSolver`/`ParamsNeqDmftSolver`), so they're easy to miss if you're
-scanning the `Params*.h` files instead of the actual `.ain` examples:
+Two keywords the ED solver itself requires directly, easy to miss if you're
+scanning `Params*.h` instead of the actual `.ain` examples:
 
 | Keyword | Type | Meaning |
 |---|---|---|
@@ -62,22 +76,14 @@ scanning the `Params*.h` files instead of the actual `.ain` examples:
 
 **Half-filling constraint:** the ED neq solver hardcodes the impurity
 chemical potential to `mu_imp = -U/2` (particle-hole symmetry). It will
-`err()` at run time unless `TargetElectronsUp + TargetElectronsDown ==
+error at run time unless `TargetElectronsUp + TargetElectronsDown ==
 NumberOfBathPoints + 1` (i.e., exactly half-filling of the full star-geometry
 system: 1 impurity + `NumberOfBathPoints` bath sites). There is no way to run
 away from half filling with this solver today.
 
-The equilibrium run also needs its usual DMRG-omega-scan block
-(`RootOutputname=`, `FiniteLoopsGs=`, `OmegaBegin=`, etc.) even when
-`ImpuritySolver="exactdiag"` — `ParamsDmftSolver`'s constructor and the
-downstream `DmftSolver` machinery require those fields to parse regardless of
-which solver ultimately consumes them. Copy them from one of the working
-examples below rather than trying to omit them.
-
 ## Neq-specific input
 
-All of the following go below the equilibrium block, and are parsed by
-`ParamsNeqDmftSolver` (`cincuenta/src/ParamsNeqDmftSolver.h`) unless noted.
+All of the following go below the equilibrium block.
 
 ### Required
 
@@ -88,59 +94,21 @@ All of the following go below the equilibrium block, and are parsed by
 | `TmaxNeq=` | real | Total real-time window to simulate, t ∈ [0, TmaxNeq]. **Presence of this line (with a positive value) is what turns on neq mode at all.** |
 | `NtNeq=` | int | Number of real-time steps. `dt = TmaxNeq / NtNeq` is fixed automatically — you don't set `dt` directly. |
 
-### Optional (all default sensibly if omitted)
+### Optional
 
 | Keyword | Type | Default | Meaning |
 |---|---|---|---|
-| `NeqDmftIter=` | int | same as equilibrium `DmftNumberOfIterations=` | Inner DMFT self-consistency iterations *at each time step*. The loop itself always runs (`NeqDmftSolver::timeStep()` is shared by every neq solver), but each iteration calls `prepareTimeStep()`, which is a no-op for plain ED (the bath is fixed) — so on the plain-ED path, extra iterations are harmless but do nothing; only `NeqSolver="gbek"` (which updates its Cholesky bath in `prepareTimeStep()`) actually needs more than 1. |
+| `NeqSolver=` | string | `"ed"` | `"ed"` or `"tdmrg"`; see method table above. Anything else is a hard error. |
+| `NeqBathRank=` | int | 0 | See [How much bath does the quench see?](#how-much-bath-does-the-quench-see-neqbathrank) above — **read that before leaving this at 0.** |
+| `NeqDmftIter=` | int | same as equilibrium `DmftNumberOfIterations=` | Inner self-consistency iterations at each time step, used only when `NeqBathRank>0` (updating the second bath); harmless no-op at `NeqBathRank=0`. |
 | `NeqDmftTolerance=` | real | same as equilibrium `DmftTolerance=` | Convergence tolerance for the above. |
-| `NeqSolver=` | string | *(empty → plain ED)* | `"tdmrg"` or `"gbek"`; see solver table above. This label is declared in the Ainur grammar but **read directly in `cincuenta.cpp`**, not by `ParamsNeqDmftSolver` — if you go looking for it in `ParamsNeqDmftSolver.h` you won't find it. |
-| `NeqBathRank=` | int | 0 | GBEK second-bath rank L. Irrelevant unless `NeqSolver="gbek"`. |
 | `BandwidthFinal=` | real | 0 (no quench) | Bethe-lattice bandwidth *for t > 0*, i.e. a **hopping** quench on top of (or instead of) the interaction quench. 0 means the lattice bandwidth stays at its equilibrium `LatticeGf=` value for all t. |
 | `QuenchShape=` | string | `"step"` | Ramp shape for the hopping quench: `"step"`, `"cosine"`, or `"tanh"`. Only matters if `BandwidthFinal=` is nonzero. |
 | `QuenchDuration=` | real | 0 (instantaneous) | Ramp duration t_q for the hopping quench. |
 | `NeqOutputPrefix=` | string | `""` | Prefix prepended to output Green's-function filenames (see [Output files](#output-files)). |
-| `NeqAtomicLimit=` | int (0/1) | 0 | See [NeqAtomicLimit gotcha](#neqatomiclimit-only-affects-the-gbek-path) below — **read this before using it.** |
+| `NeqAtomicLimit=` | int (0/1) | 0 | Start the neq run from the true atomic limit: no bath at all at t = 0 (hybridization Λ⁻ ≡ 0 exactly), per GBEK Sec. VI. When set, the equilibrium bath fit is skipped entirely (its result would be discarded anyway) — `NumberOfBathPoints=0` is fine in this case. **Not supported with `NeqSolver="tdmrg"`** (rejected with an error). Requires `TargetElectronsUp + TargetElectronsDown == 1`. |
 
 ## Gotchas
-
-### `NeqAtomicLimit=` only affects the GBEK path
-
-`NeqAtomicLimit=1` is meant to start the neq run from the true atomic limit
-(no bath at t = 0, so the hybridization Λ⁻(t,t′) is identically zero — the
-setup in GBEK Sec. VI). Looking at how it actually flows through
-`cincuenta.cpp`: the flag is read into `neqParams.neqAtomicLimit`, and an
-"empty bath" substitution (`neqBathParams`) is built from it — **but that
-substitution is only ever used on the `NeqSolver="gbek"` branch.** Both the
-default (bare ED) branch and the `NeqSolver="tdmrg"` branch pass the
-equilibrium-fitted bath (`dmftSolver.bathResult()`) unconditionally,
-ignoring `NeqAtomicLimit=` entirely.
-
-In practice this means:
-- With `NeqSolver="gbek"` and `NeqAtomicLimit=1`: works as intended — see
-  `inputNeqAtomicLimitGBEKL3.ain` for a full worked example (also below).
-- With no `NeqSolver=` (plain ED) and `NeqAtomicLimit=1`: **the flag does
-  nothing.** `ImpuritySolverNeqExactDiag::solve()` dispatches to
-  `solveAtomicLimit()` (the closed-form single-Hubbard-atom path) purely
-  based on `bathParams.size() == 0` — and on the plain-ED branch,
-  `cincuenta.cpp` always passes the equilibrium-fitted bath
-  (`dmftSolver.bathResult()`), never the empty one, regardless of
-  `NeqAtomicLimit=`. Setting `NumberOfBathPoints=0` will **not** work around
-  this either: the equilibrium bath-fit minimizer requires at least one bath
-  parameter pair and errors out before the neq stage is reached (confirmed by
-  the comment in `inputNeqAtomicLimitGBEKL3.ain`, which needs
-  `NumberOfBathPoints=1` for exactly this reason even though it discards the
-  eq fit result). **There is currently no supported way to reach the plain-ED
-  atomic limit from the input file.** If you need it, use
-  `NeqSolver="gbek"` with `NeqAtomicLimit=1` (which does work, and itself
-  bottoms out in the same `solveAtomicLimit()`), or ask a developer to wire
-  `NeqAtomicLimit=` into the default branch in `cincuenta.cpp`.
-
-This is existing behavior, not something this doc changes — flagged here so
-you don't spend an afternoon debugging why `NeqAtomicLimit=1` had no visible
-effect on a plain ED run. It's also a real input-ergonomics gap worth fixing
-in the code (a declared flag that's silently inert on two of three solver
-branches), separate from this documentation pass.
 
 ### `HubbardU=` is shared between the two stages
 
@@ -150,14 +118,15 @@ There's only one `HubbardU=` line in the file. It's U_i for the neq quench
 
 ### DMRG-only fields are still required even for `ImpuritySolver="exactdiag"`
 
-See [Required equilibrium input](#required-equilibrium-input-recap) above.
-This trips people up because it looks redundant, but omitting it will fail
-input parsing before you even get to the neq stage.
+See [Required equilibrium input](#required-equilibrium-input-recap) above and
+`cincuenta_design.md`'s reference table. This trips people up because it
+looks redundant, but omitting it will fail input parsing before you even get
+to the neq stage.
 
 ## Output files
 
-After the neq run finishes, `dumpGreenFunctions()` writes (via
-`KadanoffBaym::dump`, with `<prefix>` = `NeqOutputPrefix=` value or empty):
+After the neq run finishes, files are written with `<prefix>` = your
+`NeqOutputPrefix=` value (or nothing, if omitted):
 
 | File | Contents |
 |---|---|
@@ -165,7 +134,11 @@ After the neq run finishes, `dumpGreenFunctions()` writes (via
 | `<prefix->green-lesser` | Lesser impurity Green's function G^<(t, t′) |
 | `<prefix->green-matsubara-t` | Mixed Matsubara/real-time component |
 | `<prefix->weiss-green-retarded/lesser/matsubara-t` | Same three components for the Weiss field G₀ (the bath-only, U = 0 reference) |
-| `<prefix->weiss-delta-...` | Hybridization Λ(t, t′) components. (The filenames say "delta" — that's `KadanoffBaym::dump`'s literal, unrenamed output-file naming; the physical quantity is Λ, not Δ.) |
+| `<prefix->weiss-delta-...` | Hybridization Λ(t, t′) components. (The filenames say "delta" — that's legacy output-file naming; the physical quantity is Λ, not Δ.) |
+
+If `NeqBathRank>0`, two more files appear: `<prefix->cholesky-V` (the raw
+second-bath Cholesky factor) and `<prefix->docc-energy` (double occupation
+and kinetic/interaction/total energy vs. time).
 
 Two boundary-condition identities are checked automatically in CI
 (`cincuenta/src/CMakeLists.txt`, `neqTsuji0` test): `G^R(0,0) = -i` and
@@ -176,9 +149,10 @@ For the U_i = U_f = 0 sanity check (Σ = 0 exactly ⟹ G_imp must equal the
 Weiss field G₀), use `cincuenta/TestSuite/compare_gimp_weiss.py` — see
 `inputU0NeqExactDiag.ain` for the reference setup.
 
-## Worked example
+## Worked examples
 
-The reduced/fast Tsuji reference test,
+### Small-quench sanity check (`NeqBathRank=0`, the default)
+
 `cincuenta/TestSuite/inputs/inputNeqTsujiExactDiag.ain` (a full-resolution
 version, `inputNeqTsuji.ain`, is what's actually registered in CTest —
 identical physics, `NtNeq=200` instead of `50`):
@@ -236,8 +210,8 @@ NtNeq=50;
 NeqDmftIter=1;
 NeqDmftTolerance=0.001;
 
-# ---- Exact-diag non-equilibrium solver (default, NeqSolver not set) -------
-# (No NeqSolver line: falls through to ImpuritySolverNeqExactDiag)
+# NeqSolver not set -> "ed" default, NeqBathRank not set -> 0 (fixed bath).
+# Reasonable here because the quench starts from U_i=0.
 ```
 
 Note `TargetElectronsUp=3`/`TargetElectronsDown=3` against
@@ -245,22 +219,54 @@ Note `TargetElectronsUp=3`/`TargetElectronsDown=3` against
 constraint.
 
 Physics: at half filling, 5-bath fit, an interaction quench from U_i = 0 to
-U_f = 2 is followed for t ∈ [0, 5] in 50 steps.
+U_f = 2 is followed for t ∈ [0, 5] in 50 steps, with the bath fixed at its
+equilibrium value — reasonable here specifically because U_i = 0 means the
+"equilibrium bath" is trivial to begin with.
 
 ### Sanity-check variant (U = 0, no quench)
 
 `inputU0NeqExactDiag.ain` sets `HubbardUFinal=0.` (same as `HubbardU=0.`) —
 with Σ ≡ 0 exactly, G_imp must equal the Weiss field G₀ by the Dyson
 equation, which is a strong, solver-independent correctness check to run
-before trusting any real quench result. Worth running on any new input setup
-before changing `HubbardUFinal=` to something nonzero.
+before trusting any real quench result.
 
-### GBEK atomic-limit variant (different solver)
+### Physically meaningful quench (`NeqBathRank>0`)
 
-`inputNeqAtomicLimitGBEKL3.ain` sets `NeqSolver="gbek"`, `NeqBathRank=3`, and
-`NeqAtomicLimit=1` together, plus a hopping quench (`BandwidthFinal=`,
-`QuenchShape="cosine"`, `QuenchDuration=`) — this is the GBEK Fig. 3 setup,
-not the plain-ED path this guide otherwise covers. Included here mainly to
-show `NeqAtomicLimit=1` used in the one context where it actually does
-something (see the gotcha above). For anything beyond copying this file
-verbatim, read `cincuenta/TestSuite/gbek_reference/README.md` first.
+`cincuenta/TestSuite/inputs/inputNeqGBEKFig3L3.ain` — a hopping quench
+(`BandwidthFinal=`, `QuenchShape="cosine"`, `QuenchDuration=`) at fixed
+U = 2, with a rank-3 second bath so the bath itself responds to the quench:
+
+```
+# ---- Non-equilibrium DMFT parameters (excerpt) -----------------------------
+HubbardUFinal=2.;
+TmaxNeq=4.0;
+NtNeq=100;
+
+NeqDmftIter=3;
+NeqDmftTolerance=1e-8;
+
+NeqSolver="ed";       # default; written explicitly for clarity
+NeqBathRank=3;
+
+BandwidthFinal=4.;
+QuenchShape="cosine";
+QuenchDuration=0.25;
+
+NeqOutputPrefix="gebk-fig3-L3";
+```
+
+This is the setup to reach for when the quench isn't small — read
+`cincuenta/TestSuite/gbek_reference/README.md` for guidance on choosing `L`
+and for how long the result stays trustworthy before finite-rank error
+dominates.
+
+### True atomic limit (`NeqAtomicLimit=1`)
+
+`inputNeqAtomicLimitGBEKL3.ain` sets `NeqAtomicLimit=1` together with
+`NeqBathRank=3` — this is the GBEK Fig. 3 setup starting from an exact
+atomic limit (no bath at all at t = 0) rather than the near-zero-bandwidth
+approximation the previous example uses. Because the equilibrium bath fit is
+skipped entirely in this mode, `NumberOfBathPoints=0` is fine here, and
+`TargetElectronsUp=1`/`TargetElectronsDown=0` (single-atom sector) is
+required. For anything beyond copying this file verbatim, read
+`cincuenta/TestSuite/gbek_reference/README.md` first.
