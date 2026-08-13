@@ -3,15 +3,15 @@
 ## Licensing
 
 
- The full software license for DMRG++ version 3 
+ The full software license for DMRG++ version 3
  can be found in file LICENSE in the root directory of the code.
  DMRG++ is a free and open source implementation of the
  DMRG algorithm. You are welcomed to use it and publish data
  obtained with DMRG++. If you do,
-<b>please cite this work</b> (see next subsection).
+<b>please cite this work</b> (see next HowToCiteDMRGPP.md).
 
 ## DISCLAIMER
-
+<small>
 <pre>
  THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -36,56 +36,7 @@
  INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
  DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 </pre>
-
-## How To Cite This Work
-
-<pre>
-\@article{re:alvarez0209,
-author="G. Alvarez",
-title="The Density Matrix Renormalization Group for
-Strongly Correlated Electron Systems: A Generic Implementation",
-journal="Computer Physics Communications",
-volume="180",
-pages="1572-1578",
-year="2009"}
-
-\@article{re:alvarez0310,
-author="G. Alvarez",
-title="Implementation of the SU(2) Hamiltonian
-Symmetry for the DMRG Algorithm",
-journal="Computer Physics Communications",
-volume="183",
-pages="2226-2232",
-year="2012"}
-
-
-\@article{re:alvarez0311,
-author="G. Alvarez and  L. G. G. V. Dias da Silva and
-E. Ponce and  E. Dagotto",
-title="Time Evolution with the DMRG Algorithm:
-A Generic Implementation
-for Strongly Correlated Electronic Systems",
-journal="Phys. Rev. E",
-volume="84",
-pages="056706",
-year="2011"}
-
-\@article{re:alvarez0713,
-author="G. Alvarez",
-title="Production of minimally entangled typical thermal states
-with the Krylov-space approach",
-journal="Phys. Rev. B",
-volume="87",
-pages="245130",
-year="2013"}
-
-And also:
-\@article{re:alvarez08,
- re:webDmrgPlusPlus,
- Author = {G. Alvarez},
- Title = {DMRG++ Website},
- Publisher = {\\url{https://g1257.github.com/dmrgPlusPlus}} }
-</pre>
+</small>
 
 ## Code Integrity
 
@@ -104,23 +55,24 @@ Keys at https://g1257.github.com/keys.html
 
 * The BLAS and LAPACK library or equivalent
 
-* [required] HDF5
+* HDF5 devel with C++ support
 
-* [required] boost-devel (boost-spirit) for Ainur
+* boost-devel (boost-spirit) for Ainur
 Only headers files are used; boost runtime is not used.
 
-* [required] cmake and dependencies
+* cmake and dependencies
 
-* [required] perl
+* GSL (GNU Scientific Library)
 
-* [required] GSL (GNU Scientific Library)
+* Kokkos and Kokkos-Kernels [automatic download possible]
+
+* Catch2 for testing [automatic download possible]
 
 ### Downloading DMRG++
 Create a directory somewhere and cd to it.
 
 <pre>
-cd ../
-git clone https://github.com/g1257/dmrgpp.git
+git clone https://github.com/dmrgpp-project/dmrgpp.git
 cd dmrgpp/
 </pre>
 Pull requests should be opened against the `master` branch.
@@ -204,14 +156,11 @@ cmake --install builddir --prefix installdir
 
 ### Running DMRG++
 
-Assuming you are in dmrgpp/src,
-copy input2.ain to dmrgpp/src with
-
-<code>cp ../TestSuite/inputs/input2.ain .</code>
-
-and then you may run with
-
-<code>./dmrg -f ../TestSuite/inputs/input2.ain</code>
+Assuming you are in your build directory
+copy input2.ain to it and then you may run with
+```
+./dmrg/dmrg -f input.ain
+```
 
 You will now have two files a data2.hdf5 and an ASCII file runForinput2.cout.
 The name data2 is obtained from the corresponding label in the input file,
@@ -219,7 +168,7 @@ in this case input2.ain. Normally the code writes stdout to
 runForinput2.cout for an input called input2.inp, and stderr to the
 terminal. If you would like to override the default inferred
 name runForinput2.cout you may use
-<code>./dmrg -f ../TestSuite/inputs/input2.ain -l myoutputfile</code>
+<code>./dmrg/dmrg -f ../TestSuite/inputs/input2.ain -l myoutputfile</code>
 If you would like stdout be written to the terminal say -l -
 
 ### Profiling
