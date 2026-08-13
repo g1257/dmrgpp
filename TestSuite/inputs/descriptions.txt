@@ -156,6 +156,10 @@ Page* where more or less this feature is used: 2230
 250) MultiTargeting
 320) Fe-based Superconductors model on a chain
 340) A test of the Fe-based Superconductors extended model
+341) Performance input: two-orbital Hubbard 8 sites
+342) Performance input: two-orbital Hubbard 16 sites; m=200, 500
+343) Performance input: two-orbital Hubbard 32 sites; m=1000, 1000
+344) Performance input: two-orbital Hubbard 16 sites; m=1000, 1000
 ###TD 350) Transverse-Field Ising MultiOrb (Using Heisenberg, benchmark)
 ###TD 351) Transverse-Field Ising MultiOrb 1
 ###TD 352) Transverse-Field Ising MultiOrb 2
