@@ -55,6 +55,9 @@ template <typename InitKronType> class BatchedGemmKokkos {
 	using MemorySpace    = typename ExecutionSpace::memory_space;
 	using ScalarView     = Kokkos::View<KokkosScalar*, MemorySpace>;
 
+	// Needs to be public so we can use lambdas with Cuda.
+public:
+
 	// Compact struct holding all parameters for one batched GEMM call.
 	// Stored in device memory and accessed inside the kernel.
 	struct GemmArgs {
@@ -62,6 +65,8 @@ template <typename InitKronType> class BatchedGemmKokkos {
 		int       lda, ldb, ldc; // leading dimensions (column-major strides)
 		long long a_off, b_off, c_off; // element offsets into device flat arrays
 	};
+
+private:
 
 	using DevArgsView = Kokkos::View<GemmArgs*, MemorySpace>;
 
@@ -255,6 +260,15 @@ private:
 			            m * sizeof(ComplexOrRealType));
 	}
 
+	// Needs to be public so we can use lambdas with Cuda.
+public:
+
+	struct PackTask {
+		const ComplexOrRealType* src;
+		ComplexOrRealType*       dst;
+		int                      m, n, lds, ldd;
+	};
+
 	void setup_()
 	{
 		Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup");
@@ -368,11 +382,6 @@ private:
 
 		// Instead of performing many serial lacpy calls, collect pack tasks and
 		// perform them in parallel on the host mirror.
-		struct PackTask {
-			const ComplexOrRealType* src;
-			ComplexOrRealType*       dst;
-			int                      m, n, lds, ldd;
-		};
 		std::vector<PackTask> packTasks;
 		packTasks.reserve(npatches * npatches); // heuristic
 
@@ -550,6 +559,8 @@ private:
 			}
 		}
 	}
+
+private:
 
 	// -----------------------------------------------------------------------
 
