@@ -19,14 +19,18 @@ void apply_Htarget_sparse(
     VectorSizeType           right_patch_start_,
     VectorSizeType           xy_patch_start_,
     VectorSizeType           nC_,
-    T**                      gAbatch_,
+    T**                      gAbatch,
     const VectorIntegerType& ld_gAbatch_,
-    T**                      gBbatch_,
+    T**                      gBbatch,
     const VectorIntegerType& ld_gBbatch_,
     Kokkos::View<const typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace> X_,
     Kokkos::View<typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace>       Y_)
 {
 	using KokkosScalar       = typename PsimagLite::KokkosType<T>::type;
+
+    auto gAbatch_ = reinterpret_cast<KokkosScalar**>(gAbatch);
+	auto gBbatch_ = reinterpret_cast<KokkosScalar**>(gBbatch);
+
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 	const IntegerType idebug = 1;
 	const SizeType    ialign = 32;
@@ -194,7 +198,7 @@ void apply_Htarget_sparse(
 	gflops1            = 0;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		KokkosScalar* BXbatch = gBXbatch_[ipatch - 1];
-		T*            Bbatch  = gBbatch_[ipatch - 1];
+		KokkosScalar* Bbatch  = gBbatch_[ipatch - 1];
 
 		for (jpatch = 1; jpatch <= npatches; jpatch++) {
 			IntegerType nconnection = nC_[indx2f(ipatch, jpatch, npatches)];
@@ -240,7 +244,7 @@ void apply_Htarget_sparse(
 					IntegerType nn = ncolBX;
 					IntegerType kk = ncolB;
 
-					T*                  pA = Bbatch;
+					KokkosScalar*       pA = Bbatch;
 					const KokkosScalar* pB = XJ;
 					KokkosScalar*       pC = BXbatch;
 
@@ -256,8 +260,7 @@ void apply_Htarget_sparse(
 					ldb_array_[ibatch - 1] = ld2;
 					ldc_array_[ibatch - 1] = ld3;
 
-					a_array_[ibatch - 1]
-					    = reinterpret_cast<const KokkosScalar*>(pA);
+					a_array_[ibatch - 1] = pA;
 					b_array_[ibatch - 1] = pB;
 					c_array_[ibatch - 1] = pC;
 
@@ -331,7 +334,7 @@ void apply_Htarget_sparse(
 	gflops2 = 0;
 	ibatch  = 1;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
-		T*            Abatch  = gAbatch_[ipatch - 1];
+		KokkosScalar* Abatch  = gAbatch_[ipatch - 1];
 		KokkosScalar* BXbatch = gBXbatch_[ipatch - 1];
 
 		IntegerType   iy = xy_patch_start_[ipatch - 1];
@@ -387,7 +390,7 @@ void apply_Htarget_sparse(
 		IntegerType kk       = ncolumns;
 
 		KokkosScalar* pA = BXbatch;
-		T*            pB = Abatch;
+		KokkosScalar* pB = Abatch;
 		KokkosScalar* pC = YI;
 
 		IntegerType ld1 = ld_BX;
@@ -398,8 +401,8 @@ void apply_Htarget_sparse(
 		n_array_[ibatch - 1] = nn;
 		k_array_[ibatch - 1] = kk;
 
-		a_array_[ibatch - 1] = reinterpret_cast<KokkosScalar*>(pA);
-		b_array_[ibatch - 1] = reinterpret_cast<KokkosScalar*>(pB);
+		a_array_[ibatch - 1] = pA;
+		b_array_[ibatch - 1] = pB;
 		c_array_[ibatch - 1] = pC;
 
 		lda_array_[ibatch - 1] = ld1;
