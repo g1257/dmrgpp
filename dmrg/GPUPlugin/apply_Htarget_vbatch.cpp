@@ -10,20 +10,20 @@
 #include <cassert>
 #include <vector>
 
-using KokkosScalar = PsimagLite::KokkosType<FpType>::type;
-
-void apply_Htarget_vbatch(SizeType                                               noperator,
-                          SizeType                                               npatches,
-                          VectorSizeType                                         left_patch_start_,
-                          VectorSizeType                                         right_patch_start_,
-                          VectorSizeType                                         xy_patch_start_,
-                          std::vector<FpType>                                    Abatch_,
-                          SizeType                                               ld_Abatch,
-                          std::vector<FpType>                                    Bbatch_,
-                          SizeType                                               ld_Bbatch,
-                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> X_,
-                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Y_)
+void apply_Htarget_vbatch(
+    SizeType            noperator,
+    SizeType            npatches,
+    VectorSizeType      left_patch_start_,
+    VectorSizeType      right_patch_start_,
+    VectorSizeType      xy_patch_start_,
+    std::vector<FpType> Abatch_,
+    SizeType            ld_Abatch,
+    std::vector<FpType> Bbatch_,
+    SizeType            ld_Bbatch,
+    Kokkos::View<const typename PsimagLite::KokkosType<FpType>::type*, Kokkos::SharedSpace> X_,
+    Kokkos::View<typename PsimagLite::KokkosType<FpType>::type*, Kokkos::SharedSpace>       Y_)
 {
+	using KokkosScalar       = typename PsimagLite::KokkosType<FpType>::type;
 	const IntegerType idebug = 1;
 	const IntegerType ialign = 32;
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;

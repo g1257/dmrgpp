@@ -11,20 +11,22 @@
 #include <omp.h>
 #endif
 
-template <typename T, typename KokkosScalar>
-void apply_Htarget_sparse(SizeType                                               noperator,
-                          SizeType                                               npatches,
-                          VectorSizeType                                         left_patch_start_,
-                          VectorSizeType                                         right_patch_start_,
-                          VectorSizeType                                         xy_patch_start_,
-                          VectorSizeType                                         nC_,
-                          T**                                                    gAbatch_,
-                          const VectorIntegerType&                               ld_gAbatch_,
-                          T**                                                    gBbatch_,
-                          const VectorIntegerType&                               ld_gBbatch_,
-                          Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> X_,
-                          Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       Y_)
+template <typename T>
+void apply_Htarget_sparse(
+    SizeType                 noperator,
+    SizeType                 npatches,
+    VectorSizeType           left_patch_start_,
+    VectorSizeType           right_patch_start_,
+    VectorSizeType           xy_patch_start_,
+    VectorSizeType           nC_,
+    T**                      gAbatch_,
+    const VectorIntegerType& ld_gAbatch_,
+    T**                      gBbatch_,
+    const VectorIntegerType& ld_gBbatch_,
+    Kokkos::View<const typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace> X_,
+    Kokkos::View<typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace>       Y_)
 {
+	using KokkosScalar       = typename PsimagLite::KokkosType<T>::type;
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 	const IntegerType idebug = 1;
 	const SizeType    ialign = 32;
@@ -140,8 +142,9 @@ void apply_Htarget_sparse(SizeType                                              
 	 setup gBXbatch
 	 ---------------
 	 */
-	KokkosScalar** gBXbatch_ = reinterpret_cast<KokkosScalar**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("gBXbatch_", npatches * sizeof(KokkosScalar*)));
+	KokkosScalar** gBXbatch_
+	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(
+	        "gBXbatch_", npatches * sizeof(KokkosScalar*)));
 
 	nbytes_BX = sizeof(T) * sum_BX_sizes;
 	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> pBXmem("pBXmem", sum_BX_sizes);
@@ -168,12 +171,15 @@ void apply_Htarget_sparse(SizeType                                              
 	T alpha = 1.;
 	T beta  = 0.;
 
-	KokkosScalar const** a_array_ = reinterpret_cast<KokkosScalar const**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("a_array_", sizeof(KokkosScalar*) * batch_size_dim));
-	KokkosScalar const** b_array_ = reinterpret_cast<KokkosScalar const**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("b_array_", sizeof(KokkosScalar*) * batch_size_dim));
-	KokkosScalar** c_array_ = reinterpret_cast<KokkosScalar**>(
-	    Kokkos::kokkos_malloc<Kokkos::SharedSpace>("c_array_", sizeof(KokkosScalar*) * batch_size_dim));
+	KokkosScalar const** a_array_
+	    = reinterpret_cast<KokkosScalar const**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(
+	        "a_array_", sizeof(KokkosScalar*) * batch_size_dim));
+	KokkosScalar const** b_array_
+	    = reinterpret_cast<KokkosScalar const**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(
+	        "b_array_", sizeof(KokkosScalar*) * batch_size_dim));
+	KokkosScalar** c_array_
+	    = reinterpret_cast<KokkosScalar**>(Kokkos::kokkos_malloc<Kokkos::SharedSpace>(
+	        "c_array_", sizeof(KokkosScalar*) * batch_size_dim));
 
 	Kokkos::View<IntegerType*, Kokkos::SharedSpace> m_array_("m_array", ngroups_dim);
 	Kokkos::View<IntegerType*, Kokkos::SharedSpace> n_array_("n_array", ngroups_dim);
