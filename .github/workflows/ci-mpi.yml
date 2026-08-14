@@ -42,7 +42,7 @@ jobs:
               -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -DCMAKE_REQUIRE_FIND_PACKAGE_Kokkos=ON \
               -DCMAKE_REQUIRE_FIND_PACKAGE_KokkosKernels=ON \
-              -DUSE_MPI=ON
+              -DDMRGPP_USE_MPI=ON
 
     - name: Build MPI Targets
       run: cmake --build ${{github.workspace}}/build --target dmrg omegas

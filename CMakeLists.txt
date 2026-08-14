@@ -60,8 +60,8 @@ else()
 endif()
 
 option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
-option(USE_MPI "Enable MPI support" OFF)
-if(USE_MPI)
+option(DMRGPP_USE_MPI "Enable MPI support" OFF)
+if(DMRGPP_USE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
 endif()
 

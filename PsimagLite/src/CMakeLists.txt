@@ -47,18 +47,18 @@ target_link_libraries(psimaglite PUBLIC loki)
 
 add_library(psimaglite::psimaglite ALIAS psimaglite)
 
-if(USE_MPI)
-  target_compile_definitions(psimaglite PUBLIC USE_MPI)
+if(DMRGPP_USE_MPI)
+  target_compile_definitions(psimaglite PUBLIC DMRGPP_USE_MPI)
   target_link_libraries(psimaglite PUBLIC MPI::MPI_CXX)
 endif()
 
 # Prefer HDF5 parallel when MPI is enabled.
-set(HDF5_PREFER_PARALLEL ${USE_MPI})
+set(HDF5_PREFER_PARALLEL ${DMRGPP_USE_MPI})
 find_package(
   HDF5 REQUIRED
   COMPONENTS CXX HL
   MODULE)
-if(USE_MPI AND NOT HDF5_IS_PARALLEL)
+if(DMRGPP_USE_MPI AND NOT HDF5_IS_PARALLEL)
   message(WARNING "HDF5 that was found \(${HDF5_DIR}\) is not parallel")
 endif()
 target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
