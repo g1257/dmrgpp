@@ -5,14 +5,12 @@ catch_discover_tests(test_LastKrylovSlots)
 
 add_executable(testVectorWithOffset testVectorWithOffset.cpp)
 target_link_libraries(testVectorWithOffset PRIVATE Catch2::Catch2WithMain dmrgpp_utils psimaglite)
-target_include_directories(testVectorWithOffset PRIVATE ${CMAKE_SOURCE_DIR}/dmrg
-                                                        ${CMAKE_SOURCE_DIR}/dmrg/Engine)
+target_include_directories(testVectorWithOffset PRIVATE ${CMAKE_SOURCE_DIR}/dmrg ${CMAKE_SOURCE_DIR}/dmrg/Engine)
 catch_discover_tests(testVectorWithOffset)
 
 add_executable(testVectorWithOffsets testVectorWithOffsets.cpp)
 target_link_libraries(testVectorWithOffsets PRIVATE Catch2::Catch2WithMain dmrgpp_utils psimaglite)
-target_include_directories(testVectorWithOffsets PRIVATE ${CMAKE_SOURCE_DIR}/dmrg
-                                                         ${CMAKE_SOURCE_DIR}/dmrg/Engine)
+target_include_directories(testVectorWithOffsets PRIVATE ${CMAKE_SOURCE_DIR}/dmrg ${CMAKE_SOURCE_DIR}/dmrg/Engine)
 catch_discover_tests(testVectorWithOffsets)
 
 # BatchedGemm test
