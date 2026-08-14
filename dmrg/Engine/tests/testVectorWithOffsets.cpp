@@ -1,14 +1,14 @@
 #include "Qn.h"
 #include "VectorWithOffsets.h"
-#include <PsimagLite/Vector.h>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <complex>
+#include <vector>
 
 namespace {
 
-using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+using VectorSizeType = std::vector<SizeType>;
 
 template <typename T> void checkValue(const T& actual, double real, double imag = 0.0)
 {
@@ -38,8 +38,8 @@ public:
 
 private:
 
-	VectorSizeType         partitions_;
-	Dmrg::Qn::VectorQnType qns_;
+	VectorSizeType        partitions_;
+	std::vector<Dmrg::Qn> qns_;
 };
 
 } // namespace
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data",
                    double,
                    std::complex<double>)
 {
-	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorType            = std::vector<TestType>;
 	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 5.0 });
@@ -151,7 +151,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets converts a full vector",
                    double,
                    std::complex<double>)
 {
-	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorType            = std::vector<TestType>;
 	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorWithOffsetsType v;
@@ -201,7 +201,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets public arithmetic",
                    double,
                    std::complex<double>)
 {
-	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorType            = std::vector<TestType>;
 	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 0.0 });
