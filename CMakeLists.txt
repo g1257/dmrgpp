@@ -59,14 +59,26 @@ else()
   set(CMAKE_INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
 option(DMRGPP_USE_MPI "Enable MPI support" OFF)
 if(DMRGPP_USE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
+
+# Define our prefered warning set for compilers we know about.
+# In other words we're going to use -Wno-unused-parameter rather than annotations
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_compile_options(-Wall -Wextra -Wno-unused-parameter)
+endif()
+
+if(NOT DMRG_BATCHED_GEMM_TYPE)
+  set(DMRG_BATCHED_GEMM_TYPE
+      "Plugin"
+      CACHE STRING "Choose the batched gemm implementation" FORCE)
+  set_property(CACHE DMRG_BATCHED_GEMM_TYPE PROPERTY STRINGS "CPU" "Plugin")
 endif()
 
 include(CMakeDependentOption)
-cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF "DMRG_BUILD_BATCHED" OFF)
+cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF
+                       "DMRG_BATCHED_GEMM_TYPE STREQUAL \"Plugin\"" OFF)
 
 add_subdirectory(util)
 

@@ -1,4 +1,4 @@
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
 #include <algorithm>
@@ -210,10 +210,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	SizeType batch_size     = ngroups;
 	SizeType batch_size_dim = ialign * ICEIL(batch_size, ialign);
 
-	T* alpha_array_ = dmrg_malloc<T>(sizeof(T) * ngroups_dim, sizeof(T) * ngroups_dim);
-	T* beta_array_  = dmrg_malloc<T>(sizeof(T) * ngroups_dim, sizeof(T) * ngroups_dim);
-	assert(alpha_array_ != nullptr);
-	assert(beta_array_ != nullptr);
+	T alpha = 1.;
+	T beta  = 0.;
 
 	T** a_array_ = dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
 	T** b_array_ = dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
@@ -243,12 +241,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	assert(lda_array_ != nullptr);
 	assert(ldb_array_ != nullptr);
 	assert(ldc_array_ != nullptr);
-
-	SizeType nbytes_trans  = (sizeof(char) * ngroups_dim);
-	char*    transa_array_ = dmrg_malloc<char>(nbytes_trans, nbytes_trans);
-	char*    transb_array_ = dmrg_malloc<char>(nbytes_trans, nbytes_trans);
-	assert(transa_array_ != nullptr);
-	assert(transb_array_ != nullptr);
 
 	IntegerType ibatch = 1;
 	gflops1            = 0;
@@ -295,15 +287,10 @@ void apply_Htarget_sparse(SizeType                 noperator,
 					 1:ncolX)
 					 ------------------------------------------------------------------
 					 */
-					char transA = 'N';
-					char transB = 'N';
 
 					IntegerType mm = nrowBX;
 					IntegerType nn = ncolBX;
 					IntegerType kk = ncolB;
-
-					T alpha = 1;
-					T beta  = 0;
 
 					T* pA = Bbatch;
 					T* pB = XJ;
@@ -313,15 +300,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 					IntegerType ld2 = ld_XJ;
 					IntegerType ld3 = ld_BX;
 
-					transa_array_[ibatch - 1] = transA;
-					transb_array_[ibatch - 1] = transB;
-
 					m_array_[ibatch - 1] = mm;
 					n_array_[ibatch - 1] = nn;
 					k_array_[ibatch - 1] = kk;
-
-					alpha_array_[ibatch - 1] = alpha;
-					beta_array_[ibatch - 1]  = beta;
 
 					lda_array_[ibatch - 1] = ld1;
 					ldb_array_[ibatch - 1] = ld2;
@@ -357,18 +338,20 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 ------------------
 	 */
 
+	char transA     = 'N';
+	char transB     = 'N';
 	time_1st_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch<T>(transa_array_,
-	                     transb_array_,
+	dmrg_Xgemm_vbatch<T>(transA,
+	                     transB,
 	                     m_array_,
 	                     n_array_,
 	                     k_array_,
-	                     alpha_array_,
+	                     alpha,
 	                     a_array_,
 	                     lda_array_,
 	                     b_array_,
 	                     ldb_array_,
-	                     beta_array_,
+	                     beta,
 	                     c_array_,
 	                     ldc_array_,
 	                     ngroups,
@@ -454,12 +437,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		IntegerType nn       = ncolY;
 		IntegerType kk       = ncolumns;
 
-		char transA = 'N';
-		char transB = 'T';
-
-		T alpha = 1;
-		T beta  = 0;
-
 		T* pA = BXbatch;
 		T* pB = Abatch;
 		T* pC = YI;
@@ -468,14 +445,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		IntegerType ld2 = ld_A;
 		IntegerType ld3 = ld_YI;
 
-		transa_array_[ibatch - 1] = transA;
-		transb_array_[ibatch - 1] = transB;
-		m_array_[ibatch - 1]      = mm;
-		n_array_[ibatch - 1]      = nn;
-		k_array_[ibatch - 1]      = kk;
-
-		alpha_array_[ibatch - 1] = alpha;
-		beta_array_[ibatch - 1]  = beta;
+		m_array_[ibatch - 1] = mm;
+		n_array_[ibatch - 1] = nn;
+		k_array_[ibatch - 1] = kk;
 
 		a_array_[ibatch - 1] = pA;
 		b_array_[ibatch - 1] = pB;
@@ -503,18 +475,20 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 second vbatch DGEMM
 	 ------------------
 	 */
+	transA          = 'N';
+	transB          = 'T';
 	time_2nd_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch<T>(transa_array_,
-	                     transb_array_,
+	dmrg_Xgemm_vbatch<T>(transA,
+	                     transB,
 	                     m_array_,
 	                     n_array_,
 	                     k_array_,
-	                     alpha_array_,
+	                     alpha,
 	                     a_array_,
 	                     lda_array_,
 	                     b_array_,
 	                     ldb_array_,
-	                     beta_array_,
+	                     beta,
 	                     c_array_,
 	                     ldc_array_,
 	                     ngroups,
@@ -571,21 +545,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	};
 }
 
-template void apply_Htarget_sparse<MYTYPE>(SizeType,
-                                           SizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           MYTYPE**,
-                                           const VectorIntegerType&,
-                                           MYTYPE**,
-                                           const VectorIntegerType&,
-                                           MYTYPE*,
-                                           MYTYPE*);
-
-#if defined(USE_COMPLEX_Z)
-
 template void apply_Htarget_sparse<double>(SizeType,
                                            SizeType,
                                            VectorSizeType,
@@ -598,7 +557,6 @@ template void apply_Htarget_sparse<double>(SizeType,
                                            const VectorIntegerType&,
                                            double*,
                                            double*);
-#else
 
 template void apply_Htarget_sparse<std::complex<double>>(SizeType,
                                                          SizeType,
@@ -612,4 +570,3 @@ template void apply_Htarget_sparse<std::complex<double>>(SizeType,
                                                          const VectorIntegerType&,
                                                          std::complex<double>*,
                                                          std::complex<double>*);
-#endif

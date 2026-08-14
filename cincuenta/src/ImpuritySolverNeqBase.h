@@ -31,8 +31,8 @@ public:
 	/*!
 	 * \brief solve
 	 * Run the impurity solver for the given bath parameters.
-	 * Diagonalizes H(U_i) and H(U_f) so that subsequent computeGimp(n)
-	 * calls can fill time slices on demand.
+	 * For fixed-bath solvers (ExactDiag): diagonalizes H(U_i) and H(U_f) so that
+	 * subsequent computeGimp(n) calls can fill time slices on demand.
 	 *
 	 * \param[in] bathParams Bath parameters passed to the solver.
 	 */
@@ -47,6 +47,25 @@ public:
 	 * \param[in] n Current time-step index.
 	 */
 	virtual void computeGimp(KBType& gimp, int n) const = 0;
+
+	// Called after updateDelta fills row n of Delta, before the corrector computeGimp(n).
+	// Default: no-op (ExactDiag has a fixed bath that doesn't update per step).
+	// GBEK overrides this to update the Cholesky bath decomposition for step n.
+	virtual void prepareTimeStep(int /*n*/, const KBType& /*delta*/) { }
+
+	// Write -i*Delta^+_<(t_n,t_j) = sum_p V(n,p)*conj(V(j,p)) to file.
+	// No-op for solvers that have no second bath.
+	virtual void dumpPlusBath(const std::string& /*filename*/) const { }
+
+	// Write the raw Cholesky factor V(n,p) itself (not the reconstructed
+	// product) to file, for row-by-row comparison against an independent
+	// offline trace. No-op for solvers that have no second bath.
+	virtual void dumpV(const std::string& /*filename*/) const { }
+
+	// Write one line per time step, "t docc Ekin Eint Etot", for double
+	// occupation and energy-conservation observables. No-op for solvers
+	// that don't compute these (currently only GBEK does).
+	virtual void dumpDoccAndEnergy(const std::string& /*filename*/) const { }
 
 	/*!
 	 * \brief gimp

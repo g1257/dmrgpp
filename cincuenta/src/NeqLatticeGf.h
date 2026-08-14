@@ -43,11 +43,11 @@ public:
 	    , nTau_(params.eqParams.nMatsubaras)
 	    , dtau_(params.eqParams.ficticiousBeta
 	            / static_cast<RealType>(params.eqParams.nMatsubaras))
-	    , tStar_(parseTstar(params.eqParams.latticeGf))
+	    , tStar_(params.neqAtomicLimit ? RealType(0) : parseTstar(params.eqParams.latticeGf))
 	    , tStarSq_(tStar_ * tStar_)
-	    , tStarFinalSq_(params.bandwidthFinal > RealType(0) ? RealType(0.25)
-	                            * params.bandwidthFinal * RealType(0.25) * params.bandwidthFinal
-	                                                        : tStarSq_)
+	    , tStarFinal_(params.bandwidthFinal > RealType(0)
+	                      ? RealType(0.25) * params.bandwidthFinal
+	                      : tStar_)
 	    , g0_(params.nT,
 	          params.eqParams.nMatsubaras,
 	          params.dt,
@@ -145,21 +145,25 @@ public:
 
 	/*!
 	 * \brief updateDelta
-	 * Copy t*_f² G_imp → Δ for the n-th time row (retarded, lesser, left-mixing).
-	 * Uses tStarFinalSq_ (post-quench bandwidth) for t > 0; t=0 BCs use tStarSq_.
+	 * Compute Delta(t_n, t_j) = t*(t_n) t*(t_j) G_imp for all retarded, lesser,
+	 * and left-mixing components at row n.  t*(t) follows the ramp shape
+	 * specified by params_.quenchShape / params_.quenchDuration.
 	 *
 	 * \param[in] n    Time row index.
 	 * \param[in] gimp Impurity Green's function at time step n.
 	 */
 	void updateDelta(int n, const KBType& gimp)
 	{
+		const RealType tsn = tStarAt(n);
 		for (int j = 0; j <= n; ++j) {
-			delta_.retarded(n, j) = tStarFinalSq_ * gimp.retarded(n, j);
-			delta_.lesser(n, j)   = tStarFinalSq_ * gimp.lesser(n, j);
-			delta_.lesser(j, n)   = tStarFinalSq_ * gimp.lesser(j, n);
+			const RealType tsj    = tStarAt(j);
+			delta_.retarded(n, j) = tsn * tsj * gimp.retarded(n, j);
+			delta_.lesser(n, j)   = tsn * tsj * gimp.lesser(n, j);
+			delta_.lesser(j, n)   = tsj * tsn * gimp.lesser(j, n);
 		}
+		// Left-mixing: real-time hopping x imaginary-time (equilibrium) hopping.
 		for (SizeType j = 0; j <= nTau_; ++j)
-			delta_.left_mixing(n, j) = tStarFinalSq_ * gimp.left_mixing(n, j);
+			delta_.left_mixing(n, j) = tsn * tStar_ * gimp.left_mixing(n, j);
 	}
 
 	/*!
@@ -180,6 +184,30 @@ public:
 	const KBType& delta() const { return delta_; }
 
 private:
+
+	// Evaluate t*(t_n = n*dt) according to the quench ramp shape.
+	// "cosine" matches GBEK PRB 88, 235106 (recommended t_q=0.25).
+	// "tanh"   sigmoid centered at t_q/2 with characteristic width t_q/6.
+	// "step" (or quenchDuration=0): t*_i at n=0, t*_f for n>=1.
+	RealType tStarAt(int n) const
+	{
+		const RealType tq = params_.quenchDuration;
+		if (tq <= RealType(0) || params_.quenchShape == "step")
+			return (n == 0) ? tStar_ : tStarFinal_;
+
+		const RealType t = n * params_.dt;
+		if (t >= tq)
+			return tStarFinal_;
+
+		RealType shape;
+		if (params_.quenchShape == "tanh") {
+			const RealType x = (t / tq - RealType(0.5)) * RealType(6);
+			shape            = RealType(0.5) * (RealType(1) + std::tanh(x));
+		} else { // "cosine" (default for any unrecognised value)
+			shape = RealType(0.5) * (RealType(1) - std::cos(M_PI * t / tq));
+		}
+		return tStar_ + (tStarFinal_ - tStar_) * shape;
+	}
 
 	/*!
 	 * \brief parseTstar
@@ -281,7 +309,7 @@ private:
 	RealType             dtau_;
 	RealType             tStar_;
 	RealType             tStarSq_;
-	RealType             tStarFinalSq_; ///< post-quench; equals tStarSq_ if BandwidthFinal=0
+	RealType             tStarFinal_; ///< t*_f (post-quench); equals tStar_ if BandwidthFinal=0
 	KBType               g0_;
 	KBType               delta_;
 	KBDerivType          g0_der_;

@@ -1,4 +1,4 @@
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "dmrg_vbatch.h"
 #include <cstring>
 #ifdef USE_MAGMA
@@ -269,37 +269,25 @@ template char*        dmrg_malloc<char>(const size_t alloc_size, SizeType size);
 template void         dmrg_free<char>(char*);
 template IntegerType* dmrg_malloc<IntegerType>(const size_t alloc_size, SizeType size);
 template void         dmrg_free<IntegerType>(IntegerType*);
-template MYTYPE*      dmrg_malloc<MYTYPE>(const size_t alloc_size, SizeType size);
 
-template MYTYPE** dmrg_malloc<MYTYPE*>(const size_t alloc_size, SizeType size);
-template void     dmrg_free<MYTYPE*>(MYTYPE**);
-
-template void dmrg_free<MYTYPE>(MYTYPE*);
-template void dmrg_lacpy<MYTYPE>(const char*       uplo,
-                                 const IntegerType m,
-                                 const IntegerType n,
-                                 const MYTYPE*     src,
-                                 const IntegerType ld_src,
-                                 MYTYPE*           dest,
-                                 const IntegerType ld_dest);
-
-#if defined(USE_COMPLEX_Z)
-template void    dmrg_free<double>(double*);
-template double* dmrg_malloc<double>(const size_t alloc_size, SizeType size);
-template void    dmrg_lacpy<double>(const char*       uplo,
+template void     dmrg_free<double>(double*);
+template void     dmrg_free<double*>(double**);
+template double*  dmrg_malloc<double>(const size_t alloc_size, SizeType size);
+template double** dmrg_malloc<double*>(const size_t alloc_size, SizeType size);
+template void     dmrg_lacpy<double>(const char*       uplo,
                                  const IntegerType m,
                                  const IntegerType n,
                                  const double*     src,
                                  const IntegerType ld_src,
                                  double*           dest,
                                  const IntegerType ld_dest);
-#else
+
 template void                   dmrg_free<std::complex<double>>(std::complex<double>*);
+template void                   dmrg_free<std::complex<double>*>(std::complex<double>**);
 template std::complex<double>*  dmrg_malloc<std::complex<double>>(const size_t alloc_size,
                                                                  SizeType     size);
 template std::complex<double>** dmrg_malloc<std::complex<double>*>(const size_t alloc_size,
                                                                    SizeType     size);
-template void                   dmrg_free<std::complex<double>*>(std::complex<double>**);
 template void                   dmrg_lacpy<std::complex<double>>(const char*                 uplo,
                                                const IntegerType           m,
                                                const IntegerType           n,
@@ -307,4 +295,3 @@ template void                   dmrg_lacpy<std::complex<double>>(const char*    
                                                const IntegerType           ld_src,
                                                std::complex<double>*       dest,
                                                const IntegerType           ld_dest);
-#endif

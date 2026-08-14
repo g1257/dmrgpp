@@ -3,6 +3,8 @@
 #include "setup_sparse_batch.h"
 #include "setup_vbatch.h"
 
+#include <complex>
+
 template <typename T>
 BatchedGemm<T>::BatchedGemm(SizeType         noperator,
                             SizeType         npatches,
@@ -110,59 +112,6 @@ template <typename T> void BatchedGemm<T>::apply_Htarget(T* vin, T* vout)
 	}
 }
 
-template class BatchedGemm<MYTYPE>;
+template class BatchedGemm<double>;
 
-// FOR DMRG COMPILATION BELOW
-
-#if defined(USE_COMPLEX_Z)
-
-template <>
-BatchedGemm<double>::BatchedGemm(SizeType              noperator,
-                                 SizeType              npatches,
-                                 VectorSizeType&       left_patch_size,
-                                 VectorSizeType&       right_patch_size,
-                                 std::vector<double*>& Amatrix,
-                                 VectorSizeType&       ld_Amatrix,
-                                 std::vector<double*>& Bmatrix,
-                                 VectorSizeType&       ld_Bmatrix)
-    : noperator_(noperator)
-    , npatches_(npatches)
-    , ld_Abatch_(0)
-    , ld_Bbatch_(0)
-    , ld_gAbatch_(npatches + 1)
-    , ld_gBbatch_(npatches + 1)
-{ }
-
-template <> void BatchedGemm<double>::apply_Htarget(double* vin, double* vout) { }
-
-template <> BatchedGemm<double>::~BatchedGemm() { }
-
-#else
-
-#include <complex>
-
-template <>
-BatchedGemm<std::complex<double>>::BatchedGemm(SizeType                            noperator,
-                                               SizeType                            npatches,
-                                               VectorSizeType&                     left_patch_size,
-                                               VectorSizeType&                     right_patch_size,
-                                               std::vector<std::complex<double>*>& Amatrix,
-                                               VectorSizeType&                     ld_Amatrix,
-                                               std::vector<std::complex<double>*>& Bmatrix,
-                                               VectorSizeType&                     ld_Bmatrix)
-    : noperator_(noperator)
-    , npatches_(npatches)
-    , ld_Abatch_(0)
-    , ld_Bbatch_(0)
-    , ld_gAbatch_(npatches + 1)
-    , ld_gBbatch_(npatches + 1)
-{ }
-
-template <>
-void BatchedGemm<std::complex<double>>::apply_Htarget(std::complex<double>* vin,
-                                                      std::complex<double>* vout)
-{ }
-
-template <> BatchedGemm<std::complex<double>>::~BatchedGemm() { }
-
-#endif
+template class BatchedGemm<std::complex<double>>;
