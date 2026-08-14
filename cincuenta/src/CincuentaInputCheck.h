@@ -62,9 +62,9 @@ public:
 		str += "integer NtNeq;\n";
 		str += "integer NeqDmftIter;\n";
 		str += "real NeqDmftTolerance;\n";
-		str += "string NeqSolver;\n"; // "ed" (default) or "tdmrg" to select solver
+		str += "string NeqSolver;\n"; // "exactdiag" (default) or "tdmrg" to select solver
 		// GBEK two-bath scheme (Gramsch, Balzer, Eckstein, Kollar PRB 88, 235106),
-		// active under NeqSolver="ed" when NeqBathRank>0
+		// active under NeqSolver="exactdiag" when NeqBathRank>0
 		str += "integer NeqBathRank;\n"; // L: rank of Cholesky second bath (0 = first bath
 		                                 // only)
 		str += "real BandwidthFinal;\n"; // W_f for hopping quench; default 0 = no quench

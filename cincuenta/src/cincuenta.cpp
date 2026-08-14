@@ -195,8 +195,9 @@ int main(int argc, char** argv)
 	if (neqAtomicLimit) {
 		// These configure the equilibrium bath fit, which never runs in this
 		// mode -- reject them outright rather than silently ignoring them.
-		// (LatticeGf= is rejected inside ParamsMatsubaraGrid, constructed
-		// below as part of ParamsNeqDmftSolver.)
+		// (LatticeGf= is still required, not rejected: it's checked inside
+		// ParamsMatsubaraGrid, constructed below as part of ParamsNeqDmftSolver,
+		// which only accepts the zero-bandwidth value under NeqAtomicLimit=1.)
 		rejectUnderAtomicLimit<SizeType>(io, "NumberOfBathPoints=");
 		rejectUnderAtomicLimit<std::string>(io, "ImpuritySolver=");
 		rejectUnderAtomicLimit<std::string>(io, "FitOptions=");
@@ -242,9 +243,10 @@ int main(int argc, char** argv)
 			std::cout << "\n=== Non-equilibrium DMFT (interaction quench) ===\n";
 			ParamsNeqType neqParams(io);
 
-			// NeqSolver= selects the neq propagation method: "ed" (default,
-			// also selected by omitting NeqSolver= entirely) or "tdmrg".
-			// "ed" always uses the GBEK-capable exact-diagonalization solver:
+			// NeqSolver= selects the neq propagation method: "exactdiag"
+			// (default, also selected by omitting NeqSolver= entirely) or
+			// "tdmrg".
+			// "exactdiag" always uses the GBEK-capable exact-diagonalization solver:
 			// NeqBathRank=0 (default) reduces exactly to a fixed equilibrium
 			// bath with no time-dependent second bath; NeqBathRank>0 adds the
 			// low-rank Cholesky second bath (Gramsch/Balzer/Eckstein/Kollar,
@@ -265,7 +267,7 @@ int main(int argc, char** argv)
 				tdmrgSolver.solve(equilibriumBathResult);
 				const std::string& p = neqParams.neqOutputPrefix;
 				tdmrgSolver.gimp().dump(p.empty() ? "green" : p + "-green");
-			} else if (neqSolverType == "" || neqSolverType == "ed") {
+			} else if (neqSolverType == "" || neqSolverType == "exactdiag") {
 				std::cout << "  using ImpuritySolverNeqGBEK (exact "
 				             "diagonalization, NeqBathRank="
 				          << neqParams.neqBathRank << ")\n";
@@ -277,7 +279,7 @@ int main(int argc, char** argv)
 				neqSolver.dumpGreenFunctions();
 			} else {
 				err("Unknown NeqSolver=\"" + neqSolverType
-				    + "\"; expected \"ed\" (default) or \"tdmrg\"\n");
+				    + "\"; expected \"exactdiag\" (default) or \"tdmrg\"\n");
 			}
 		}
 	}

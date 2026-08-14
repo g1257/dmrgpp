@@ -361,6 +361,19 @@ private:
 			    "bath, not an interaction quench); got uInitial="
 			    + ttos(params_.uInitial) + " uFinal=" + ttos(params_.uFinal) + "\n");
 
+		// This closed form is pinned at the particle-hole-symmetric pole
+		// (see G^M(iw_k) below), unconditionally -- there is no non-symmetric
+		// atomic-limit path to opt out of via a fit option. ChemicalPotential=
+		// must therefore match HubbardU/2 exactly (HubbardU, not HubbardUFinal:
+		// requiring them equal above is only what this solver currently
+		// supports, not an essential feature of the atomic limit itself).
+		const RealType muExpected = RealType(0.5) * params_.uInitial;
+		if (std::abs(params_.grid.mu - muExpected) > 1e-10)
+			err("ImpuritySolverNeqExactDiag (NeqAtomicLimit): requires "
+			    "ChemicalPotential=HubbardU/2 ("
+			    + ttos(muExpected) + "); got ChemicalPotential=" + ttos(params_.grid.mu)
+			    + "\n");
+
 		atomicLimit_ = true;
 		uAtomic_     = params_.uFinal;
 

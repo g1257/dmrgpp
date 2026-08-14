@@ -12,7 +12,13 @@ namespace Dmft {
  * \brief ParamsMatsubaraGrid
  * The imaginary-time/Matsubara grid parameters that both the equilibrium
  * and non-equilibrium stages need: FicticiousBeta, ChemicalPotential,
- * Matsubaras, and (unless NeqAtomicLimit=1) LatticeGf.
+ * Matsubaras, and LatticeGf.
+ *
+ * LatticeGf= is required here even under NeqAtomicLimit=1, like every other
+ * calculation this code supports -- it just constrains what value is
+ * accepted (see the neqAtomicLimit check below) rather than rejecting the
+ * key outright, so an atomic-limit input still states its lattice the same
+ * way any other input does.
  *
  * Split out of ParamsDmftSolver so the neq atomic-limit path -- which never
  * runs an equilibrium DMFT stage at all -- doesn't have to construct
@@ -31,26 +37,21 @@ template <typename ComplexOrRealType> struct ParamsMatsubaraGrid {
 		io.readline(mu, "ChemicalPotential=");
 		io.readline(nMatsubaras, "Matsubaras=");
 
-		// LatticeGf= sets the pre-quench (equilibrium) bandwidth; under
-		// NeqAtomicLimit=1 there is no equilibrium bath at all, so it's not
-		// just unused -- it's a stale key that would silently do nothing.
-		// Reject it outright rather than requiring-and-ignoring it.
-		if (neqAtomicLimit) {
-			std::string tmp;
-			bool        present = true;
-			try {
-				io.readline(tmp, "LatticeGf=");
-			} catch (std::exception&) {
-				present = false;
-			}
-			if (present)
-				err("LatticeGf= has no effect when NeqAtomicLimit=1 (there is no "
-				    "equilibrium bath to fit; the pre-quench hopping is exactly "
-				    "zero by construction); remove it from the input\n");
-		} else {
-			io.readline(latticeGf, "LatticeGf=");
-			v_hop = parseVhop(latticeGf);
-		}
+		// LatticeGf= sets the pre-quench (equilibrium) bandwidth, same as any
+		// other calculation. Under NeqAtomicLimit=1 there is no equilibrium
+		// bath at all, so the only value currently supported is the
+		// zero-bandwidth limit -- not because a nonzero pre-quench bath is
+		// physically meaningless here, but because the atomic-limit closed
+		// form (ImpuritySolverNeqExactDiag::solveAtomicLimit()) doesn't
+		// support one yet.
+		io.readline(latticeGf, "LatticeGf=");
+		v_hop = parseVhop(latticeGf);
+
+		if (neqAtomicLimit && v_hop != 0)
+			err("LatticeGf= must be \"energy,semicircular,0\" when "
+			    "NeqAtomicLimit=1 (nonzero pre-quench bandwidth is not "
+			    "supported by the atomic-limit closed form); got: "
+			    + latticeGf + "\n");
 	}
 
 	RealType    ficticiousBeta = 0;

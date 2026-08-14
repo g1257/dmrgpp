@@ -150,6 +150,12 @@ zero-energy site for odd `nBath`).  This halves the number of free energy
 unknowns, making the fit better conditioned for half-filled, particle-hole
 symmetric models.
 
+When this is selected the
+chemical potential is required to be to U/2 (true for all LatticeGf or
+only semicircular?) Additionally `TargetElectronsUp + TargetElectronsDown ==
+NumberOfBathPoints + 1` (i.e., exactly half-filling of the full star-geometry
+system: must be specified.)
+
 ### Step 3 — Solve the impurity problem
 
 `ImpuritySolverBase::solve(bathParams, freqEnum, iter)` is the interface.  The

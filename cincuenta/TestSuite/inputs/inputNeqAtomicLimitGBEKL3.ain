@@ -12,20 +12,23 @@
 # NeqAtomicLimit=1 means there is no equilibrium DMFT stage at all --
 # cincuenta.cpp never even constructs the equilibrium bath-fit machinery.
 # Equilibrium-bath-fit-only keys (NumberOfBathPoints=, ImpuritySolver=,
-# FitOptions=, MinParams*=, LatticeGf=, DmftNumberOfIterations=,
-# DmftTolerance=, and the whole DMRG omega-scan block) are therefore simply
-# omitted below rather than set to placeholder values -- most of them
-# (NumberOfBathPoints=, ImpuritySolver=, FitOptions=) are now rejected with
-# an error if present at all, since they would otherwise silently do
-# nothing. TargetElectronsUp=1/Down=0 is still required by the neq solver
-# itself (nup_+ndown_==1 for the atomic-limit bypass).
+# FitOptions=, MinParams*=, DmftNumberOfIterations=, DmftTolerance=, and the
+# whole DMRG omega-scan block) are therefore simply omitted below rather
+# than set to placeholder values -- most of them (NumberOfBathPoints=,
+# ImpuritySolver=, FitOptions=) are now rejected with an error if present at
+# all, since they would otherwise silently do nothing. TargetElectronsUp=1/
+# Down=0 is still required by the neq solver itself (nup_+ndown_==1 for the
+# atomic-limit bypass). LatticeGf= is, like every other calculation, still
+# required; the atomic-limit closed form only supports the zero-bandwidth
+# value below (see ParamsMatsubaraGrid.h).
 #
 # GBEK Fig. 3 parameters: U=2, 100 steps, dt=0.04 (tmax=4),
 # quench to Bethe bandwidth W_f=4 (v=1), L=3 second bath rank.
 
 FicticiousBeta=16;
-ChemicalPotential=0.;
+ChemicalPotential=1.;  # HubbardU/2, required by the atomic-limit closed form
 Matsubaras=200;
+LatticeGf="energy,semicircular,0";  # W_i=0: no pre-quench bath, by construction
 
 TargetElectronsUp=1;
 TargetElectronsDown=0;
@@ -41,9 +44,9 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-# ED solver with GBEK second bath, rank L=3 (NeqSolver="ed" is the default;
+# ED solver with GBEK second bath, rank L=3 (NeqSolver="exactdiag" is the default;
 # written here for clarity)
-NeqSolver="ed";
+NeqSolver="exactdiag";
 NeqBathRank=3;
 NeqAtomicLimit=1;
 

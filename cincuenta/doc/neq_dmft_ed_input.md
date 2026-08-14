@@ -13,18 +13,21 @@ needed.
 ## The physical picture
 
 `cincuenta` first solves the **equilibrium** DMFT problem to get a converged
-bath (the `{V_α, ε_α}` in `cincuenta_design.md`'s Anderson model). Then, in a
-second stage, it quenches the interaction from `U_i` to `U_f` at t = 0 and
-follows the resulting real-time dynamics on the Keldysh contour. This second
-stage is set up by adding a `TmaxNeq=` line (with a positive value) below
-your usual equilibrium input — its presence is what turns on neq mode at all.
+bath (the `{V_α, ε_α}` in `cincuenta_design.md`'s Anderson model).
+Then, in an optional second stage, it can do limited neq-DMFT calculations.
+It quenches either the interaction from `U_i` to `U_f`
+at t = 0 or the hopping from ? to ? with an optional ramp function.
+The code then follows the resulting real-time dynamics on the Keldysh
+contour.
+This second stage is set up by adding a `TmaxNeq=` line (with a positive value) below
+your usual equilibrium input — its presence is what turns on neq mode.
 
 There are two neq **methods**, chosen by `NeqSolver=`:
 
 | `NeqSolver=` | Meaning |
 |---|---|
-| `"ed"` (or omit the line — this is the default) | **This guide's subject.** Exact diagonalization. |
-| `"tdmrg"` | Time-dependent DMRG instead of ED. Not covered here — ask a developer. |
+| `"exactdiag"` (or omit the line — this is the default) | **This guide's subject.** Exact diagonalization. |
+| `"tdmrg"` | Time-dependent DMRG instead of ED. Not covered here — not fully implemented. |
 
 ### How much bath does the quench see? `NeqBathRank=`
 
@@ -38,16 +41,15 @@ respond — its effective hybridization Λ(t,t′) changes in time. `NeqBathRank
 
 - **`NeqBathRank=0`** (default): the bath stays exactly as fitted at
   equilibrium for the entire real-time run — no time-dependent response at
-  all. This is a real approximation, not just a numerically cheap special
-  case: it drops the back-reaction of the quench on the effective medium
-  entirely. It is only trustworthy when the quench is small enough that the
-  bath wouldn't need to change much anyway (e.g. quenching away from U = 0,
-  or a small ΔU) — it is not a generally valid non-equilibrium DMFT method.
-- **`NeqBathRank=L>0`**: adds a second, low-rank ("Cholesky") bath that
-  *does* evolve with the quench, following Gramsch, Balzer, Eckstein, Kollar,
+  all. This is crude approximation, it drops the back-reaction of the
+  quench on the effective medium entirely. It is only "defensible"
+  when the quench is small enough that the bath wouldn't change
+  change.
+- **`NeqBathRank=L>0`**: adds a second, low-rank ("Cholesky")
+  bath that *does* evolve with the quench, following Gramsch, Balzer, Eckstein, Kollar,
   PRB **88**, 235106 (2013) ("GBEK"). This is the physically meaningful way
-  to run neq-DMFT ED here — larger L captures the bath's time-dependent
-  response for longer before finite-rank truncation error takes over (see
+  to run neq-DMFT ED — larger L captures the bath's time-dependent
+  response for longer before the finite-rank truncation error becones significant (see
   `cincuenta/TestSuite/gbek_reference/README.md` for how much `L` you need
   and for how long, for a given system).
 
@@ -60,20 +62,18 @@ at all.
 
 ## Required equilibrium input (recap)
 
-The neq stage is bolted onto an ordinary equilibrium run, so the usual
+In general doing non-equilibrium DMFT depends on starting from and
+equilibrium calculation. so except in a special case covered later the usual
 required equilibrium keywords still apply — see
 [`cincuenta_design.md`](cincuenta_design.md#input-file-reference) for the
 full table. `ImpuritySolver=` should be `"exactdiag"` (the equilibrium bath
-fit is what the neq stage's bath comes from). **Exception: none of this
-applies under `NeqAtomicLimit=1`** — see its own section below, since in
-that mode there is no equilibrium stage at all.
+fit is what the neq stage's bath comes from).
 
 **`LatticeGf=` constraint for any neq run:** the neq Bethe-lattice
 self-consistency only supports the semicircular DOS — `LatticeGf=` must be
 exactly `"energy,semicircular,W"`. The equilibrium stage itself supports
-more (e.g. `"momentum,1D,Nk"`), so this only bites once you add `TmaxNeq=`;
-anything else errors with a clear message the first time the neq machinery
-reads it.
+more (e.g. `"momentum,1D,Nk"`), Support for other LatticeGf is not on
+the roadmap yet.
 
 Two keywords the ED solver itself requires directly, easy to miss if you're
 scanning `Params*.h` instead of the actual `.ain` examples:
@@ -82,13 +82,6 @@ scanning `Params*.h` instead of the actual `.ain` examples:
 |---|---|---|
 | `TargetElectronsUp=` | int | Number of up-spin electrons in the target sector |
 | `TargetElectronsDown=` | int | Number of down-spin electrons in the target sector |
-
-**Half-filling constraint:** the ED neq solver hardcodes the impurity
-chemical potential to `mu_imp = -U/2` (particle-hole symmetry). It will
-error at run time unless `TargetElectronsUp + TargetElectronsDown ==
-NumberOfBathPoints + 1` (i.e., exactly half-filling of the full star-geometry
-system: 1 impurity + `NumberOfBathPoints` bath sites). There is no way to run
-away from half filling with this solver today.
 
 ## Neq-specific input
 
@@ -107,49 +100,45 @@ All of the following go below the equilibrium block.
 
 | Keyword | Type | Default | Meaning |
 |---|---|---|---|
-| `NeqSolver=` | string | `"ed"` | `"ed"` or `"tdmrg"`; see method table above. Anything else is a hard error. |
-| `NeqBathRank=` | int | 0 | See [How much bath does the quench see?](#how-much-bath-does-the-quench-see-neqbathrank) above — **read that before leaving this at 0.** |
+| `NeqSolver=` | string | `"exactdiag"` | `"exactdiag"` or `"tdmrg"`; see method table above. Anything else is a hard error. |
+| `NeqBathRank=` | int | 0 | rank of the Cholesky decompsition used for the evolving bath and bath sites is this * 2 |
 | `NeqDmftIter=` | int | same as equilibrium `DmftNumberOfIterations=` | Inner self-consistency iterations at each time step, used only when `NeqBathRank>0` (updating the second bath); harmless no-op at `NeqBathRank=0`. |
 | `NeqDmftTolerance=` | real | same as equilibrium `DmftTolerance=` | Convergence tolerance for the above. |
 | `BandwidthFinal=` | real | 0 (no quench) | Bethe-lattice bandwidth *for t > 0*, i.e. a **hopping** quench on top of (or instead of) the interaction quench. 0 means the lattice bandwidth stays at its equilibrium `LatticeGf=` value for all t. |
 | `QuenchShape=` | string | `"step"` | Ramp shape for the hopping quench: `"step"`, `"cosine"`, or `"tanh"`. Only matters if `BandwidthFinal=` is nonzero. |
 | `QuenchDuration=` | real | 0 (instantaneous) | Ramp duration t_q for the hopping quench. |
 | `NeqOutputPrefix=` | string | `""` | Prefix prepended to output Green's-function filenames (see [Output files](#output-files)). |
-| `NeqAtomicLimit=` | int (0/1) | 0 | Start the neq run from the true atomic limit: no bath at all at t = 0 (hybridization Λ⁻ ≡ 0 exactly), per GBEK Sec. VI. See [The atomic limit skips the equilibrium stage entirely](#the-atomic-limit-skips-the-equilibrium-stage-entirely) below — this changes what's *allowed* in the rest of the file, not just what's optional. **Not supported with `NeqSolver="tdmrg"`** (rejected with an error). Requires `TargetElectronsUp + TargetElectronsDown == 1`. |
+| `NeqAtomicLimit=` | int (0/1) | 0 | Start the neq run from the true atomic limit no bath at all at t = 0 (hybridization Λ⁻ ≡ 0 exactly), per GBEK Sec. VI. See [The atomic limit skips the equilibrium stage entirely](#the-atomic-limit-skips-the-equilibrium-stage-entirely) below — this changes what's *allowed* in the rest of the file, not just what's optional. **Not supported with `NeqSolver="tdmrg"`** (rejected with an error). Requires `TargetElectronsUp + TargetElectronsDown == 1`. |
 
-## Gotchas
+### When NeqAtomicLimit = 1 the equilibrium stage is skipped
 
-### The atomic limit skips the equilibrium stage entirely
-
-`NeqAtomicLimit=1` doesn't just make the equilibrium bath fit's *result*
-irrelevant — `cincuenta` never constructs the equilibrium machinery at all
-in this mode, because there's nothing for it to do (the neq stage starts
-from an empty bath regardless of what any fit would have produced). That
-means every equilibrium-bath-fit-only keyword is out of place in an
-atomic-limit input, and the following four are actively **rejected** if
-present, with a clear error, rather than silently parsed and ignored:
+As a result the following equilibrium are not allowed in input and
+result in an error.
 
 - `NumberOfBathPoints=`
 - `ImpuritySolver=`
 - `FitOptions=`
-- `LatticeGf=`
+
+`LatticeGf` is still required and for the atomic limit starting point
+ "energy,semicircular,0" is the required input. This is for
+ consistency with all other inputs for cincuenta.
 
 The rest of the equilibrium-only keywords (`MinParams*=`, `InitBath*=`,
 `Precision=`, and the whole DMRG omega-scan block: `RootOutputname=`,
 `FiniteLoopsGs=`, `OmegaBegin=`, etc.) aren't actively rejected, but they're
-never read either — just omit them. `FicticiousBeta=`, `ChemicalPotential=`,
+never read either — just omit them. ` In the future logical
+consistency of inputs may be further constrained so leaving
+inconsistent and/or unused keywords in inputs is not guaranteed to be
+supported in future versions.
+
+`FicticiousBeta=`, `ChemicalPotential=`,
 `Matsubaras=`, `TargetElectronsUp=`/`Down=`, `ImpuritySite=`, and `HubbardU=`
 are still required — those define the real-time/Matsubara grid and the
 target sector, which the neq stage genuinely needs regardless of whether an
 equilibrium bath fit ran.
 
-### `HubbardU=` is shared between the two stages
-
-There's only one `HubbardU=` line in the file. It's U_i for the neq quench
-*and* the equilibrium bath-fit's interaction — you don't write it twice.
-`HubbardUFinal=` is the only new interaction keyword.
-
-### DMRG-only fields are still required even for `ImpuritySolver="exactdiag"`
+`ChemicalPotential` must equal U/2 since only the half filling
+particle hole symmetric case is implemented.
 
 See [Required equilibrium input](#required-equilibrium-input-recap) above and
 `cincuenta_design.md`'s reference table. This trips people up because it
@@ -245,7 +234,7 @@ NtNeq=50;
 NeqDmftIter=1;
 NeqDmftTolerance=0.001;
 
-# NeqSolver not set -> "ed" default, NeqBathRank not set -> 0 (fixed bath).
+# NeqSolver not set -> "exactdiag" default, NeqBathRank not set -> 0 (fixed bath).
 # Reasonable here because the quench starts from U_i=0.
 ```
 
@@ -267,33 +256,12 @@ before trusting any real quench result.
 
 ### Physically meaningful quench (`NeqBathRank>0`)
 
-`cincuenta/TestSuite/inputs/inputNeqGBEKFig3L3.ain` — a hopping quench
-(`BandwidthFinal=`, `QuenchShape="cosine"`, `QuenchDuration=`) at fixed
-U = 2, with a rank-3 second bath so the bath itself responds to the quench:
-
-```
-# ---- Non-equilibrium DMFT parameters (excerpt) -----------------------------
-HubbardUFinal=2.;
-TmaxNeq=4.0;
-NtNeq=100;
-
-NeqDmftIter=3;
-NeqDmftTolerance=1e-8;
-
-NeqSolver="ed";       # default; written explicitly for clarity
-NeqBathRank=3;
-
-BandwidthFinal=4.;
-QuenchShape="cosine";
-QuenchDuration=0.25;
-
-NeqOutputPrefix="gebk-fig3-L3";
-```
-
 This is the setup to reach for when the quench isn't small — read
 `cincuenta/TestSuite/gbek_reference/README.md` for guidance on choosing `L`
 and for how long the result stays trustworthy before finite-rank error
 dominates.
+
+Right now only the special case of the atomic limit is validated:
 
 ### True atomic limit (`NeqAtomicLimit=1`)
 
@@ -301,15 +269,15 @@ dominates.
 `NeqBathRank=3` — this is the GBEK Fig. 3 setup starting from an exact
 atomic limit (no bath at all at t = 0) rather than the near-zero-bandwidth
 approximation the previous example uses. Note how much shorter this file is
-than the others in this guide — per
-[the atomic limit skips the equilibrium stage entirely](#the-atomic-limit-skips-the-equilibrium-stage-entirely),
-there's no equilibrium block, no `LatticeGf=`, no DMRG omega-scan settings:
+than the others in this guide — equilibrium only input can be dropped,
+but `LatticeGf` is still required.
 
 ```
 ##Ainur1.0
 
+LatticeGf="energy,semicircular,0";
 FicticiousBeta=16;
-ChemicalPotential=0.;
+ChemicalPotential=1.0;
 Matsubaras=200;
 
 TargetElectronsUp=1;
@@ -325,7 +293,7 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-NeqSolver="ed";
+NeqSolver="exactdiag";
 NeqBathRank=3;
 NeqAtomicLimit=1;
 

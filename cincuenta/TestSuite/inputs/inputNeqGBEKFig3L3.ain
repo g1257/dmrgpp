@@ -11,7 +11,7 @@
 # Correlations expected to persist to t≈2.5 (vs t≈1.5 for L=2).
 
 FicticiousBeta=16;
-ChemicalPotential=0.;
+ChemicalPotential=1.;  # HubbardU/2, required by FitOptions=particleholesymmetric
 Matsubaras=200;
 LatticeGf="energy,semicircular,0.1";
 NumberOfBathPoints=5;
@@ -59,9 +59,9 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-# ED solver with GBEK second bath, rank L=3 (NeqSolver="ed" is the default;
+# ED solver with GBEK second bath, rank L=3 (NeqSolver="exactdiag" is the default;
 # written here for clarity)
-NeqSolver="ed";
+NeqSolver="exactdiag";
 NeqBathRank=3;
 
 # BandwidthFinal=4 -> t*_f = 1 -> tStarFinalSq_ = 1.
