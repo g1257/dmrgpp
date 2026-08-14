@@ -2,14 +2,20 @@
 #include "VectorWithOffset.h"
 #include <PsimagLite/Vector.h>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <complex>
 #include <map>
 
 namespace {
 
-using VectorType           = PsimagLite::Vector<double>::Type;
-using VectorSizeType       = PsimagLite::Vector<SizeType>::Type;
-using VectorWithOffsetType = Dmrg::VectorWithOffset<double, Dmrg::Qn>;
+using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+
+template <typename T> void checkValue(const T& actual, double real, double imag = 0.0)
+{
+	CHECK(std::real(actual) == Catch::Approx(real));
+	CHECK(std::imag(actual) == Catch::Approx(imag));
+}
 
 Dmrg::Qn makeQn(bool odd)
 {
@@ -41,15 +47,19 @@ private:
 	Dmrg::Qn::VectorQnType qns_;
 };
 
-class FakeIo {
+template <typename T> class FakeIo {
 
 public:
+
+	using VectorType           = typename PsimagLite::Vector<T>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<T, Dmrg::Qn>;
+	using PairQnType           = typename VectorWithOffsetType::PairQnType;
 
 	void createGroup(const PsimagLite::String& label) { group_ = label; }
 
 	void write(SizeType value, const PsimagLite::String& label) { sizes_[label] = value; }
 
-	void write(const VectorWithOffsetType::PairQnType& value, const PsimagLite::String& label)
+	void write(const PairQnType& value, const PsimagLite::String& label)
 	{
 		pairs_.insert_or_assign(label, value);
 	}
@@ -61,10 +71,7 @@ public:
 
 	void read(SizeType& value, const PsimagLite::String& label) { value = sizes_.at(label); }
 
-	void read(VectorWithOffsetType::PairQnType& value, const PsimagLite::String& label)
-	{
-		value = pairs_.at(label);
-	}
+	void read(PairQnType& value, const PsimagLite::String& label) { value = pairs_.at(label); }
 
 	void read(VectorType& value, const PsimagLite::String& label)
 	{
@@ -75,16 +82,20 @@ public:
 
 private:
 
-	PsimagLite::String                                             group_;
-	std::map<PsimagLite::String, SizeType>                         sizes_;
-	std::map<PsimagLite::String, VectorWithOffsetType::PairQnType> pairs_;
-	std::map<PsimagLite::String, VectorType>                       vectors_;
+	PsimagLite::String                       group_;
+	std::map<PsimagLite::String, SizeType>   sizes_;
+	std::map<PsimagLite::String, PairQnType> pairs_;
+	std::map<PsimagLite::String, VectorType> vectors_;
 };
 
 } // namespace
 
-TEST_CASE("VectorWithOffset default state and metadata", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset default state and metadata",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	VectorWithOffsetType v;
 
 	CHECK(v.size() == 0);
@@ -93,11 +104,15 @@ TEST_CASE("VectorWithOffset default state and metadata", "[VectorWithOffset]")
 	CHECK(v.offset() == 0);
 	CHECK(v.index2Sector(0) == -1);
 	CHECK(VectorWithOffsetType::name() == "vectorwithoffset");
-	CHECK(VectorWithOffsetType::zero_ == 0.0);
+	CHECK(VectorWithOffsetType::zero_ == TestType(0.0));
 }
 
-TEST_CASE("VectorWithOffset constructors expose one sector", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset constructors expose one sector",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis basis;
 
 	SECTION("weight and sector constructor")
@@ -131,8 +146,13 @@ TEST_CASE("VectorWithOffset constructors expose one sector", "[VectorWithOffset]
 	}
 }
 
-TEST_CASE("VectorWithOffset sets, extracts, and clears data", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset sets, extracts, and clears data",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType           = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis      basis;
 	VectorType           data({ 1.0, 2.0, 3.0 });
 	VectorWithOffsetType v;
@@ -153,9 +173,9 @@ TEST_CASE("VectorWithOffset sets, extracts, and clears data", "[VectorWithOffset
 	v.extract(extracted, 0);
 	CHECK(extracted == replacement);
 
-	std::vector<double> sparse;
+	std::vector<TestType> sparse;
 	v.toSparse(sparse);
-	CHECK(sparse == std::vector<double>({ 0.0, 0.0, 4.0, 5.0, 6.0 }));
+	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 4.0, 5.0, 6.0 }));
 
 	v.clear();
 	CHECK(v.size() == 0);
@@ -164,8 +184,13 @@ TEST_CASE("VectorWithOffset sets, extracts, and clears data", "[VectorWithOffset
 	CHECK(v.offset() == 0);
 }
 
-TEST_CASE("VectorWithOffset converts from a full vector", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset converts from a full vector",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType           = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis      basis;
 	VectorWithOffsetType v;
 	v.fromFull(VectorType({ 0.0, 0.0, 7.0, 8.0, 9.0 }), basis);
@@ -183,8 +208,13 @@ TEST_CASE("VectorWithOffset converts from a full vector", "[VectorWithOffset]")
 	CHECK(v.index2Sector(5) == -1);
 }
 
-TEST_CASE("VectorWithOffset public arithmetic", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset public arithmetic",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType           = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis      basis;
 	VectorType           first({ 3.0, 4.0, 0.0 });
 	VectorWithOffsetType v;
@@ -192,32 +222,37 @@ TEST_CASE("VectorWithOffset public arithmetic", "[VectorWithOffset]")
 
 	CHECK(norm(v) == Catch::Approx(5.0));
 	normalize(v);
-	CHECK(v.fastAccess(0, 0) == Catch::Approx(0.6));
-	CHECK(v.fastAccess(0, 1) == Catch::Approx(0.8));
+	checkValue(v.fastAccess(0, 0), 0.6);
+	checkValue(v.fastAccess(0, 1), 0.8);
 
 	v.fastAccess(0, 2) = 1.0;
 	v.slowAccess(2)    = 1.0;
 	v *= 2.0;
-	CHECK(v.fastAccess(0, 0) == Catch::Approx(2.0));
+	checkValue(v.fastAccess(0, 0), 2.0);
 
 	VectorWithOffsetType scaled = 0.5 * v;
-	CHECK(scaled.fastAccess(0, 0) == Catch::Approx(1.0));
-	CHECK(scaled * scaled == Catch::Approx(2.64));
+	checkValue(scaled.fastAccess(0, 0), 1.0);
+	checkValue(scaled * scaled, 2.64);
 
 	VectorWithOffsetType sum;
 	sum += scaled;
 	sum += scaled;
-	CHECK(sum.fastAccess(0, 0) == Catch::Approx(2.0));
-	CHECK(sum.fastAccess(0, 1) == Catch::Approx(1.6));
-	CHECK(sum.fastAccess(0, 2) == Catch::Approx(2.0));
+	checkValue(sum.fastAccess(0, 0), 2.0);
+	checkValue(sum.fastAccess(0, 1), 1.6);
+	checkValue(sum.fastAccess(0, 2), 2.0);
 
 	VectorWithOffsetType otherSector(2, 0, basis);
-	CHECK(scaled * otherSector == 0.0);
+	CHECK(scaled * otherSector == TestType(0.0));
 	CHECK_THROWS_AS(sum += otherSector, PsimagLite::RuntimeError);
 }
 
-TEST_CASE("VectorWithOffset populates matching quantum-number sector", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset populates matching quantum-number sector",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType           = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis      basis;
 	VectorType           data({ 1.0, 2.0, 3.0 });
 	VectorWithOffsetType source;
@@ -237,14 +272,19 @@ TEST_CASE("VectorWithOffset populates matching quantum-number sector", "[VectorW
 	CHECK_THROWS_AS(destination.populateSectors(basis), PsimagLite::RuntimeError);
 }
 
-TEST_CASE("VectorWithOffset writes and reads its public representation", "[VectorWithOffset]")
+TEMPLATE_TEST_CASE("VectorWithOffset writes and reads its public representation",
+                   "[VectorWithOffset]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType           = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<TestType, Dmrg::Qn>;
 	const FakeBasis      basis;
 	VectorType           data({ 2.0, 4.0, 6.0 });
 	VectorWithOffsetType original;
 	original.set(data, 1, basis);
 
-	FakeIo io;
+	FakeIo<TestType> io;
 	original.write(io, "vector");
 	CHECK(io.group() == "vector");
 
@@ -254,9 +294,9 @@ TEST_CASE("VectorWithOffset writes and reads its public representation", "[Vecto
 	CHECK(restored.offset() == original.offset());
 	CHECK(restored.sector(0) == original.sector(0));
 	CHECK(restored.qn(0) == original.qn(0));
-	CHECK(restored * original == Catch::Approx(56.0));
+	checkValue(restored * original, 56.0);
 
 	VectorWithOffsetType loaded;
 	loaded.loadOneSector(io, "vector", 7);
-	CHECK(loaded * original == Catch::Approx(56.0));
+	checkValue(loaded * original, 56.0);
 }
