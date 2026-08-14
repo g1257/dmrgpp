@@ -80,11 +80,8 @@ if(DMRGPP_USE_MPI)
 
   function(add_mpi_hdf5_check name filename depends)
     add_test(NAME ${name} COMMAND ${H5LS_EXECUTABLE} ${filename}/Def/Energies)
-    set_tests_properties(
-      ${name}
-      PROPERTIES LABELS "MPI"
-                 WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
-                 DEPENDS ${depends})
+    set_tests_properties(${name} PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                            ${depends})
   endfunction()
 
   add_mpi_test(omegas_mpi_dry_run 2 $<TARGET_FILE:omegas> -d -f ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
