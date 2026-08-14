@@ -2,13 +2,19 @@
 #include "VectorWithOffsets.h"
 #include <PsimagLite/Vector.h>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <complex>
 
 namespace {
 
-using VectorType            = PsimagLite::Vector<double>::Type;
-using VectorSizeType        = PsimagLite::Vector<SizeType>::Type;
-using VectorWithOffsetsType = Dmrg::VectorWithOffsets<double, Dmrg::Qn>;
+using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+
+template <typename T> void checkValue(const T& actual, double real, double imag = 0.0)
+{
+	CHECK(std::real(actual) == Catch::Approx(real));
+	CHECK(std::imag(actual) == Catch::Approx(imag));
+}
 
 Dmrg::Qn makeQn(bool odd)
 {
@@ -38,8 +44,12 @@ private:
 
 } // namespace
 
-TEST_CASE("VectorWithOffsets default state and identity", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets default state and identity",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	VectorWithOffsetsType v;
 	CHECK(v.size() == 0);
 	CHECK(v.sectors() == 0);
@@ -47,8 +57,12 @@ TEST_CASE("VectorWithOffsets default state and identity", "[VectorWithOffsets]")
 	CHECK(norm(v) == 0.0);
 }
 
-TEST_CASE("VectorWithOffsets constructs populated sectors", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets constructs populated sectors",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis basis;
 
 	SECTION("weights for all basis sectors")
@@ -88,8 +102,13 @@ TEST_CASE("VectorWithOffsets constructs populated sectors", "[VectorWithOffsets]
 	}
 }
 
-TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 5.0 });
 	VectorWithOffsetsType v;
@@ -109,26 +128,31 @@ TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data", "[VectorWithO
 
 	VectorType replacement({ 6.0, 7.0, 8.0 });
 	v.setDataInSector(replacement, 1);
-	CHECK(v.fastAccess(1, 0) == 6.0);
+	checkValue(v.fastAccess(1, 0), 6.0);
 	v.fastAccess(1, 1) = 9.0;
-	CHECK(v.slowAccess(3) == 9.0);
+	checkValue(v.slowAccess(3), 9.0);
 	v.slowAccess(4) = 10.0;
 
 	const VectorWithOffsetsType& constV = v;
-	CHECK(constV.slowAccess(0) == 0.0);
-	CHECK(constV.slowAccess(4) == 10.0);
+	checkValue(constV.slowAccess(0), 0.0);
+	checkValue(constV.slowAccess(4), 10.0);
 
-	std::vector<double> sparse;
+	std::vector<TestType> sparse;
 	v.toSparse(sparse);
-	CHECK(sparse == std::vector<double>({ 0.0, 0.0, 6.0, 9.0, 10.0, 0.0 }));
+	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 6.0, 9.0, 10.0, 0.0 }));
 
 	v.clear();
 	CHECK(v.size() == 0);
 	CHECK(v.sectors() == 0);
 }
 
-TEST_CASE("VectorWithOffsets converts a full vector", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets converts a full vector",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorWithOffsetsType v;
 	v.fromFull(VectorType({ 1.0, 2.0, 0.0, 0.0, 0.0, 3.0 }), basis);
@@ -143,8 +167,12 @@ TEST_CASE("VectorWithOffsets converts a full vector", "[VectorWithOffsets]")
 	CHECK(v.index2Sector(3) == -1);
 }
 
-TEST_CASE("VectorWithOffsets populates and collapses sectors", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets populates and collapses sectors",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorWithOffsetsType v;
 	v.populateSectors(basis);
@@ -168,8 +196,13 @@ TEST_CASE("VectorWithOffsets populates and collapses sectors", "[VectorWithOffse
 	CHECK(copy.fastAccess(1, 0) == 0.0);
 }
 
-TEST_CASE("VectorWithOffsets public arithmetic", "[VectorWithOffsets]")
+TEMPLATE_TEST_CASE("VectorWithOffsets public arithmetic",
+                   "[VectorWithOffsets]",
+                   double,
+                   std::complex<double>)
 {
+	using VectorType            = typename PsimagLite::Vector<TestType>::Type;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 0.0 });
 	VectorWithOffsetsType v;
@@ -180,14 +213,14 @@ TEST_CASE("VectorWithOffsets public arithmetic", "[VectorWithOffsets]")
 	CHECK(norm(v) == Catch::Approx(1.0));
 
 	v *= 2.0;
-	CHECK(v.fastAccess(1, 0) == Catch::Approx(1.2));
+	checkValue(v.fastAccess(1, 0), 1.2);
 	VectorWithOffsetsType scaled = 0.5 * v;
-	CHECK(scaled.fastAccess(1, 1) == Catch::Approx(0.8));
-	CHECK(scaled * scaled == Catch::Approx(1.0));
+	checkValue(scaled.fastAccess(1, 1), 0.8);
+	checkValue(scaled * scaled, 1.0);
 
 	VectorWithOffsetsType sum;
 	sum += scaled;
 	sum += scaled;
-	CHECK(sum.fastAccess(1, 0) == Catch::Approx(1.2));
-	CHECK(sum.fastAccess(1, 1) == Catch::Approx(1.6));
+	checkValue(sum.fastAccess(1, 0), 1.2);
+	checkValue(sum.fastAccess(1, 1), 1.6);
 }
