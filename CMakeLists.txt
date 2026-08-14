@@ -62,6 +62,7 @@ endif()
 option(DMRGPP_USE_MPI "Enable MPI support" OFF)
 if(DMRGPP_USE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
+endif()
 
 # Define our prefered warning set for compilers we know about.
 # In other words we're going to use -Wno-unused-parameter rather than annotations
