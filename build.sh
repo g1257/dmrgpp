@@ -20,8 +20,6 @@ if [[ $(uname -s) == Darwin ]]; then
 else
     cmake_options+=(
         -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_REQUIRE_FIND_PACKAGE_Kokkos=ON
-        -DCMAKE_REQUIRE_FIND_PACKAGE_KokkosKernels=ON
     )
 fi
 
