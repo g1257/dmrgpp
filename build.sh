@@ -2,12 +2,27 @@
 
 set -euo pipefail
 
-project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-build_dir="${project_dir}/build"
+source_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+build_dir="${source_dir}/build"
 
 mkdir -p "${build_dir}"
 
-cmake -S "${project_dir}" -B "${build_dir}" \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_CXX_FLAGS="-Wall -Werror" \
-    -DCMAKE_CXX_COMPILER=clang++
+cmake_options=(
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+)
+
+if [[ $(uname -s) == Darwin ]]; then
+    cmake_options+=(
+        -DKokkosKernels_ENABLE_TPL_BLAS=ON
+        -DKokkosKernels_ENABLE_TPL_LAPACK=ON
+    )
+else
+    cmake_options+=(
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_REQUIRE_FIND_PACKAGE_Kokkos=ON
+        -DCMAKE_REQUIRE_FIND_PACKAGE_KokkosKernels=ON
+    )
+fi
+
+cmake -S "${source_dir}" -B "${build_dir}" "${cmake_options[@]}"
