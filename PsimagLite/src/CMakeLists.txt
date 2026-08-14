@@ -33,6 +33,15 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/kokkos/kokkos-kernels
   GIT_TAG 5.2.0
   SYSTEM FIND_PACKAGE_ARGS 5.1 NAMES KokkosKernels)
+# Since DRMGPP requires BLAS and LAPACK, we should also make sure KokkosKernels uses these as TPLs
+# FIXME Up to version 5.2 KokkosKernels doesn't export the enabled TPLs in CMake
+#       so we can't check for an externally installed KokkosKernels library
+set(KokkosKernels_ENABLE_TPL_BLAS
+    ON
+    CACHE BOOL "Whether to enable the BLAS TPL" FORCE)
+set(KokkosKernels_ENABLE_TPL_LAPACK
+    ON
+    CACHE BOOL "Whether to enable the LAPACK TPL" FORCE)
 FetchContent_MakeAvailable(KokkosKernels)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
