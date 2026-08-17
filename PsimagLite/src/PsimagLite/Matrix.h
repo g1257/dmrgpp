@@ -1096,7 +1096,7 @@ template <typename T> typename EnableIf<!IsComplexNumber<T>::True, void>::Type e
 	throw RuntimeError("expIpi: only when using complex number\n");
 }
 
-#ifdef USE_MPI
+#ifdef DMRGPP_USE_MPI
 namespace MPI {
 
 	template <typename SomeMatrixType>
@@ -1131,7 +1131,7 @@ namespace MPI {
 	}
 
 } // namespace MPI
-#endif // USE_MPI
+#endif // DMRGPP_USE_MPI
 
 } // namespace PsimagLite
 #endif
