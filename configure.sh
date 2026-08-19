@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+computeProcsForMake()
+{
+    echo 1
+}
+
 source_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 build_dir="${source_dir}/build"
 
@@ -24,3 +29,4 @@ else
 fi
 
 cmake -S "${source_dir}" -B "${build_dir}" "${cmake_options[@]}"
+make -C "${build_dir}" -j "$(computeProcsForMake)"
