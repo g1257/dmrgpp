@@ -1,7 +1,10 @@
 #ifndef BATCHEDGEMMINCLUDE_HH
 #define BATCHEDGEMMINCLUDE_HH
 #include "DMRGConfig.h"
-#ifdef PLUGIN_SC
+#if defined(KOKKOS_BATCHED)
+#include "BatchedGemmKokkos.h"
+#define BATCHED_GEMM BatchedGemmKokkos
+#elif defined(PLUGIN_SC)
 #include "BatchedGemmPluginSc.h"
 #define BATCHED_GEMM BatchedGemmPluginSc
 #else
@@ -16,20 +19,16 @@ class BatchedGemmInclude {
 
 public:
 
-	static void failIfNotSupported()
-	{
-#ifdef PLUGIN_SC
-		return;
-#endif
-		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
-	}
+	static void failIfNotSupported() { }
 
 	static std::string info()
 	{
-#ifdef PLUGIN_SC
+#if defined(KOKKOS_BATCHED)
+		return "KOKKOS_BATCHED";
+#elif defined(PLUGIN_SC)
 		return "PLUGIN_SC";
 #else
-		return "";
+		return "CPU";
 #endif
 	}
 };
