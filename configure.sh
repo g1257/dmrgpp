@@ -4,7 +4,19 @@ set -euo pipefail
 
 computeProcsForMake()
 {
-    echo 1
+    local nprocs
+
+    if [[ $(uname -s) == Darwin ]]; then
+        nprocs=$(sysctl -n hw.ncpu)
+    else
+        nprocs=$(nproc)
+    fi
+
+    if (( nprocs > 3 )); then
+        echo $((nprocs - 2))
+    else
+        echo 1
+    fi
 }
 
 source_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
