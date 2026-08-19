@@ -428,7 +428,8 @@ private:
 			checkPoint = true;
 		}
 
-		parameters_.readFiniteLoops(ioIn, vfl, parameters_.truncationControl, lastSite);
+		parameters_.readFiniteLoops(
+		    ioIn, vfl, parameters_.truncationControl, lastSite, isRestart_);
 
 		if (!parameters_.autoRestart) {
 			checkFiniteLoops(vfl, totalSites, lastSite, prevDeltaSign, checkPoint);
