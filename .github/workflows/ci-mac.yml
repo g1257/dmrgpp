@@ -29,9 +29,7 @@ jobs:
               -B ${{github.workspace}}/build \
               -GNinja \
               -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
-              -DKokkosKernels_ENABLE_TPL_BLAS=ON \
-              -DKokkosKernels_ENABLE_TPL_LAPACK=ON
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
