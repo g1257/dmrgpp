@@ -521,13 +521,14 @@ struct ParametersDmrgSolver {
 			lastSite        = (isAllInSys) ? numberOfSites - 2 : numberOfSites / 2 - 1;
 		}
 
-		readFiniteLoops(io, finiteLoop, truncationControl, lastSite);
+		readFiniteLoops(io, finiteLoop, truncationControl, lastSite, isRestart);
 	}
 
 	void readFiniteLoops(InputValidatorType&          io,
 	                     VectorFiniteLoopType&        vfl,
 	                     const TruncationControlType& truncationC,
-	                     int                          lastSite) const
+	                     int                          lastSite,
+	                     bool                         isRestart) const
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
@@ -536,7 +537,7 @@ struct ParametersDmrgSolver {
 		} else {
 			MatrixStringType tmpMat;
 			io.read(tmpMat, "FiniteLoops");
-			readFiniteLoops_(io, vfl, tmpMat, truncationC, lastSite);
+			readFiniteLoops_(io, vfl, tmpMat, truncationC, lastSite, isRestart);
 		}
 	}
 
@@ -562,7 +563,8 @@ struct ParametersDmrgSolver {
 	                      VectorFiniteLoopType&        vfl,
 	                      const MatrixStringType&      tmpMat,
 	                      const TruncationControlType& truncationC,
-	                      int                          lastSite) const
+	                      int                          lastSite,
+	                      bool                         isRestart) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -573,7 +575,8 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		if (lastSite == 1 && numberOfSites > 4) {
+		bool from_infinite = (numberOfSites < 5 && !isRestart);
+		if (lastSite == 1 && !from_infinite) {
 			lastSite = 0;
 		}
 
