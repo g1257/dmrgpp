@@ -148,9 +148,6 @@ add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
 add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
 
-# input3 would be too big if we were to make it converge (input12 is better)
-# add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain) # energy -21.5102
-# add_lowest_eigenvalue_check_test(output3 input3 -21.5102 runForinput3.cout)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output4 input4 -15.9938 runForinput4.cout)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain) # energy -15.9938
