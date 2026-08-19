@@ -3,7 +3,7 @@
 #include "Concurrency.h"
 #include "Vector.h"
 
-#ifdef USE_MPI
+#ifdef DMRGPP_USE_MPI
 #include "InterNodeMpi.h"
 #else
 #include "InterNodeSerial.h"

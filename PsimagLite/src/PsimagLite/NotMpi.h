@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MPI_HEADER_H
 #define MPI_HEADER_H
 
-#ifdef USE_MPI
+#ifdef DMRGPP_USE_MPI
 #include "MpiYes.h"
 #else
 #include "MpiNo.h"

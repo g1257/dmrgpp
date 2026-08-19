@@ -1,0 +1,6 @@
+##Ainur1.0
+real OmegaBegin=0.0;
+real OmegaStep=0.1;
+integer OmegaTotal=4;
+integer OmegaOffset=0;
+string Observable="splus";
