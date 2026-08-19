@@ -27,14 +27,11 @@ mkdir -p "${build_dir}"
 cmake_options=(
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+    -DKokkosKernels_ENABLE_TPL_BLAS=ON
+    -DKokkosKernels_ENABLE_TPL_LAPACK=ON
 )
 
-if [[ $(uname -s) == Darwin ]]; then
-    cmake_options+=(
-        -DKokkosKernels_ENABLE_TPL_BLAS=ON
-        -DKokkosKernels_ENABLE_TPL_LAPACK=ON
-    )
-else
+if [[ $(uname -s) != Darwin ]]; then
     cmake_options+=(
         -DBUILD_SHARED_LIBS=OFF
     )
