@@ -98,24 +98,24 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t        transA,
 	                                     queue);
 }
 
-static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                      transA,
-                                                 magma_trans_t                      transB,
-                                                 magma_IntegerType_t*               m,
-                                                 magma_IntegerType_t*               n,
-                                                 magma_IntegerType_t*               k,
-                                                 std::complex<double>               alpha,
-                                                 std::complex<double> const* const* dA_array,
-                                                 magma_IntegerType_t*               ldda,
-                                                 std::complex<double> const* const* dB_array,
-                                                 magma_IntegerType_t*               lddb,
-                                                 std::complex<double>               beta,
-                                                 std::complex<double>**             dC_array,
-                                                 magma_IntegerType_t*               lddc,
-                                                 magma_IntegerType_t                batchCount,
-                                                 magma_IntegerType_t                max_m,
-                                                 magma_IntegerType_t                max_n,
-                                                 magma_IntegerType_t                max_k,
-                                                 magma_queue_t                      queue)
+static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                         transA,
+                                                 magma_trans_t                         transB,
+                                                 magma_IntegerType_t*                  m,
+                                                 magma_IntegerType_t*                  n,
+                                                 magma_IntegerType_t*                  k,
+                                                 std::complex<double>                  alpha,
+                                                 Kokkos::complex<double> const* const* dA_array,
+                                                 magma_IntegerType_t*                  ldda,
+                                                 Kokkos::complex<double> const* const* dB_array,
+                                                 magma_IntegerType_t*                  lddb,
+                                                 std::complex<double>                  beta,
+                                                 Kokkos::complex<double>**             dC_array,
+                                                 magma_IntegerType_t*                  lddc,
+                                                 magma_IntegerType_t                   batchCount,
+                                                 magma_IntegerType_t                   max_m,
+                                                 magma_IntegerType_t                   max_n,
+                                                 magma_IntegerType_t                   max_k,
+                                                 magma_queue_t                         queue)
 {
 
 	magmablas_zgemm_vbatched_max_nocheck(
@@ -139,24 +139,24 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
 	    queue);
 }
 
-static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                     transA,
-                                                 magma_trans_t                     transB,
-                                                 magma_IntegerType_t*              m,
-                                                 magma_IntegerType_t*              n,
-                                                 magma_IntegerType_t*              k,
-                                                 std::complex<float>               alpha,
-                                                 std::complex<float> const* const* dA_array,
-                                                 magma_IntegerType_t*              ldda,
-                                                 std::complex<float> const* const* dB_array,
-                                                 magma_IntegerType_t*              lddb,
-                                                 std::complex<float>               beta,
-                                                 std::complex<float>**             dC_array,
-                                                 magma_IntegerType_t*              lddc,
-                                                 magma_IntegerType_t               batchCount,
-                                                 magma_IntegerType_t               max_m,
-                                                 magma_IntegerType_t               max_n,
-                                                 magma_IntegerType_t               max_k,
-                                                 magma_queue_t                     queue)
+static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                        transA,
+                                                 magma_trans_t                        transB,
+                                                 magma_IntegerType_t*                 m,
+                                                 magma_IntegerType_t*                 n,
+                                                 magma_IntegerType_t*                 k,
+                                                 std::complex<float>                  alpha,
+                                                 Kokkos::complex<float> const* const* dA_array,
+                                                 magma_IntegerType_t*                 ldda,
+                                                 Kokkos::complex<float> const* const* dB_array,
+                                                 magma_IntegerType_t*                 lddb,
+                                                 std::complex<float>                  beta,
+                                                 Kokkos::complex<float>**             dC_array,
+                                                 magma_IntegerType_t*                 lddc,
+                                                 magma_IntegerType_t                  batchCount,
+                                                 magma_IntegerType_t                  max_m,
+                                                 magma_IntegerType_t                  max_n,
+                                                 magma_IntegerType_t                  max_k,
+                                                 magma_queue_t                        queue)
 {
 
 	magmablas_cgemm_vbatched_max_nocheck(

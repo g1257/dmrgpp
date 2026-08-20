@@ -13,23 +13,21 @@ gt1:DegreesOfFreedom=1;
 gt1:GeometryKind="ladder";
 gt1:GeometryOptions="ConstantValues";
 gt1:LadderLeg=2;
-gt1:dir0:Connectors=[6];
-gt1:dir1:Connectors=[6];
+gt1:dir0:Connectors=[1.0];
+gt1:dir1:Connectors=[1.0];
 
-hubbardU=[0.0,...];
+hubbardU=[8.0,...];
 potentialV=[0.0,...];
 Model="HubbardOneBandExtended";
-SolverOptions="none";
+SolverOptions="twositedmrg";
 Version="6b9dc12805519cb864e80fa0957129a010711116";
 OutputFile="data12";
 InfiniteLoopKeptStates=150;
 FiniteLoops=[
-[  5, 200, 0],
-[-10, 200, 0],
-[ 10, 200, 1],
-[ -1, 200, 1]];
-TargetElectronsUp=6;
-TargetElectronsDown=6;
-TargetSpinTimesTwo=0;
+[@auto, 300, 0],
+[@auto, 400, 0],
+[@auto, 500, 1]];
+TargetElectronsUp=5;
+TargetElectronsDown=5;
 Threads=2;
 

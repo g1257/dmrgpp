@@ -23,6 +23,13 @@ if(DMRG_BUILD_BATCHED_MAGMA)
   pkg_check_modules(MAGMA REQUIRED IMPORTED_TARGET magma)
 endif()
 
+set(FpType "double")
+if(DMRG_BUILD_BATCHED_MAGMA)
+  set(USE_MAGMA ON)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/GPUPluginConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/GPUPluginConfig.h @ONLY)
+
 add_library(gpuplugin ${SRC_FILES})
 target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite)

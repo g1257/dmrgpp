@@ -3,7 +3,6 @@
 #define DMRG_CONFIG_H
 
 #cmakedefine PLUGIN_SC
-#cmakedefine FpType @FpType@
-#cmakedefine USE_MAGMA
+#cmakedefine KOKKOS_BATCHED
 
 #endif // DMRG_CONFIG_H

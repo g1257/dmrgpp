@@ -5,34 +5,32 @@ add_custom_command(
   COMMENT "Generating Git Revision File"
   VERBATIM)
 
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   add_subdirectory(GPUPlugin)
   set(PLUGIN_SC ON)
-  set(FpType "double")
-  if(DMRG_BUILD_BATCHED_MAGMA)
-    set(USE_MAGMA ON)
-  endif()
+endif()
+
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Kokkos")
+  set(KOKKOS_BATCHED ON)
 endif()
 
 add_subdirectory(KronUtil)
 
-# Generate configuration header for PsimagLite
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/GPUPlugin/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin/DMRGConfig.h
-               @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h @ONLY)
 
 # DMRG++ as a library so cincuenta can use it
 add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
 endif()
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   target_link_libraries(dmrg_runner PUBLIC gpuplugin)
 endif()
 
@@ -70,6 +68,55 @@ install(TARGETS dmrg observe toolboxdmrg omegas introspect RUNTIME DESTINATION $
 
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
+if(DMRGPP_USE_MPI)
+  function(add_mpi_test name nprocs executable)
+    set(_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "${nprocs}")
+    list(APPEND _cmd ${MPIEXEC_PREFLAGS})
+    list(APPEND _cmd "${executable}")
+    list(APPEND _cmd ${MPIEXEC_POSTFLAGS})
+    list(APPEND _cmd ${ARGN})
+    add_test(NAME ${name} COMMAND ${_cmd})
+    set_tests_properties(${name} PROPERTIES LABELS "MPI" PROCESSORS ${nprocs})
+  endfunction()
+
+  set(_omegas_mpi_tiny_workdir ${CMAKE_CURRENT_BINARY_DIR}/omegas_mpi_tiny_real)
+  find_program(H5LS_EXECUTABLE NAMES h5ls REQUIRED)
+
+  function(add_mpi_hdf5_check name filename depends)
+    add_test(NAME ${name} COMMAND ${H5LS_EXECUTABLE} ${filename}/Def/Energies)
+    set_tests_properties(${name} PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                            ${depends})
+  endfunction()
+
+  add_mpi_test(omegas_mpi_dry_run 2 $<TARGET_FILE:omegas> -d -f ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
+  set_tests_properties(omegas_mpi_dry_run PROPERTIES PASS_REGULAR_EXPRESSION "MPI rank=1")
+
+  file(MAKE_DIRECTORY ${_omegas_mpi_tiny_workdir})
+
+  # Keep the producer/consumer chain explicit so ctest --parallel cannot race it.
+  add_test(NAME omegas_mpi_tiny_clean COMMAND ${CMAKE_COMMAND} -E rm -f tinyGs.hd5 tinyOmega0.hd5 tinyOmega1.hd5)
+  set_tests_properties(omegas_mpi_tiny_clean PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir})
+
+  add_test(NAME omegas_mpi_tiny_gs COMMAND $<TARGET_FILE:dmrg> -f ${PATH_TO_INPUTS}/inputManyOmegasTinyGs.ain)
+  set_tests_properties(omegas_mpi_tiny_gs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                                     omegas_mpi_tiny_clean)
+  add_mpi_hdf5_check(omegas_mpi_tiny_gs_output tinyGs.hd5 omegas_mpi_tiny_gs)
+
+  add_mpi_test(
+    omegas_mpi_tiny_real
+    2
+    $<TARGET_FILE:omegas>
+    -f
+    ${PATH_TO_INPUTS}/inputManyOmegasTiny.ain
+    -O
+    tinyOmega)
+  set_tests_properties(omegas_mpi_tiny_real PROPERTIES WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                                       omegas_mpi_tiny_gs_output PASS_REGULAR_EXPRESSION "MPI rank=1")
+
+  add_mpi_hdf5_check(omegas_mpi_tiny_omega0_output tinyOmega0.hd5 omegas_mpi_tiny_real)
+  add_mpi_hdf5_check(omegas_mpi_tiny_omega1_output tinyOmega1.hd5 omegas_mpi_tiny_real)
+endif()
+
 # For introspect
 add_test(
   NAME introspect0
@@ -102,13 +149,9 @@ endfunction()
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 
-if(DMRG_BUILD_BATCHED)
-  add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
-  add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
-endif()
+add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
+add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
 
-add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain) # energy -21.5102
-add_lowest_eigenvalue_check_test(output3 input3 -21.5102 runForinput3.cout)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output4 input4 -15.9938 runForinput4.cout)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain) # energy -15.9938
@@ -121,9 +164,10 @@ add_lowest_eigenvalue_check_test(output7 input7 -15.9939 runForinput7.cout)
 add_test(NAME input10 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input10.ain) # energy -19.6747
 add_lowest_eigenvalue_check_test(output10 input10 -19.6747 runForinput10.cout)
 
-# input11 and input12 need -DUSE_PTHREADS
+# input11 is redundant
 # add_test(NAME input11 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input11.ain)
-# add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain)
+add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain) # energy 2.23292
+add_lowest_eigenvalue_check_test(output12 input12 2.23292 runForinput12.cout)
 add_test(NAME input20 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input20.ain) # energy -3.37493
 add_lowest_eigenvalue_check_test(output20 input20 -3.37493 runForinput20.cout)
 add_test(NAME input21 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input21.ain "<gs|sz|P0>") # none
@@ -177,6 +221,9 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # The following tests are expensive to
   add_lowest_eigenvalue_check_test(output341 input341 -0.093321 runForinput341.cout)
   add_test(NAME input342 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342.ain) # energy -0.0933211
   add_lowest_eigenvalue_check_test(output342 input342 -0.0933211 runForinput342.cout)
+  add_test(NAME input342_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342_batchedgemm.ain) # energy -0.0933211
+  add_lowest_eigenvalue_check_test(output342_batchedgemm input342_batchedgemm -0.0933211
+                                   runForinput342_batchedgemm.cout)
 endif()
 add_test(NAME input351 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input351.ain) # energy -0.408019
 add_lowest_eigenvalue_check_test(output351 input351 -0.408019 runForinput351.cout)

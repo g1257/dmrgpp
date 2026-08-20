@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-#ifdef USE_MPI
+#ifdef DMRGPP_USE_MPI
 #include "MpiYes.cpp"
 #else
 #include "MpiNo.cpp"

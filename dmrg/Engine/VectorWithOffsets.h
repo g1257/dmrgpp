@@ -72,11 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*@{*/
 
 /*! \file VectorWithOffsets.h
- *
- *  A class to represent a vector like this 000000 XXXXXXXX 0000XXXXXXX000000000....
- *  offsets_ is where the first X (non-zero element) is in each block of Xs.
- *  data_ contains a vector of vectors for each nonzero part.
- *  size_ is the size of the whole vector
+ * \brief Defines a vector stored as multiple symmetry-sector blocks.
  */
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
@@ -89,6 +85,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
 namespace Dmrg {
+
+/*!
+ * \brief Stores a vector as independently addressable symmetry-sector blocks.
+ *
+ * The full vector is represented by one data block per basis sector. Only populated
+ * sectors are listed in nzMsAndQns_; offsets_ maps each sector to its position in the
+ * full vector, and index2Sector_ provides the inverse mapping for element access.
+ *
+ * \tparam ComplexOrRealType Scalar type stored by the vector.
+ * \tparam QnType_ Quantum-number type associated with each populated sector.
+ */
 template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 
 	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
@@ -106,12 +113,23 @@ public:
 	using VectorType       = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using VectorVectorType = typename PsimagLite::Vector<VectorType>::Type;
 
+	/*!
+	 * \brief CONSTRUCTOR
+	 *
+	 * Constructs an empty vector with no populated sectors.
+	 */
 	VectorWithOffsets()
 	    : progress_("VectorWithOffsets")
 	    , size_(0)
 	    , index2Sector_(0)
 	{ }
 
+	/*!
+	 * \brief Constructs sector storage from one weight per basis sector.
+	 *
+	 * \param[in] weights Number of stored elements in each sector.
+	 * \param[in] someBasis Basis supplying partitions and quantum numbers.
+	 */
 	template <typename SomeBasisType>
 	VectorWithOffsets(const typename PsimagLite::Vector<SizeType>::Type& weights,
 	                  const SomeBasisType&                               someBasis)
@@ -135,6 +153,11 @@ public:
 		setIndex2Sector();
 	}
 
+	/*!
+	 * \brief Rejects the single-sector construction path.
+	 *
+	 * This overload exists for interface compatibility but always reports a fatal error.
+	 */
 	template <typename SomeBasisType>
 	VectorWithOffsets(SizeType, SizeType, const SomeBasisType&)
 	    : progress_("VectorWithOffset")
@@ -142,6 +165,13 @@ public:
 		err("VectorWithOffsets::ctor() FATAL: wrong execution path!\n");
 	}
 
+	/*!
+	 * \brief Constructs storage for an explicit list of populated sectors.
+	 *
+	 * \param[in] compactedWeights Number of stored elements for each listed sector.
+	 * \param[in] sectors Basis-sector index for each compacted weight.
+	 * \param[in] someBasis Basis supplying partitions and quantum numbers.
+	 */
 	template <typename SomeBasisType>
 	VectorWithOffsets(const VectorSizeType& compactedWeights,
 	                  const VectorSizeType& sectors,
@@ -170,6 +200,7 @@ public:
 		setIndex2Sector();
 	}
 
+	/*! \brief Resets the object to an empty vector with no sectors. */
 	void clear()
 	{
 		size_ = 0;
@@ -179,6 +210,15 @@ public:
 		nzMsAndQns_.clear();
 	}
 
+	/*!
+	 * \brief Replaces the vector with data from one sector.
+	 *
+	 * The data are swapped into this object, leaving \p v empty.
+	 *
+	 * \param[in,out] v Sector data transferred into this object.
+	 * \param[in] sector Basis-sector index for the data.
+	 * \param[in] someBasis Basis supplying partitions and quantum numbers.
+	 */
 	template <typename SomeBasisType>
 	void set(VectorType& v, SizeType sector, const SomeBasisType& someBasis)
 	{
@@ -200,6 +240,10 @@ public:
 		setIndex2Sector();
 	}
 
+	/*!
+	 * \brief Allocates zero-filled storage for every basis sector.
+	 * \param[in] someBasis Basis defining the sectors.
+	 */
 	template <typename SomeBasisType> void populateSectors(const SomeBasisType& someBasis)
 	{
 		SizeType np = someBasis.partition() - 1;
@@ -225,6 +269,12 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
+	/*!
+	 * \brief Allocates zero-filled sectors matching another vector's quantum numbers.
+	 *
+	 * \param[in] v Vector whose populated quantum numbers are replicated.
+	 * \param[in] someBasis Destination basis used to locate matching sectors.
+	 */
 	template <typename SomeBasisType>
 	void populateFromQns(const VectorWithOffsets& v, const SomeBasisType& someBasis)
 	{
@@ -257,6 +307,11 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
+	/*!
+	 * \brief Removes sectors whose stored elements are numerically zero.
+	 *
+	 * All basis sectors must be represented before this operation is called.
+	 */
 	void collapseSectors()
 	{
 		SizeType np = data_.size();
@@ -284,6 +339,11 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
+	/*!
+	 * \brief Replaces the data at a basis-sector index.
+	 * \param[in] v Replacement data.
+	 * \param[in] i0 Basis-sector index in the sector array.
+	 */
 	void setDataInSector(const VectorType& v, SizeType i0)
 	{
 		if (i0 >= data_.size())
@@ -292,20 +352,37 @@ public:
 		data_[i0] = v;
 	}
 
+	/*! \brief Returns the number of populated sectors. */
 	SizeType sectors() const { return nzMsAndQns_.size(); }
 
+	/*!
+	 * \brief Returns the basis-sector index of a populated sector.
+	 * \param[in] i Index in the compact list of populated sectors.
+	 */
 	SizeType sector(SizeType i) const
 	{
 		assert(i < nzMsAndQns_.size());
 		return nzMsAndQns_[i].first;
 	}
 
+	/*!
+	 * \brief Returns the quantum number of a populated sector.
+	 * \param[in] i Index in the compact list of populated sectors.
+	 */
 	const QnType& qn(SizeType i) const
 	{
 		assert(i < nzMsAndQns_.size());
 		return nzMsAndQns_[i].second;
 	}
 
+	/*!
+	 * \brief Builds the sector representation from a full vector.
+	 *
+	 * Only sectors containing nonzero elements are stored as populated.
+	 *
+	 * \param[in] v Full vector in basis order.
+	 * \param[in] someBasis Basis defining sector boundaries and quantum numbers.
+	 */
 	template <typename SomeBasisType>
 	void fromFull(const VectorType& v, const SomeBasisType& someBasis)
 	{
@@ -334,6 +411,11 @@ public:
 		setIndex2Sector();
 	}
 
+	/*!
+	 * \brief Copies the data stored at a basis-sector index.
+	 * \param[out] v Receives the sector data.
+	 * \param[in] i Basis-sector index.
+	 */
 	void extract(VectorType& v, SizeType i) const
 	{
 		if (i >= data_.size())
@@ -342,8 +424,13 @@ public:
 		v = data_[i];
 	}
 
+	/*! \brief Returns the size of the corresponding full vector. */
 	SizeType size() const { return size_; }
 
+	/*!
+	 * \brief Returns the number of stored elements at a basis-sector index.
+	 * \param[in] i Basis-sector index.
+	 */
 	SizeType effectiveSize(SizeType i) const
 	{
 		if (i >= data_.size())
@@ -352,6 +439,10 @@ public:
 		return data_[i].size();
 	}
 
+	/*!
+	 * \brief Returns a sector's starting position in the full vector.
+	 * \param[in] i Basis-sector index.
+	 */
 	SizeType offset(SizeType i) const
 	{
 		if (i >= offsets_.size())
@@ -359,6 +450,11 @@ public:
 		return offsets_[i];
 	}
 
+	/*!
+	 * \brief Returns a const reference to an element using sector-local indices.
+	 * \param[in] i Basis-sector index.
+	 * \param[in] j Element index within the sector.
+	 */
 	const ComplexOrRealType& fastAccess(SizeType i, SizeType j) const
 	{
 		assert(i < data_.size());
@@ -366,6 +462,11 @@ public:
 		return data_[i][j];
 	}
 
+	/*!
+	 * \brief Returns a mutable reference to an element using sector-local indices.
+	 * \param[in] i Basis-sector index.
+	 * \param[in] j Element index within the sector.
+	 */
 	ComplexOrRealType& fastAccess(SizeType i, SizeType j)
 	{
 		assert(i < data_.size());
@@ -373,6 +474,12 @@ public:
 		return data_[i][j];
 	}
 
+	/*!
+	 * \brief Returns an element using its full-vector index.
+	 *
+	 * Returns a reference to zero when the index belongs to an unpopulated sector.
+	 * \param[in] i Full-vector index.
+	 */
 	const ComplexOrRealType& slowAccess(SizeType i) const
 	{
 		assert(i < index2Sector_.size());
@@ -382,6 +489,10 @@ public:
 		return data_[j][i - offsets_[j]];
 	}
 
+	/*!
+	 * \brief Returns a mutable element reference using its full-vector index.
+	 * \param[in] i Full-vector index.
+	 */
 	ComplexOrRealType& slowAccess(SizeType i)
 	{
 		int j = index2Sector_[i];
@@ -396,6 +507,10 @@ public:
 		return data_[j][i - offsets_[j]];
 	}
 
+	/*!
+	 * \brief Copies populated sector data into a full sparse-vector representation.
+	 * \param[out] sv Destination sparse vector, resized to size().
+	 */
 	template <typename SparseVectorType> void toSparse(SparseVectorType& sv) const
 	{
 		sv.resize(size_);
@@ -407,6 +522,11 @@ public:
 		}
 	}
 
+	/*!
+	 * \brief Reads the vector from hierarchical storage.
+	 * \param[in,out] io Input object.
+	 * \param[in] label Storage path containing the vector.
+	 */
 	template <typename SomeInputType> void read(SomeInputType& io, PsimagLite::String label)
 	{
 		io.read(size_, label + "/size_");
@@ -439,6 +559,11 @@ public:
 		}
 	}
 
+	/*!
+	 * \brief Writes the vector to hierarchical storage.
+	 * \param[in,out] io Output object.
+	 * \param[in] label Storage path for the vector.
+	 */
 	template <typename SomeIoOutputType>
 	void write(SomeIoOutputType& io, const PsimagLite::String& label) const
 	{
@@ -453,6 +578,12 @@ public:
 	// We don't have a partitioned basis because we don't
 	// have the superblock basis at this point
 	// Therefore, partitioning is bogus here
+	/*!
+	 * \brief Loads a legacy text representation containing populated sectors.
+	 * \param[in,out] io Input object.
+	 * \param[in] label Label advanced to before reading.
+	 * \param[in] counter Occurrence of \p label to load.
+	 */
 	template <typename IoInputter>
 	void loadOneSector(IoInputter& io, const PsimagLite::String& label, SizeType counter = 0)
 	{
@@ -493,6 +624,11 @@ public:
 		setIndex2Sector();
 	}
 
+	/*!
+	 * \brief Scales every populated sector in place.
+	 * \param[in] value Scalar multiplier.
+	 * \return This vector after scaling.
+	 */
 	VectorWithOffsets& operator*=(const ComplexOrRealType& value)
 	{
 		for (SizeType ii = 0; ii < nzMsAndQns_.size(); ++ii) {
@@ -504,6 +640,11 @@ public:
 		return *this;
 	}
 
+	/*!
+	 * \brief Adds another vector's populated sector data in place.
+	 * \param[in] v Vector to add.
+	 * \return This vector after addition.
+	 */
 	VectorWithOffsets operator+=(const VectorWithOffsets& v)
 	{
 		if (nzMsAndQns_.size() == 0) {
@@ -525,14 +666,24 @@ public:
 		return *this;
 	}
 
+	/*!
+	 * \brief Maps a full-vector index to its basis-sector index.
+	 * \param[in] i Full-vector index.
+	 * \return Basis-sector index, or -1 for an unpopulated sector.
+	 */
 	int index2Sector(SizeType i) const
 	{
 		assert(i < index2Sector_.size());
 		return index2Sector_[i];
 	}
 
+	/*! \brief Returns the serialization name for this vector type. */
 	static PsimagLite::String name() { return "vectorwithoffsets"; }
 
+	/*!
+	 * \brief Computes the Euclidean norm across all populated sectors.
+	 * \param[in] v Vector to measure.
+	 */
 	friend RealType norm(const VectorWithOffsets& v)
 	{
 		RealType sum = 0;
@@ -546,6 +697,10 @@ public:
 		return sqrt(sum);
 	}
 
+	/*!
+	 * \brief Normalizes a vector in place.
+	 * \param[in,out] v Vector to normalize.
+	 */
 	friend void normalize(VectorWithOffsets& v)
 	{
 		RealType norma = norm(v);
@@ -561,6 +716,11 @@ public:
 				v.data_[i][j] /= norma;
 	}
 
+	/*!
+	 * \brief Computes the inner product over sectors populated in both vectors.
+	 * \param[in] v1 Left vector.
+	 * \param[in] v2 Right vector.
+	 */
 	friend ComplexOrRealType operator*(const VectorWithOffsets& v1, const VectorWithOffsets& v2)
 	{
 		ComplexOrRealType sum = 0;
@@ -579,6 +739,11 @@ public:
 		return sum;
 	}
 
+	/*!
+	 * \brief Returns a scaled copy of a vector.
+	 * \param[in] value Scalar multiplier.
+	 * \param[in] v Vector to scale.
+	 */
 	friend VectorWithOffsets operator*(const ComplexOrRealType& value,
 	                                   const VectorWithOffsets& v)
 	{
@@ -593,6 +758,11 @@ public:
 		return w;
 	}
 
+	/*!
+	 * \brief Returns the sum of vectors with matching populated sectors.
+	 * \param[in] v1 Left vector.
+	 * \param[in] v2 Right vector.
+	 */
 	friend VectorWithOffsets operator+(const VectorWithOffsets& v1, const VectorWithOffsets& v2)
 	{
 		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";

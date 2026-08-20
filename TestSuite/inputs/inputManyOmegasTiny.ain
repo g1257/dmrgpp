@@ -1,0 +1,47 @@
+##Ainur1.0
+TotalNumberOfSites=4;
+NumberOfTerms=2;
+
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1];
+
+Model="Heisenberg";
+HeisenbergTwiceS=1;
+
+SolverOptions="twositedmrg,CorrectionVectorTargeting,restart";
+RestartFilename="tinyGs";
+Version="version";
+InfiniteLoopKeptStates=20;
+FiniteLoops=[[-2, 20, 2], [2, 20, 2]];
+TargetSzPlusConst=2;
+
+CorrectionA=0;
+LanczosEps=1e-7;
+TridiagonalEps=1e-7;
+TruncationTolerance=1e-7;
+DynamicDmrgType=0;
+TSPSites=[2];
+TSPLoops=[0];
+TSPProductOrSum=sum;
+CorrectionVectorFreqType=Real;
+
+CorrectionVectorEta=0.1;
+CorrectionVectorAlgorithm=Krylov;
+Orbitals=1;
+GsWeight=0.1;
+
+string TSPOp0:TSPOperator=expression;
+string TSPOp0:OperatorExpression=sminus;
+
+string Observable="splus";
+real OmegaBegin=0.1;
+real OmegaStep=0.2;
+integer OmegaTotal=2;
+integer OmegaOffset=0;

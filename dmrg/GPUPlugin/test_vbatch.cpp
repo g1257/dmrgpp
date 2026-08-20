@@ -1,4 +1,4 @@
-#include "DMRGConfig.h"
+#include "GPUPluginConfig.h"
 #include "analysis.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
@@ -116,10 +116,12 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 		fflush(stdout);
 	}
 
-	std::vector<FpType>      Abatch_;
-	std::vector<FpType>      Bbatch_;
-	FpType**                 pAbatch_ = NULL;
-	FpType**                 pBbatch_ = NULL;
+	std::vector<FpType> Abatch_;
+	std::vector<FpType> Bbatch_;
+	// Determine Kokkos scalar type
+	using KokkosScalar                = PsimagLite::KokkosType<FpType>::type;
+	KokkosScalar**           pAbatch_ = nullptr;
+	KokkosScalar**           pBbatch_ = nullptr;
 	std::vector<IntegerType> ld_pAbatch_(npatches, 0);
 	std::vector<IntegerType> ld_pBbatch_(npatches, 0);
 
@@ -226,8 +228,6 @@ void test_vbatch(SizeType noperator, IntegerType left_size, IntegerType max_keep
 		       (double)total_memory_in_nbytes / giga);
 	}
 
-	// Determine Kokkos scalar type
-	using KokkosScalar = PsimagLite::KokkosType<FpType>::type;
 	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> X_("X_", xy_size);
 	Kokkos::View<KokkosScalar*, Kokkos::SharedSpace> Y_("Y_", xy_size);
 

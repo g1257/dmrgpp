@@ -22,7 +22,7 @@ list(APPEND CMAKE_MESSAGE_INDENT "[Kokkos] ")
 FetchContent_Declare(
   Kokkos
   GIT_REPOSITORY https://github.com/kokkos/kokkos
-  GIT_TAG 5.1.1
+  GIT_TAG 5.2.0
   SYSTEM FIND_PACKAGE_ARGS 5.1 NAMES Kokkos)
 FetchContent_MakeAvailable(Kokkos)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
@@ -31,9 +31,29 @@ list(APPEND CMAKE_MESSAGE_INDENT "[KokkosKernels] ")
 FetchContent_Declare(
   KokkosKernels
   GIT_REPOSITORY https://github.com/kokkos/kokkos-kernels
-  GIT_TAG 5.1.1
+  GIT_TAG 5.2.0
   SYSTEM FIND_PACKAGE_ARGS 5.1 NAMES KokkosKernels)
+# Since DRMGPP requires BLAS and LAPACK, we should also make sure KokkosKernels uses these as TPLs
+set(KokkosKernels_ENABLE_TPL_BLAS
+    ON
+    CACHE BOOL "Whether to enable the BLAS TPL" FORCE)
+set(KokkosKernels_ENABLE_TPL_LAPACK
+    ON
+    CACHE BOOL "Whether to enable the LAPACK TPL" FORCE)
 FetchContent_MakeAvailable(KokkosKernels)
+if(NOT KokkosKernels_POPULATED)
+  unset(KokkosKernels_ENABLE_TPL_BLAS CACHE)
+  unset(KokkosKernels_ENABLE_TPL_LAPACK CACHE)
+  # Past version 5.2, KokkosKernels exports its TPLs as non-CACHE variables
+  if(KokkosKernels_VERSION VERSION_GREATER_EQUAL 5.2.99)
+    if(NOT KokkosKernels_ENABLE_TPL_BLAS)
+      message(FATAL_ERROR "KokkosKernels must be configured with BLAS support!")
+    endif()
+    if(NOT KokkosKernels_ENABLE_TPL_LAPACK)
+      message(FATAL_ERROR "KokkosKernels must be configured with LAPACK support!")
+    endif()
+  endif()
+endif()
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 target_link_libraries(psimaglite PUBLIC Kokkos::kokkoskernels Kokkos::kokkos)
@@ -47,20 +67,18 @@ target_link_libraries(psimaglite PUBLIC loki)
 
 add_library(psimaglite::psimaglite ALIAS psimaglite)
 
-# find_package(MPI COMPONENTS CXX)
-if(MPI_FOUND)
-  target_compile_definitions(psimaglite PUBLIC USE_MPI)
+if(DMRGPP_USE_MPI)
+  target_compile_definitions(psimaglite PUBLIC DMRGPP_USE_MPI)
   target_link_libraries(psimaglite PUBLIC MPI::MPI_CXX)
-
-  # Prefer HDF5 parallel when MPI is enabled
-  set(HDF5_PREFER_PARALLEL ON)
 endif()
 
+# Prefer HDF5 parallel when MPI is enabled.
+set(HDF5_PREFER_PARALLEL ${DMRGPP_USE_MPI})
 find_package(
   HDF5 REQUIRED
   COMPONENTS CXX HL
   MODULE)
-if(MPI_FOUND AND NOT HDF5_IS_PARALLEL)
+if(DMRGPP_USE_MPI AND NOT HDF5_IS_PARALLEL)
   message(WARNING "HDF5 that was found \(${HDF5_DIR}\) is not parallel")
 endif()
 target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
