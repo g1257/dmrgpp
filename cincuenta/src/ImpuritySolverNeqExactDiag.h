@@ -73,14 +73,12 @@ public:
 	    , nup_(0)
 	    , ndown_(0)
 	    , nT_(params.nT)
-	    , nTau_(params.eqParams.nMatsubaras)
-	    , dtau_(params.eqParams.ficticiousBeta
-	            / static_cast<RealType>(params.eqParams.nMatsubaras))
+	    , nTau_(params.grid.nMatsubaras)
+	    , dtau_(params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	    , gimp_(params.nT,
-	            params.eqParams.nMatsubaras,
+	            params.grid.nMatsubaras,
 	            params.dt,
-	            params.eqParams.ficticiousBeta
-	                / static_cast<RealType>(params.eqParams.nMatsubaras))
+	            params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	    , E0_pre_(0)
 	{
 		io.readline(nup_, "TargetElectronsUp=");
@@ -362,6 +360,19 @@ private:
 			    "(the atomic limit here is a hopping quench carried by the "
 			    "bath, not an interaction quench); got uInitial="
 			    + ttos(params_.uInitial) + " uFinal=" + ttos(params_.uFinal) + "\n");
+
+		// This closed form is pinned at the particle-hole-symmetric pole
+		// (see G^M(iw_k) below), unconditionally -- there is no non-symmetric
+		// atomic-limit path to opt out of via a fit option. ChemicalPotential=
+		// must therefore match HubbardU/2 exactly (HubbardU, not HubbardUFinal:
+		// requiring them equal above is only what this solver currently
+		// supports, not an essential feature of the atomic limit itself).
+		const RealType muExpected = RealType(0.5) * params_.uInitial;
+		if (std::abs(params_.grid.mu - muExpected) > 1e-10)
+			err("ImpuritySolverNeqExactDiag (NeqAtomicLimit): requires "
+			    "ChemicalPotential=HubbardU/2 ("
+			    + ttos(muExpected) + "); got ChemicalPotential=" + ttos(params_.grid.mu)
+			    + "\n");
 
 		atomicLimit_ = true;
 		uAtomic_     = params_.uFinal;
@@ -695,7 +706,7 @@ private:
 		const SizeType dimNm1pre = energiesNm1_pre_.size();
 		const SizeType nTauSteps = nTau_ + 1;
 		const SizeType nFreqs    = nTau_;
-		const RealType beta      = params_.eqParams.ficticiousBeta;
+		const RealType beta      = params_.grid.ficticiousBeta;
 
 		for (SizeType j = 0; j < nTauSteps; ++j) {
 			const RealType tau = j * dtau_;

@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant DmftSolver
+    participant LatticeGf
+    participant Fit
+    participant ImpuritySolver
+    participant ModelParams
+    participant AndersonFunction
+
+    DmftSolver->>DmftSolver: selfConsistencyLoop()
+    loop until convergence or maxIter
+        DmftSolver->>LatticeGf: update()
+        LatticeGf->>LatticeGf: compute lattice G(iωₙ) from Σ
+        LatticeGf->>LatticeGf: compute Γ(iωₙ) = iωₙ - 1/G - Σ
+        LatticeGf-->>DmftSolver: return Γ
+
+        DmftSolver->>Fit: fit(Γ)
+        Fit->>AndersonFunction: define objective f(V,ε) = Σ|Δ(Γ)−Δ(Anderson)|²
+        Fit->>Fit: minimize f via conjugate gradient/simplex
+        Fit-->>DmftSolver: return optimized bathParams = [V, ε]
+
+        DmftSolver->>ModelParams: ModelParams(bathParams, io)
+        ModelParams-->>DmftSolver: unpack to hoppings, potentialV
+
+        DmftSolver->>ImpuritySolver: solve(bathParams)
+        ImpuritySolver->>ImpuritySolver: build Hamiltonian (ModelParams)
+        ImpuritySolver->>ImpuritySolver: diagonalize (LanczosSolver)
+        ImpuritySolver->>ImpuritySolver: compute G_imp(iωₙ) via resolvent
+        ImpuritySolver-->>DmftSolver: return gimp
+
+        DmftSolver->>DmftSolver: computeNewSelfEnergy(bathParams)
+        DmftSolver->>AndersonFunction: evaluate Δ(bathParams, iωₙ)
+        DmftSolver->>DmftSolver: Σ_new = iωₙ - Δ - 1/G_imp
+        DmftSolver-->>DmftSolver: compute error = ||Σ_new - Σ_old||²
+    end

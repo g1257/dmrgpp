@@ -16,14 +16,16 @@ namespace Dmft {
  * Non-equilibrium Weiss field G_0(t,t') for the Bethe lattice.
  *
  * Self-consistency (Bethe lattice):
- *   Δ(t,t') = t*² G_imp(t,t')    where t* = D = W/2 (half-bandwidth)
+ *   Δ(t,t') = v² G_imp(t,t')    where v is the Bethe-lattice hopping
+ *   (Gramsch, Balzer, Eckstein, Kollar, PRB 88, 235106 (2013) Eq. (14);
+ *   v = D/2 = W/4, D the half-bandwidth)
  *
  * Dyson equation (Volterra integro-differential):
  *   [i d/dt - μ] G_0(t,t') = δ_C(t,t') + (Δ ⊛ G_0)(t,t')
  *
  * Usage per time step n:
  *   1. Call initialize(gimp) once after the equilibrium run (sets t=0 BCs).
- *   2. updateDelta(n, gimp) — copy t*² G_imp → Δ for the n-th row.
+ *   2. updateDelta(n, gimp) — copy v² G_imp → Δ for the n-th row.
  *   3. advance(n) — solve the Volterra equation for G_0(n, j), j ≤ n.
  */
 template <typename ComplexOrRealType> class NeqLatticeGf {
@@ -40,34 +42,31 @@ public:
 
 	explicit NeqLatticeGf(const ParamsNeqType& params)
 	    : params_(params)
-	    , nTau_(params.eqParams.nMatsubaras)
-	    , dtau_(params.eqParams.ficticiousBeta
-	            / static_cast<RealType>(params.eqParams.nMatsubaras))
-	    , tStar_(params.neqAtomicLimit ? RealType(0) : parseTstar(params.eqParams.latticeGf))
-	    , tStarSq_(tStar_ * tStar_)
-	    , tStarFinal_(params.bandwidthFinal > RealType(0)
-	                      ? RealType(0.25) * params.bandwidthFinal
-	                      : tStar_)
+	    , nTau_(params.grid.nMatsubaras)
+	    , dtau_(params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
+	    , vHop_(params.grid.v_hop)
+	    , vHopSq_(vHop_ * vHop_)
+	    , vHopFinal_(params.bandwidthFinal > RealType(0)
+	                     ? RealType(0.25) * params.bandwidthFinal
+	                     : vHop_)
 	    , g0_(params.nT,
-	          params.eqParams.nMatsubaras,
+	          params.grid.nMatsubaras,
 	          params.dt,
-	          params.eqParams.ficticiousBeta
-	              / static_cast<RealType>(params.eqParams.nMatsubaras))
+	          params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	    , delta_(params.nT,
-	             params.eqParams.nMatsubaras,
+	             params.grid.nMatsubaras,
 	             params.dt,
-	             params.eqParams.ficticiousBeta
-	                 / static_cast<RealType>(params.eqParams.nMatsubaras))
-	    , g0_der_(params.nT, params.eqParams.nMatsubaras)
-	    , g0_der_new_(params.nT, params.eqParams.nMatsubaras)
-	    , h_(params.nT + 1, ComplexType(params.eqParams.mu, 0))
+	             params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
+	    , g0_der_(params.nT, params.grid.nMatsubaras)
+	    , g0_der_new_(params.nT, params.grid.nMatsubaras)
+	    , h_(params.nT + 1, ComplexType(params.grid.mu, 0))
 	{ }
 
 	/*!
 	 * \brief initialize
 	 * Set t=0 boundary conditions and Matsubara components from equilibrium G_imp.
 	 *
-	 * G_0^M(iω_k) = 1 / (iω_k + μ - t*² G_imp^M(iω_k))
+	 * G_0^M(iω_k) = 1 / (iω_k + μ - v² G_imp^M(iω_k))
 	 * G_0^M(τ_j) via inverse Matsubara sum
 	 * G_0^{Left}(0,j) = -i G_0^M(β - τ_j)
 	 * G_0^R(0,0) = -i
@@ -78,13 +77,13 @@ public:
 	void initialize(const KBType& gimp)
 	{
 		const int         Ntau = static_cast<int>(nTau_);
-		const RealType    beta = params_.eqParams.ficticiousBeta;
-		const RealType    mu   = params_.eqParams.mu;
+		const RealType    beta = params_.grid.ficticiousBeta;
+		const RealType    mu   = params_.grid.mu;
 		const ComplexType I(0, 1);
 
 		// Δ^M and G_0^M in Matsubara frequency
 		for (SizeType k = 0; k < nTau_; ++k)
-			delta_.matsubara_w[k] = tStarSq_ * gimp.matsubara_w[k];
+			delta_.matsubara_w[k] = vHopSq_ * gimp.matsubara_w[k];
 
 		for (SizeType k = 0; k < nTau_; ++k) {
 			const RealType omk = matsubaraFreq(k, nTau_, beta);
@@ -105,29 +104,29 @@ public:
 			g0_.matsubara_t[j] = gm / beta;
 		}
 
-		// Δ^M(τ_j) = t*² G_imp^M(τ_j)
+		// Δ^M(τ_j) = v² G_imp^M(τ_j)
 		for (SizeType j = 0; j <= nTau_; ++j)
-			delta_.matsubara_t[j] = tStarSq_ * gimp.matsubara_t[j];
+			delta_.matsubara_t[j] = vHopSq_ * gimp.matsubara_t[j];
 
 		// t=0 imaginary-time slice
 		// G_0^{Left}(0,j) = -i G_0^M(β - τ_j) = -i matsubara_t[nTau - j]
 		for (int j = 0; j <= Ntau; ++j)
 			g0_.left_mixing(0, j) = -I * g0_.matsubara_t[Ntau - j];
 
-		// Δ^{Left}(0,j) = t*² G_imp^{Left}(0,j)
+		// Δ^{Left}(0,j) = v² G_imp^{Left}(0,j)
 		for (int j = 0; j <= Ntau; ++j)
-			delta_.left_mixing(0, j) = tStarSq_ * gimp.left_mixing(0, j);
+			delta_.left_mixing(0, j) = vHopSq_ * gimp.left_mixing(0, j);
 
 		// t=0 retarded boundary condition
 		g0_.retarded(0, 0)    = ComplexType(0, -1);
-		delta_.retarded(0, 0) = tStarSq_ * gimp.retarded(0, 0);
+		delta_.retarded(0, 0) = vHopSq_ * gimp.retarded(0, 0);
 
 		// t=0 lesser: G_0^<(0,0) = i * n  where n is the equilibrium occupancy.
 		// The Matsubara sum at tau=beta suffers high-frequency tail truncation and
 		// gives the wrong value; use the positive-frequency sum instead, which
 		// converges correctly: n = 1/2 + (1/beta) Re[sum_{omega>0} G_0^M(i*omega)].
 		{
-			const RealType betaVal = params_.eqParams.ficticiousBeta;
+			const RealType betaVal = params_.grid.ficticiousBeta;
 			const SizeType halfN   = nTau_ / 2; // first positive-frequency index
 			ComplexType    posSum  = 0;
 			for (SizeType k = halfN; k < nTau_; ++k)
@@ -137,7 +136,7 @@ public:
 			g0_.left_mixing(0, 0)
 			    = g0_.lesser(0, 0); // left_mixing(0, tau=0) = lesser(0,0)
 		}
-		delta_.lesser(0, 0) = tStarSq_ * gimp.lesser(0, 0);
+		delta_.lesser(0, 0) = vHopSq_ * gimp.lesser(0, 0);
 
 		// Initial RK derivatives d/dt G_0(0, ·) needed for the n=1 predictor
 		computeDerivativesAt0();
@@ -145,8 +144,8 @@ public:
 
 	/*!
 	 * \brief updateDelta
-	 * Compute Delta(t_n, t_j) = t*(t_n) t*(t_j) G_imp for all retarded, lesser,
-	 * and left-mixing components at row n.  t*(t) follows the ramp shape
+	 * Compute Delta(t_n, t_j) = v(t_n) v(t_j) G_imp for all retarded, lesser,
+	 * and left-mixing components at row n.  v(t) follows the ramp shape
 	 * specified by params_.quenchShape / params_.quenchDuration.
 	 *
 	 * \param[in] n    Time row index.
@@ -154,16 +153,16 @@ public:
 	 */
 	void updateDelta(int n, const KBType& gimp)
 	{
-		const RealType tsn = tStarAt(n);
+		const RealType vn = vHopAt(n);
 		for (int j = 0; j <= n; ++j) {
-			const RealType tsj    = tStarAt(j);
-			delta_.retarded(n, j) = tsn * tsj * gimp.retarded(n, j);
-			delta_.lesser(n, j)   = tsn * tsj * gimp.lesser(n, j);
-			delta_.lesser(j, n)   = tsj * tsn * gimp.lesser(j, n);
+			const RealType vj     = vHopAt(j);
+			delta_.retarded(n, j) = vn * vj * gimp.retarded(n, j);
+			delta_.lesser(n, j)   = vn * vj * gimp.lesser(n, j);
+			delta_.lesser(j, n)   = vj * vn * gimp.lesser(j, n);
 		}
 		// Left-mixing: real-time hopping x imaginary-time (equilibrium) hopping.
 		for (SizeType j = 0; j <= nTau_; ++j)
-			delta_.left_mixing(n, j) = tsn * tStar_ * gimp.left_mixing(n, j);
+			delta_.left_mixing(n, j) = vn * vHop_ * gimp.left_mixing(n, j);
 	}
 
 	/*!
@@ -185,19 +184,19 @@ public:
 
 private:
 
-	// Evaluate t*(t_n = n*dt) according to the quench ramp shape.
+	// Evaluate v(t_n = n*dt) according to the quench ramp shape.
 	// "cosine" matches GBEK PRB 88, 235106 (recommended t_q=0.25).
 	// "tanh"   sigmoid centered at t_q/2 with characteristic width t_q/6.
-	// "step" (or quenchDuration=0): t*_i at n=0, t*_f for n>=1.
-	RealType tStarAt(int n) const
+	// "step" (or quenchDuration=0): v_i at n=0, v_f for n>=1.
+	RealType vHopAt(int n) const
 	{
 		const RealType tq = params_.quenchDuration;
 		if (tq <= RealType(0) || params_.quenchShape == "step")
-			return (n == 0) ? tStar_ : tStarFinal_;
+			return (n == 0) ? vHop_ : vHopFinal_;
 
 		const RealType t = n * params_.dt;
 		if (t >= tq)
-			return tStarFinal_;
+			return vHopFinal_;
 
 		RealType shape;
 		if (params_.quenchShape == "tanh") {
@@ -206,26 +205,7 @@ private:
 		} else { // "cosine" (default for any unrecognised value)
 			shape = RealType(0.5) * (RealType(1) - std::cos(M_PI * t / tq));
 		}
-		return tStar_ + (tStarFinal_ - tStar_) * shape;
-	}
-
-	/*!
-	 * \brief parseTstar
-	 * Extract the Bethe lattice hopping t* = D/2 = W/4 from "energy,semicircular,W".
-	 * D = W/2 is the half-bandwidth; t* = D/2 satisfies <epsilon^2> = t*^2
-	 * for the semicircular DOS, which is the coefficient in Delta = t*^2 G_latt.
-	 *
-	 * \param[in] latticeGf Lattice GF descriptor string, e.g. "energy,semicircular,W".
-	 * \return t* = W/4.
-	 */
-	static RealType parseTstar(const PsimagLite::String& latticeGf)
-	{
-		VectorStringType tokens;
-		PsimagLite::split(tokens, latticeGf, ",");
-		if (tokens.size() < 3)
-			err("NeqLatticeGf: LatticeGf must be 'energy,semicircular,W'; got: "
-			    + latticeGf + "\n");
-		return RealType(0.25) * PsimagLite::atof(tokens[2]); // t* = W/4
+		return vHop_ + (vHopFinal_ - vHop_) * shape;
 	}
 
 	/*!
@@ -280,7 +260,7 @@ private:
 	{
 		const ComplexType I(0, 1);
 		const int         Ntau = static_cast<int>(nTau_);
-		const RealType    mu   = params_.eqParams.mu;
+		const RealType    mu   = params_.grid.mu;
 		VectorComplexType tmp(Ntau + 1);
 
 		// Retarded diagonal
@@ -307,9 +287,9 @@ private:
 	const ParamsNeqType& params_;
 	SizeType             nTau_;
 	RealType             dtau_;
-	RealType             tStar_;
-	RealType             tStarSq_;
-	RealType             tStarFinal_; ///< t*_f (post-quench); equals tStar_ if BandwidthFinal=0
+	RealType             vHop_;
+	RealType             vHopSq_;
+	RealType             vHopFinal_; ///< v_f (post-quench); equals vHop_ if BandwidthFinal=0
 	KBType               g0_;
 	KBType               delta_;
 	KBDerivType          g0_der_;

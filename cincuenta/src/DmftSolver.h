@@ -49,6 +49,24 @@ public:
 			impuritySolver_ = new ImpuritySolverExactDiagType(params, app, io_);
 		else
 			err("Unknown impurity solver " + params.impuritySolver + "\n");
+
+		// FitOptions="particleholesymmetric" makes AndersonFunction fit mirror-image
+		// bath pairs (epsilon, -epsilon) about ChemicalPotential=; that bath is only
+		// the correct particle-hole-symmetric one if ChemicalPotential also sits at
+		// the impurity's actual particle-hole-symmetric point, which the solved
+		// impurity model fixes at U/2 (see ModelParams.h). A ChemicalPotential=
+		// away from U/2 would fit a symmetric-looking bath to the wrong target.
+		if (FitType::computeOptions(params.fit_options)
+		    == FitType::Options::PARTICLE_HOLE_SYMM) {
+			RealType U = 0;
+			io.readline(U, "HubbardU=");
+			const RealType muExpected = RealType(0.5) * U;
+			if (std::abs(params.mu - muExpected) > 1e-10)
+				err("DmftSolver: FitOptions=\"particleholesymmetric\" requires "
+				    "ChemicalPotential=HubbardU/2 ("
+				    + ttos(muExpected)
+				    + "); got ChemicalPotential=" + ttos(params.mu) + "\n");
+		}
 	}
 
 	~DmftSolver()

@@ -23,7 +23,7 @@ using Acc           = Dmft::GBEKTestAccessor;
 // the neq solver is GBEK.
 static const std::string kConfig = "##Ainur1.0\n\n"
                                    "FicticiousBeta=10;\n"
-                                   "ChemicalPotential=0.;\n"
+                                   "ChemicalPotential=1.;\n"
                                    "Matsubaras=20;\n"
                                    "LatticeGf=\"energy,semicircular,4\";\n"
                                    "NumberOfBathPoints=1;\n"
@@ -58,7 +58,6 @@ static const std::string kConfig = "##Ainur1.0\n\n"
                                    "NtNeq=2;\n"
                                    "NeqDmftIter=1;\n"
                                    "NeqDmftTolerance=1e-4;\n"
-                                   "NeqSolver=\"gbek\";\n"
                                    "NeqBathRank=1;\n"
                                    "BandwidthFinal=3.;\n";
 
@@ -409,7 +408,7 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 	static const std::string kAtomicConfig
 	    = "##Ainur1.0\n\n"
 	      "FicticiousBeta=10;\n"
-	      "ChemicalPotential=0.;\n"
+	      "ChemicalPotential=1.;\n"
 	      "Matsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\n"
 	      "NumberOfBathPoints=1;\n"
@@ -444,7 +443,6 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 	      "NtNeq=4;\n"
 	      "NeqDmftIter=1;\n"
 	      "NeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\n"
 	      "NeqBathRank=2;\n"
 	      "BandwidthFinal=4.;\n";
 
@@ -457,10 +455,9 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 
 	using KBType = SolverType::KBType;
 	KBType slice(params.nT,
-	             params.eqParams.nMatsubaras,
+	             params.grid.nMatsubaras,
 	             params.dt,
-	             params.eqParams.ficticiousBeta
-	                 / static_cast<RealType>(params.eqParams.nMatsubaras));
+	             params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras));
 
 	for (int n = 0; n <= static_cast<int>(params.nT); ++n) {
 		solver.computeGimp(slice, n);
@@ -500,7 +497,7 @@ TEST_CASE("Hamiltonian eigenvalue spectrum matches an independent Python "
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
 	      "FicticiousBeta=10;\n"
-	      "ChemicalPotential=0.;\n"
+	      "ChemicalPotential=1.;\n"
 	      "Matsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\n"
 	      "NumberOfBathPoints=1;\n"
@@ -535,7 +532,6 @@ TEST_CASE("Hamiltonian eigenvalue spectrum matches an independent Python "
 	      "NtNeq=2;\n"
 	      "NeqDmftIter=1;\n"
 	      "NeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\n"
 	      "NeqBathRank=1;\n"
 	      "BandwidthFinal=4.;\n";
 
@@ -591,7 +587,7 @@ TEST_CASE("Time propagation matches an independent Python reconstruction "
 {
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
-	      "FicticiousBeta=10;\nChemicalPotential=0.;\nMatsubaras=20;\n"
+	      "FicticiousBeta=10;\nChemicalPotential=1.;\nMatsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\nNumberOfBathPoints=1;\n"
 	      "DmftNumberOfIterations=1;\nDmftTolerance=1e-3;\n"
 	      "ImpuritySolver=\"exactdiag\";\nFitOptions=particleholesymmetric;\n"
@@ -606,7 +602,7 @@ TEST_CASE("Time propagation matches an independent Python reconstruction "
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
 	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\nNeqBathRank=1;\nBandwidthFinal=4.;\n";
+	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
 	InputNgType::Readable  io(ioW);
@@ -699,7 +695,7 @@ TEST_CASE("G^< two-time construction matches an independent Python "
 {
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
-	      "FicticiousBeta=10;\nChemicalPotential=0.;\nMatsubaras=20;\n"
+	      "FicticiousBeta=10;\nChemicalPotential=1.;\nMatsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\nNumberOfBathPoints=1;\n"
 	      "DmftNumberOfIterations=1;\nDmftTolerance=1e-3;\n"
 	      "ImpuritySolver=\"exactdiag\";\nFitOptions=particleholesymmetric;\n"
@@ -714,7 +710,7 @@ TEST_CASE("G^< two-time construction matches an independent Python "
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
 	      "TmaxNeq=0.3;\nNtNeq=6;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\nNeqBathRank=1;\nBandwidthFinal=4.;\n";
+	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
 	InputNgType::Readable  io(ioW);
@@ -874,7 +870,7 @@ TEST_CASE("docc/Ekin are exactly zero when the second-bath coupling is never "
 {
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
-	      "FicticiousBeta=10;\nChemicalPotential=0.;\nMatsubaras=20;\n"
+	      "FicticiousBeta=10;\nChemicalPotential=1.;\nMatsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\nNumberOfBathPoints=1;\n"
 	      "DmftNumberOfIterations=1;\nDmftTolerance=1e-3;\n"
 	      "ImpuritySolver=\"exactdiag\";\nFitOptions=particleholesymmetric;\n"
@@ -889,7 +885,7 @@ TEST_CASE("docc/Ekin are exactly zero when the second-bath coupling is never "
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
 	      "TmaxNeq=0.5;\nNtNeq=10;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\nNeqBathRank=1;\nBandwidthFinal=4.;\n";
+	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
 	InputNgType::Readable  io(ioW);
@@ -946,7 +942,7 @@ TEST_CASE("Etot(t) stays roughly close to its analytic -U/4 value shortly "
 {
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
-	      "FicticiousBeta=10;\nChemicalPotential=0.;\nMatsubaras=20;\n"
+	      "FicticiousBeta=10;\nChemicalPotential=1.;\nMatsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\nNumberOfBathPoints=1;\n"
 	      "DmftNumberOfIterations=1;\nDmftTolerance=1e-3;\n"
 	      "ImpuritySolver=\"exactdiag\";\nFitOptions=particleholesymmetric;\n"
@@ -961,7 +957,7 @@ TEST_CASE("Etot(t) stays roughly close to its analytic -U/4 value shortly "
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
 	      "TmaxNeq=1.5;\nNtNeq=30;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\nNeqBathRank=1;\nBandwidthFinal=4.;\n";
+	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
 	InputNgType::Readable  io(ioW);
@@ -1032,7 +1028,7 @@ TEST_CASE("computeKineticEnergyGBEKSector matches an independent dense-matrix "
 {
 	static const std::string kConfig
 	    = "##Ainur1.0\n\n"
-	      "FicticiousBeta=10;\nChemicalPotential=0.;\nMatsubaras=20;\n"
+	      "FicticiousBeta=10;\nChemicalPotential=1.;\nMatsubaras=20;\n"
 	      "LatticeGf=\"energy,semicircular,4\";\nNumberOfBathPoints=1;\n"
 	      "DmftNumberOfIterations=1;\nDmftTolerance=1e-3;\n"
 	      "ImpuritySolver=\"exactdiag\";\nFitOptions=particleholesymmetric;\n"
@@ -1047,7 +1043,7 @@ TEST_CASE("computeKineticEnergyGBEKSector matches an independent dense-matrix "
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
 	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
-	      "NeqSolver=\"gbek\";\nNeqBathRank=1;\nBandwidthFinal=4.;\n";
+	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
 	InputNgType::Readable  io(ioW);

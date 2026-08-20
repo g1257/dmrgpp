@@ -74,10 +74,9 @@ public:
 	    , app_(app)
 	    , io_(io)
 	    , gimp_(params.nT,
-	            params.eqParams.nMatsubaras,
+	            params.grid.nMatsubaras,
 	            params.dt,
-	            params.eqParams.ficticiousBeta
-	                / static_cast<RealType>(params.eqParams.nMatsubaras))
+	            params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
 	{
 		io.readline(nup_, "TargetElectronsUp=");
 		io.readline(ndown_, "TargetElectronsDown=");
