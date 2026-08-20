@@ -27,8 +27,6 @@ mkdir -p "${build_dir}"
 cmake_options=(
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
-    -DKokkosKernels_ENABLE_TPL_BLAS=ON
-    -DKokkosKernels_ENABLE_TPL_LAPACK=ON
 )
 
 if [[ $(uname -s) != Darwin ]]; then
@@ -38,4 +36,4 @@ if [[ $(uname -s) != Darwin ]]; then
 fi
 
 cmake -S "${source_dir}" -B "${build_dir}" "${cmake_options[@]}"
-make -C "${build_dir}" -j "$(computeProcsForMake)"
+cmake --build "${build_dir}" -j "$(computeProcsForMake)"
