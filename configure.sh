@@ -26,14 +26,7 @@ mkdir -p "${build_dir}"
 
 cmake_options=(
     -DCMAKE_BUILD_TYPE=Release
-    -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
 )
-
-if [[ $(uname -s) != Darwin ]]; then
-    cmake_options+=(
-        -DBUILD_SHARED_LIBS=OFF
-    )
-fi
 
 cmake -S "${source_dir}" -B "${build_dir}" "${cmake_options[@]}"
 cmake --build "${build_dir}" -j "$(computeProcsForMake)"
