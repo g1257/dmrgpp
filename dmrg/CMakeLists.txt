@@ -150,7 +150,7 @@ add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 
 add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
-add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
+add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2_batchedgemm.cout)
 
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output4 input4 -15.9938 runForinput4.cout)

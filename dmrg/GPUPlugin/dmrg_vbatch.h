@@ -3,7 +3,10 @@
 
 #include "GPUPluginConfig.h"
 #include "dmrg_types.h"
+#include <Kokkos_Core.hpp>
+#include <PsimagLite/KokkosType.h>
 #include <PsimagLite/Vector.h>
+
 #include <cassert>
 
 double dmrg_get_wtime();
@@ -23,8 +26,6 @@ SizeType    index3(const SizeType& ipatch,
 void dmrg_init();
 
 void dmrg_finalize();
-
-template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size);
 
 void dmrg_memcpy(void* dest, const void* src, SizeType n);
 
@@ -86,31 +87,33 @@ void dmrg_Xsetmatrix(const IntegerType m,
                      const IntegerType lddb);
 
 template <typename T>
-void apply_Htarget_vbatch(SizeType       noperator,
-                          SizeType       npatches,
-                          VectorSizeType left_patch_start_,
-                          VectorSizeType right_patch_start_,
-                          VectorSizeType xy_patch_start_,
-                          std::vector<T> Abatch_,
-                          SizeType       ld_Abatch,
-                          std::vector<T> Bbatch_,
-                          SizeType       ld_Bbatch,
-                          T*             X_,
-                          T*             Y_);
+void apply_Htarget_vbatch(
+    SizeType       noperator,
+    SizeType       npatches,
+    VectorSizeType left_patch_start_,
+    VectorSizeType right_patch_start_,
+    VectorSizeType xy_patch_start_,
+    std::vector<T> Abatch_,
+    SizeType       ld_Abatch,
+    std::vector<T> Bbatch_,
+    SizeType       ld_Bbatch,
+    Kokkos::View<const typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace> X_,
+    Kokkos::View<typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace>       Y_);
 
 template <typename T>
-void apply_Htarget_sparse(SizeType                 noperator,
-                          SizeType                 npatches,
-                          VectorSizeType           left_patch_start_,
-                          VectorSizeType           right_patch_start_,
-                          VectorSizeType           xy_patch_start_,
-                          VectorSizeType           nC_,
-                          T**                      gAbatch_,
-                          const VectorIntegerType& ld_gAbatch,
-                          T**                      gBbatch_,
-                          const VectorIntegerType& ld_gBbatch,
-                          T*                       X_,
-                          T*                       Y_);
+void apply_Htarget_sparse(
+    SizeType                 noperator,
+    SizeType                 npatches,
+    VectorSizeType           left_patch_start_,
+    VectorSizeType           right_patch_start_,
+    VectorSizeType           xy_patch_start_,
+    VectorSizeType           nC_,
+    T**                      gAbatch_,
+    const VectorIntegerType& ld_gAbatch,
+    T**                      gBbatch_,
+    const VectorIntegerType& ld_gBbatch,
+    Kokkos::View<const typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace> X_,
+    Kokkos::View<typename PsimagLite::KokkosType<T>::type*, Kokkos::SharedSpace>       Y_);
 
 template <typename T>
 void dmrg_Xgemm_vbatch(char         ctransa,
@@ -119,9 +122,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
                        IntegerType* n_array,
                        IntegerType* k_array,
                        T            alpha,
-                       T**          a_array,
+                       const T**    a_array,
                        IntegerType* lda_array,
-                       T**          b_array,
+                       const T**    b_array,
                        IntegerType* ldb_array,
                        T            beta,
                        T**          c_array,
