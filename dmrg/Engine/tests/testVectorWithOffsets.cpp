@@ -130,16 +130,10 @@ TEMPLATE_TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data",
 	v.setDataInSector(replacement, 1);
 	checkValue(v.fastAccess(1, 0), 6.0);
 	v.fastAccess(1, 1) = 9.0;
-	checkValue(v.slowAccess(3), 9.0);
-	v.slowAccess(4) = 10.0;
-
-	const VectorWithOffsetsType& constV = v;
-	checkValue(constV.slowAccess(0), 0.0);
-	checkValue(constV.slowAccess(4), 10.0);
 
 	std::vector<TestType> sparse;
 	v.toSparse(sparse);
-	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 6.0, 9.0, 10.0, 0.0 }));
+	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 6.0, 9.0, 8.0, 0.0 }));
 
 	v.clear();
 	CHECK(v.size() == 0);

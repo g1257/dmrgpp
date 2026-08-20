@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // the non-zero structure to basis
 namespace Dmrg {
 
-<<<<<<< HEAD
 /*!
  * \brief Stores a vector as independently addressable symmetry-sector blocks.
  *
