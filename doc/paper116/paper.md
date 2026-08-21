@@ -38,7 +38,7 @@ affiliations:
    index: 2
    ror: 01e41cf67
 date: 13 August 2026
-bibliography: dmrgpp.bib
+bibliography: paper.bib
 
 # Optional fields heres
 ---
