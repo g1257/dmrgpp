@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 set -euo pipefail
 
@@ -24,9 +24,5 @@ build_dir="${source_dir}/build"
 
 mkdir -p "${build_dir}"
 
-cmake_options=(
-    -DCMAKE_BUILD_TYPE=Release
-)
-
-cmake -S "${source_dir}" -B "${build_dir}" "${cmake_options[@]}"
+cmake -S "${source_dir}" -B "${build_dir}" -DCMAKE_BUILD_TYPE=Release
 cmake --build "${build_dir}" -j "$(computeProcsForMake)"
