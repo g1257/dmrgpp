@@ -15,15 +15,15 @@ authors:
   - name: Daniel Arndt
     orcid: 0000-0001-8773-4901
     affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Damien Lebrun-Grandie
-    orcid: 0000-0003-1952-7219
-    affiliation: "1, 2"
   - name: Peter Doak
     orcid: 0000-0001-6039-9752
     affiliation: 1
   - name: Steven Hahn
     orcid: 0000-0002-2018-7904
     affiliation: 1
+  - name: Damien Lebrun-Grandie
+    orcid: 0000-0003-1952-7219
+    affiliation: "1, 2"
   - name: Thomas A. Maier
     orcid: 0000-0002-1424-9996
     affiliation: 1
