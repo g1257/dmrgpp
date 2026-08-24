@@ -199,6 +199,8 @@ add_test(NAME input72 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input72.ain) # energy 
 add_lowest_eigenvalue_check_test(output72 input72 -4.47214 runForinput72.cout)
 add_test(NAME input73 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input73.ain) # energy -4.47214
 add_lowest_eigenvalue_check_test(output73 input73 -4.47214 runForinput73.cout)
+add_test(NAME input74 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input74.ain) # energy -0.707712
+add_lowest_eigenvalue_check_test(output74 input74 -0.707712 runForinput74.cout)
 add_test(NAME input80 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input80.ain) # energy -7.37027
 add_lowest_eigenvalue_check_test(output80 input80 -7.37027 runForinput80.cout)
 add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain) # energy -9.51754
