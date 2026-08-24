@@ -576,7 +576,7 @@ struct ParametersDmrgSolver {
 		std::cout << "FiniteLoopLengths=[";
 
 		bool from_infinite = (numberOfSites < 5 && !isRestart);
-		if (lastSite == 1 && !from_infinite) {
+		if (lastSite == 1 && !from_infinite && !latticeIsOdd) {
 			lastSite = 0;
 		}
 
@@ -588,12 +588,7 @@ struct ParametersDmrgSolver {
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
 			if (lastSite >= 0) {
-
 				lastSite += length;
-
-				if (latticeIsOdd && lastSite == 1) {
-					lastSite = 0;
-				}
 			}
 
 			std::cout << length;
