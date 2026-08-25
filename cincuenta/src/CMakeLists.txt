@@ -37,6 +37,31 @@ endfunction()
 add_test(NAME cincuenta0 COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuenta0.ain) # energy 0.456977
 # dmrg impurity solver, 3-bath fast CI check — energy -4.86046
 add_test(NAME cincuentaDmrg3Bath COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
+
+if(DMRGPP_USE_MPI)
+  set(CINCUENTA_DMRG_MPI_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathMpi)
+  file(MAKE_DIRECTORY ${CINCUENTA_DMRG_MPI_DIR})
+
+  set(_cincuenta_mpi_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2")
+  list(APPEND _cincuenta_mpi_cmd ${MPIEXEC_PREFLAGS})
+  list(APPEND _cincuenta_mpi_cmd $<TARGET_FILE:cincuenta>)
+  list(APPEND _cincuenta_mpi_cmd ${MPIEXEC_POSTFLAGS})
+  list(APPEND _cincuenta_mpi_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
+  add_test(NAME cincuentaDmrg3Bath_mpi COMMAND ${_cincuenta_mpi_cmd})
+  set_tests_properties(
+    cincuentaDmrg3Bath_mpi
+    PROPERTIES LABELS "MPI"
+               PROCESSORS 2
+               WORKING_DIRECTORY ${CINCUENTA_DMRG_MPI_DIR}
+               PASS_REGULAR_EXPRESSION "MPI rank=1")
+
+  # Check a Matsubara value assembled on rank zero after both distributed
+  # particle/hole runs.  A successful check also proves the shared artifact was written.
+  add_check(cincuentaDmrg3Bath_mpi_gimp "0\\.0628319 [-0-9.eE+]+ ([-0-9.eE+]+)" "-0.58646" "1e-4"
+            ${CINCUENTA_DMRG_MPI_DIR}/gimp_dmrg.txt cincuentaDmrg3Bath_mpi)
+  set_tests_properties(cincuentaDmrg3Bath_mpi_gimp PROPERTIES LABELS "MPI")
+endif()
+
 # dmrg impurity solver — slow; excluded from fast CI, run with: ctest -L Nightly
 add_test(NAME cincuenta1 COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuenta1.ain) # energy 0.456977
 set_tests_properties(cincuenta1 PROPERTIES LABELS "Nightly")
