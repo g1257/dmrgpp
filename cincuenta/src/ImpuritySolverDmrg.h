@@ -150,9 +150,11 @@ private:
 
 		std::string data = BaseType::addBathParams(s, model_params);
 
-		std::ofstream tout("testout.ain");
-		tout << data;
-		tout.close();
+		if (PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) == 0) {
+			std::ofstream tout("testout.ain");
+			tout << data;
+		}
+
 		return data;
 	}
 
@@ -215,7 +217,13 @@ private:
 
 		runOmegas(data2, obs, freq_enum);
 
+		// InterNode::parallelFor does not synchronize ranks.  ProcOmegas must not
+		// read a frequency file while another rank is still writing it (or starts
+		// the next particle/hole run and overwrites the same logfile).
+		PsimagLite::MPI::barrier(PsimagLite::MPI::COMM_WORLD);
+
 		procOmegas(data2, t, freq_enum);
+		broadcastGimp(freq_enum);
 	}
 
 	void procOmegas(const std::string& data2, DmrgType t, PsimagLite::FreqEnum freq_enum)
@@ -258,6 +266,21 @@ private:
 		}
 
 		readGimp(rootOname, total, t);
+	}
+
+	void broadcastGimp(PsimagLite::FreqEnum freq_enum)
+	{
+		if (PsimagLite::MPI::commSize(PsimagLite::MPI::COMM_WORLD) == 1)
+			return;
+
+		const SizeType total = (freq_enum == PsimagLite::FreqEnum::MATSUBARA)
+		    ? this->matsubaras().total()
+		    : this->realFreqRange().total();
+
+		if (PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) != 0)
+			gimp_.resize(total);
+
+		PsimagLite::MPI::bcast(gimp_, 0, PsimagLite::MPI::COMM_WORLD);
 	}
 
 	void runOmegas(const std::string&   data2,
