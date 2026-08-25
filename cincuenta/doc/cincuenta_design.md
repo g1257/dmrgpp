@@ -182,6 +182,66 @@ The DMRG solver proceeds in two stages:
 Because different frequencies are independent, the MPI parallelism in DMRG++
 can distribute them across nodes.
 
+##### MPI program flow for an equilibrium DMRG calculation
+
+MPI distributes the correction-vector frequency calculations; it does not
+split the DMFT iterations themselves. Every rank follows the same equilibrium
+DMFT control flow and redundantly updates the lattice Green's function, fits
+the bath, and updates the self-energy. The expensive impurity solve proceeds
+as follows:
+
+```text
+All ranks: update lattice G and fit the bath
+                       |
+Rank 0: run ground-state DMRG
+Other ranks: wait      |
+                       +-- barrier
+                       |
+All ranks: distribute TYPE_0 correction-vector frequencies
+                       +-- barrier
+Rank 0: ProcOmegas assembles partial G_imp
+                       +-- broadcast partial G_imp to every rank
+                       |
+All ranks: distribute TYPE_1 correction-vector frequencies
+                       +-- barrier
+Rank 0: ProcOmegas adds the second contribution to G_imp
+                       +-- broadcast complete G_imp to every rank
+                       |
+All ranks: update the same self-energy and test convergence
+```
+
+In more detail:
+
+1. `cincuenta.cpp` initializes MPI through `PsimagLite::PsiApp`. All ranks
+   parse the same input and construct equivalent `DmftSolver` and
+   `ImpuritySolverDmrg` objects. Rank 0 alone owns standard output and shared
+   user-facing log files.
+2. At each DMFT iteration, rank 0 runs the ground-state `DmrgRunner`. The other
+   ranks wait at a barrier until its restart/checkpoint data is complete on the
+   shared filesystem.
+3. For each of the particle and hole contributions (`TYPE_0` and `TYPE_1`),
+   `ManyOmegas` uses `PsimagLite::InterNode::parallelFor` to assign independent
+   Matsubara frequencies to MPI ranks. Each assigned frequency runs its own
+   correction-vector DMRG calculation and writes a frequency-specific result.
+4. An explicit barrier follows each distributed frequency batch.
+   `parallelFor` does not itself synchronize ranks, and rank 0 must not read a
+   result while another rank is still writing it or has begun reusing the same
+   logfile for the next contribution.
+5. Rank 0 runs `ProcOmegas` and reads the assembled result into `gimp_`. It
+   broadcasts `gimp_` after `TYPE_0`, preserving the partial particle/hole sum
+   on every rank, and again after `TYPE_1`, distributing the complete impurity
+   Green's function.
+6. Every rank then computes the same new self-energy and follows the same
+   convergence decision. After the Matsubara loop, the final real-frequency
+   solve uses the same ground-state, distributed-frequency, aggregation, and
+   broadcast sequence.
+
+This design requires all MPI ranks to remain in the common control flow so
+that they reach barriers and broadcasts in the same order. It also assumes the
+ranks share access to the DMRG restart and per-frequency output files. MPI
+primarily accelerates runs with enough frequencies to keep the ranks occupied;
+the ground-state DMRG run and rank-0 aggregation remain serial portions.
+
 #### ImpuritySolverExactDiag
 
 The exact-diagonalisation solver is intended for small `nBath` (typically ≤ 5)
