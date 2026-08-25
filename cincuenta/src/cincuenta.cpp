@@ -10,8 +10,15 @@
 #include <PsimagLite/PsimagLite.h>
 #include <unistd.h>
 
-std::streambuf* GlobalCoutBuffer = 0;
-std::ofstream   GlobalCoutStream;
+class NullStreamBuffer : public std::streambuf {
+protected:
+
+	int overflow(int c) override { return c; }
+};
+
+std::streambuf*  GlobalCoutBuffer = 0;
+std::ofstream    GlobalCoutStream;
+NullStreamBuffer GlobalNullStream;
 
 void restoreCoutBuffer()
 {
@@ -119,9 +126,10 @@ int main(int argc, char** argv)
 	}
 
 	using ConcurrencyType = PsimagLite::Concurrency;
+	const bool isRoot     = ConcurrencyType::root();
 
 	// print license
-	if (ConcurrencyType::root()) {
+	if (isRoot) {
 		Provenance provenance;
 		std::cout << provenance;
 		std::cout << Provenance::logo(application.name()) << "\n";
@@ -133,7 +141,8 @@ int main(int argc, char** argv)
 		if (logfile == "" || logfile == "?") {
 			logfile = Dmrg::ProgramGlobals::coutName(inputfile, "cincuenta");
 			if (queryOnly) {
-				std::cout << logfile << "\n";
+				if (isRoot)
+					std::cout << logfile << "\n";
 				return 0;
 			}
 		}
@@ -143,7 +152,12 @@ int main(int argc, char** argv)
 		return 0;
 
 	bool echoInput = false;
-	if (logfile != "-") {
+	if (!isRoot) {
+		// Only rank zero owns user-facing output and shared log files.
+		GlobalCoutBuffer = std::cout.rdbuf();
+		std::cout.rdbuf(&GlobalNullStream);
+		atexit(restoreCoutBuffer);
+	} else if (logfile != "-") {
 		GlobalCoutStream.open(logfile.c_str(), std::ofstream::out);
 		if (!GlobalCoutStream || GlobalCoutStream.bad() || !GlobalCoutStream.good()) {
 			std::string str(application.name());
@@ -167,9 +181,11 @@ int main(int argc, char** argv)
 		atexit(restoreCoutBuffer);
 	}
 
-	application.printCmdLine(std::cout);
-	if (echoInput)
-		application.echoBase64(std::cout, inputfile);
+	if (isRoot) {
+		application.printCmdLine(std::cout);
+		if (echoInput)
+			application.echoBase64(std::cout, inputfile);
+	}
 
 	Dmft::CincuentaInputCheck inputCheck;
 	InputNgType::Writeable    ioWriteable(input_path.findFirst(inputfile), inputCheck);
@@ -220,7 +236,8 @@ int main(int argc, char** argv)
 
 		dmftSolver.selfConsistencyLoop();
 
-		dmftSolver.print(std::cout);
+		if (isRoot)
+			dmftSolver.print(std::cout);
 
 		equilibriumBathResult = dmftSolver.bathResult();
 	}
