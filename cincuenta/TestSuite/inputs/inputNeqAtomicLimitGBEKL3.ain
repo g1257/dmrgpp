@@ -5,9 +5,8 @@
 # Unlike inputNeqGBEKFig3L3.ain (which approximates the atomic limit with a
 # near-zero-bandwidth equilibrium bath, W_i=0.1), this input sets
 # NeqAtomicLimit=1 so the neq stage bypasses the equilibrium bath fit
-# entirely and starts from Delta^- === 0 exactly (see
-# ImpuritySolverNeqExactDiag::solveAtomicLimit() and
-# cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py).
+# entirely and starts from Delta^- === 0 exactly; positive-rank GBEK owns
+# the atomic initialization (see cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py).
 #
 # NeqAtomicLimit=1 means there is no equilibrium DMFT stage at all --
 # cincuenta.cpp never even constructs the equilibrium bath-fit machinery.
@@ -42,11 +41,8 @@ TmaxNeq=4.0;
 NtNeq=100;
 
 NeqDmftIter=3;
-NeqDmftTolerance=1e-8;
 
-# ED solver with GBEK second bath, rank L=3 (NeqSolver="exactdiag" is the default;
-# written here for clarity)
-NeqSolver="exactdiag";
+# GBEK second bath, rank L=3.
 NeqBathRank=3;
 NeqAtomicLimit=1;
 

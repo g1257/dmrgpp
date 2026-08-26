@@ -2,7 +2,6 @@
 #include "Dispersion.h"
 #include "DmftSolver.h"
 #include "ImpuritySolverNeqGBEK.h"
-#include "ImpuritySolverNeqTdmrg.h"
 #include "NeqDmftSolver.h"
 #include "ProgramGlobals.h"
 #include "Provenance.h"
@@ -31,16 +30,21 @@ void usage(const std::string& name)
 // otherwise be silently parsed and ignored. T must match the key's declared
 // Ainur type (see CincuentaInputCheck::import()).
 template <typename T, typename ReadableType>
-void rejectUnderAtomicLimit(ReadableType& io, const std::string& key)
+bool hasInput(ReadableType& io, const std::string& key)
 {
-	T    tmp {};
-	bool present = true;
+	T tmp {};
 	try {
 		io.readline(tmp, key);
 	} catch (std::exception&) {
-		present = false;
+		return false;
 	}
-	if (present)
+	return true;
+}
+
+template <typename T, typename ReadableType>
+void rejectUnderAtomicLimit(ReadableType& io, const std::string& key)
+{
+	if (hasInput<T>(io, key))
 		err(key
 		    + " has no effect when NeqAtomicLimit=1 (the equilibrium bath "
 		      "fit is skipped entirely); remove it from the input\n");
@@ -175,6 +179,11 @@ int main(int argc, char** argv)
 	InputNgType::Writeable    ioWriteable(input_path.findFirst(inputfile), inputCheck);
 	InputNgType::Readable     io(ioWriteable);
 
+	// Reject these before selecting either the equilibrium or GBEK paths. This
+	// is deliberately independent of TmaxNeq/NeqAtomicLimit, so a stale label
+	// never changes a run merely by being silently ignored.
+	Dmft::CincuentaInputCheck::rejectRemovedLabels(io);
+
 	// NeqAtomicLimit=1 means there is no equilibrium DMFT stage at all: the
 	// neq run starts from an empty bath instead of a fitted one. Peek it
 	// before touching anything equilibrium-specific, so that case can skip
@@ -190,7 +199,7 @@ int main(int argc, char** argv)
 		} catch (std::exception&) { }
 	}
 
-	PsimagLite::Vector<RealType>::Type equilibriumBathResult;
+	DmftSolverType::EquilibriumInitialData equilibriumInitialData;
 
 	if (neqAtomicLimit) {
 		// These configure the equilibrium bath fit, which never runs in this
@@ -222,13 +231,17 @@ int main(int argc, char** argv)
 
 		dmftSolver.print(std::cout);
 
-		equilibriumBathResult = dmftSolver.bathResult();
+		// DmftSolver captured this complete, owned handoff before its final
+		// real-frequency solve replaced its internal gimp(). Stage 1 deliberately
+		// continues to pass only the bath vector to neq; its Matsubara grid can
+		// have a different cardinality and must not be assigned to KB arrays.
+		equilibriumInitialData = dmftSolver.equilibriumInitialData();
 	}
 
 	// Non-equilibrium DMFT mode: triggered when TmaxNeq is present in input.
-	// The equilibrium DMFT stage above supplies the bath parameters (fixed
-	// bath approximation for the interaction quench U_i -> U_f), unless
-	// NeqAtomicLimit=1, in which case equilibriumBathResult is empty.
+	// The equilibrium DMFT stage above supplies the initial first-bath
+	// parameters for the interaction quench U_i -> U_f, unless
+	// NeqAtomicLimit=1, in which case the bath vector is empty.
 	{
 		using ParamsNeqType = Dmft::ParamsNeqDmftSolver<std::complex<RealType>>;
 
@@ -243,44 +256,31 @@ int main(int argc, char** argv)
 			std::cout << "\n=== Non-equilibrium DMFT (interaction quench) ===\n";
 			ParamsNeqType neqParams(io);
 
-			// NeqSolver= selects the neq propagation method: "exactdiag"
-			// (default, also selected by omitting NeqSolver= entirely) or
-			// "tdmrg".
-			// "exactdiag" always uses the GBEK-capable exact-diagonalization solver:
-			// NeqBathRank=0 (default) reduces exactly to a fixed equilibrium
-			// bath with no time-dependent second bath; NeqBathRank>0 adds the
-			// low-rank Cholesky second bath (Gramsch/Balzer/Eckstein/Kollar,
-			// PRB 88, 235106 (2013)) so the bath can respond to the quench.
-			std::string neqSolverType;
-			try {
-				io.readline(neqSolverType, "NeqSolver=");
-			} catch (std::exception&) { }
+			// Production neq-DMFT always uses the positive-rank GBEK two-bath
+			// solver. Its low-rank Cholesky second bath must be present so the
+			// bath can respond to the quench (Gramsch/Balzer/Eckstein/Kollar,
+			// PRB 88, 235106 (2013)).
+			if (neqParams.neqBathRank == 0)
+				err("Non-equilibrium GBEK requires NeqBathRank>0; "
+				    "the frozen rank-zero bath path is no longer supported\n");
+			if (neqParams.neqDmftIter == 0)
+				err("Non-equilibrium GBEK requires NeqDmftIter>0; "
+				    "at least one corrector iteration is required at each time step\n");
 
-			if (neqSolverType == "tdmrg") {
-				if (neqParams.neqAtomicLimit)
-					err("NeqSolver=\"tdmrg\" does not support NeqAtomicLimit=1 "
-					    "(untested combination)\n");
-				std::cout << "  using ImpuritySolverNeqTdmrg (tDMRG)\n";
-				using TdmrgImpType
-				    = Dmft::ImpuritySolverNeqTdmrg<std::complex<RealType>>;
-				TdmrgImpType tdmrgSolver(neqParams, application, io);
-				tdmrgSolver.solve(equilibriumBathResult);
+			if (!neqParams.neqAtomicLimit) {
 				const std::string& p = neqParams.neqOutputPrefix;
-				tdmrgSolver.gimp().dump(p.empty() ? "green" : p + "-green");
-			} else if (neqSolverType == "" || neqSolverType == "exactdiag") {
-				std::cout << "  using ImpuritySolverNeqGBEK (exact "
-				             "diagonalization, NeqBathRank="
-				          << neqParams.neqBathRank << ")\n";
-				using EdNeqSolverType
-				    = Dmft::NeqDmftSolver<std::complex<RealType>,
-				                          Dmft::ImpuritySolverNeqGBEK>;
-				EdNeqSolverType neqSolver(neqParams, io);
-				neqSolver.solve(equilibriumBathResult);
-				neqSolver.dumpGreenFunctions();
-			} else {
-				err("Unknown NeqSolver=\"" + neqSolverType
-				    + "\"; expected \"exactdiag\" (default) or \"tdmrg\"\n");
+				equilibriumInitialData.writeMatsubara(
+				    p.empty() ? "equilibrium-gimp-matsubara"
+				              : p + "-equilibrium-gimp-matsubara");
 			}
+
+			std::cout << "  using ImpuritySolverNeqGBEK (exact "
+			             "diagonalization, NeqBathRank="
+			          << neqParams.neqBathRank << ")\n";
+			using GbekDmftType = Dmft::NeqDmftSolver<std::complex<RealType>>;
+			GbekDmftType gbekDmft(neqParams, io);
+			gbekDmft.solve(equilibriumInitialData.bathParameters);
+			gbekDmft.dumpGreenFunctions();
 		}
 	}
 }

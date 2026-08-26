@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 	Dmft::CincuentaInputCheck inputCheck;
 	InputNgType::Writeable    ioWriteable(inputfile, inputCheck);
 	InputNgType::Readable     io(ioWriteable);
+	Dmft::CincuentaInputCheck::rejectRemovedLabels(io);
 
 	ParamsDmftSolverType params(io);
 

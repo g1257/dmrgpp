@@ -1,6 +1,6 @@
 #ifndef NEQ_BATH_DECOMPOSITION_H
 #define NEQ_BATH_DECOMPOSITION_H
-#include "KadanoffBaym.h"
+#include "NeqRealTimeGf.h"
 #include <PsimagLite/Svd.h>
 #include <PsimagLite/Vector.h>
 #include <algorithm>
@@ -33,24 +33,20 @@ public:
 	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
 	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
 	using MatrixComplexType = PsimagLite::Matrix<ComplexType>;
-	using KBType            = KadanoffBaym<ComplexOrRealType>;
+	using RealTimeGfType    = NeqRealTimeGf<ComplexOrRealType>;
 
 	NeqBathDecomposition(SizeType              rank,
 	                     RealType              beta,
 	                     RealType              mu,
 	                     const VectorRealType& bathParams,
 	                     SizeType              nT,
-	                     SizeType              nTau,
-	                     RealType              dt,
-	                     RealType              dtau)
+	                     RealType              dt)
 	    : rank_(rank)
 	    , beta_(beta)
 	    , mu_(mu)
 	    , dt_(dt)
-	    , dtau_(dtau)
 	    , maxDiagSeen_(0)
 	    , nT_(nT)
-	    , nTau_(nTau)
 	    , V_(nT + 1, std::max(rank, SizeType(1)), ComplexType(0))
 	{
 		const SizeType nBath = bathParams.size() / 2;
@@ -70,7 +66,7 @@ public:
 	// seeds column p from pivot row p+1 (n=1..L), giving true rank-L behavior.
 	// Without the skip col 0 of V stays zero (L_eff=1) because V_(0,0)≈0 from
 	// the bath-fit residual causes V_(1,0)=Δ⁺<(1,0)/V_(0,0) to blow up.
-	void update(int n, const KBType& delta)
+	void update(int n, const RealTimeGfType& delta)
 	{
 		if (rank_ == 0)
 			return;
@@ -163,23 +159,6 @@ public:
 		return result;
 	}
 
-	// Δ⁻_⌐(t_n, τ_j): first-bath left-mixing hybridization
-	// Uses g_α^M(τ) = −f(ε_α) exp(−ε_α τ) for the free bath-site Matsubara GF
-	ComplexType deltaMinusLeftMixing(int n, int j) const
-	{
-		const ComplexType I(0, 1);
-		ComplexType       result(0);
-		for (SizeType a = 0; a < hoppings_.size(); ++a) {
-			const RealType V2    = hoppings_[a] * hoppings_[a];
-			const RealType eps   = bathEps_[a];
-			const RealType fermi = fermiFunc(eps);
-			const RealType tau   = j * dtau_;
-			result += V2 * std::exp(-I * static_cast<ComplexType>(eps * n * dt_))
-			    * (-fermi) * static_cast<ComplexType>(std::exp(-eps * tau));
-		}
-		return result;
-	}
-
 	SizeType rank() const { return rank_; }
 	SizeType nFirst() const { return hoppings_.size(); }
 
@@ -232,7 +211,7 @@ private:
 	}
 
 	// i Δ⁺_<(t_n, t_j): helper with antisymmetry for j > n
-	ComplexType iDeltaPlusLesser(int n, int j, const KBType& delta) const
+	ComplexType iDeltaPlusLesser(int n, int j, const RealTimeGfType& delta) const
 	{
 		const ComplexType I(0, 1);
 		ComplexType       dless;
@@ -245,7 +224,7 @@ private:
 
 	// Standard Cholesky off-diagonal element V_(n, p) in the standard phase.
 	// Pivot for column p is at row p+1 (row 0 is degenerate and skipped).
-	ComplexType offDiagElement(int n, int p, const KBType& delta) const
+	ComplexType offDiagElement(int n, int p, const RealTimeGfType& delta) const
 	{
 		ComplexType val = -iDeltaPlusLesser(n, p + 1, delta);
 		for (int k = 0; k < p; ++k)
@@ -314,7 +293,7 @@ private:
 	//
 	// a[k] = -iΔ⁺_<(t_n, t_{k+1}) for k = 0..s-1 (row k+1), one entry per
 	// row of Q_s.
-	void choleskyOptimalUpdate(int n, const KBType& delta)
+	void choleskyOptimalUpdate(int n, const RealTimeGfType& delta)
 	{
 		const int L = static_cast<int>(rank_);
 		const int s = n - 1; // number of previously-determined rows (1..n-1)
@@ -596,9 +575,9 @@ private:
 	}
 
 	SizeType          rank_;
-	RealType          beta_, mu_, dt_, dtau_;
+	RealType          beta_, mu_, dt_;
 	RealType          maxDiagSeen_; // running max |diag| for the seeding floor, see update()
-	SizeType          nT_, nTau_;
+	SizeType          nT_;
 	VectorRealType    hoppings_; // V_α from equilibrium bath
 	VectorRealType    bathEps_; // ε_α from equilibrium bath
 	MatrixComplexType V_; // second-bath hoppings V_[n][p], (nT+1) × rank_

@@ -2,9 +2,7 @@
 #define IMPURITYSOLVER_NEQ_GBEK_H
 
 #include "CincuentaInputCheck.h"
-#include "ImpuritySolverNeqBase.h"
-#include "ImpuritySolverNeqExactDiag.h"
-#include "KadanoffBaym.h"
+#include "NeqRealTimeGf.h"
 #include "LanczosPlusPlus/src/Engine/DefaultSymmetry.h"
 #include "LanczosPlusPlus/src/Engine/InputCheck.h"
 #include "LanczosPlusPlus/src/Engine/InternalProductStored.h"
@@ -37,9 +35,6 @@
 //   Δ⁻ : first bath — equilibrium memory from fixed {V_α, ε_α}
 //   Δ⁺ : second bath — neq dynamics via rank-L Cholesky of i·Δ⁺_<
 //
-// For L=0 (first bath only), delegates entirely to ImpuritySolverNeqExactDiag
-// (exact Lehmann representation), which is the correct L=0 limit.
-//
 // For L>0, the extended Fock space includes 2L second-bath sites:
 //   L "empty" sites (initially unoccupied, ε=0) coupled to impurity via V^+_{n,p}
 //   L "occupied" sites (initially doubly occupied, ε=0) coupled to impurity via V^+_{n,p}
@@ -49,8 +44,6 @@
 // Green's functions are computed as inner products (GBEK Eqs. 72-74):
 //   G^<(t_j, t_n) = +i <Ψ(t_j) | Ψ(t_n)>   [N-1 sector]
 //   G^>(t_n, t_j) = -i <Φ(t_n) | Φ(t_j)>   [N+1 sector]
-// G^{Left}(t_n, τ) is reused from ImpuritySolverNeqExactDiag (Matsubara-based).
-//
 // Gα/Gβ spin-seed averaging (GBEK Eq. 70): whenever the base filling is
 // spin-imbalanced (nup_ != ndown_ -- e.g. the NeqAtomicLimit single-atom
 // seed nup=1, ndown=0), a single extended-Fock-space ground state is
@@ -66,24 +59,22 @@
 namespace Dmft {
 
 template <typename ComplexOrRealType>
-class ImpuritySolverNeqGBEK : public ImpuritySolverNeqBase<ComplexOrRealType> {
+class ImpuritySolverNeqGBEK {
 
 public:
 
-	using BaseType          = ImpuritySolverNeqBase<ComplexOrRealType>;
-	using RealType          = typename BaseType::RealType;
-	using ComplexType       = typename BaseType::ComplexType;
-	using VectorRealType    = typename BaseType::VectorRealType;
-	using KBType            = typename BaseType::KBType;
-	using InputNgType       = typename BaseType::InputNgType;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType       = std::complex<RealType>;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using RealTimeGfType    = NeqRealTimeGf<ComplexOrRealType>;
+	using InputNgType       = PsimagLite::InputNg<CincuentaInputCheck>;
 	using ParamsNeqType     = ParamsNeqDmftSolver<ComplexOrRealType>;
-	using ExactDiagType     = ImpuritySolverNeqExactDiag<ComplexOrRealType>;
 	using DecompType        = NeqBathDecomposition<ComplexOrRealType>;
 	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
 	using MatrixComplexType = PsimagLite::Matrix<ComplexType>;
 	using MatrixType        = PsimagLite::Matrix<ComplexOrRealType>;
 
-	// LanczosPlusPlus / PsimagLite types (parallel to ImpuritySolverNeqExactDiag)
+	// LanczosPlusPlus / PsimagLite types used by the extended GBEK system.
 	using LppInputReadable =
 	    typename PsimagLite::InputNg<LanczosPlusPlus::InputCheck>::Readable;
 	using GeometryType = PsimagLite::
@@ -105,49 +96,38 @@ public:
 	ImpuritySolverNeqGBEK(const ParamsNeqType& params, typename InputNgType::Readable& io)
 	    : bathRank_(params.neqBathRank)
 	    , params_(params)
-	    , exactDiag_(params, io)
 	    , nup_(0)
 	    , ndown_(0)
 	    , nBath_(0)
 	    , nsites_ext_(0)
 	{
-		if (bathRank_ > 0) {
-			io.readline(nup_, "TargetElectronsUp=");
-			io.readline(ndown_, "TargetElectronsDown=");
-		}
+		if (bathRank_ == 0)
+			err("ImpuritySolverNeqGBEK requires NeqBathRank>0\n");
+		io.readline(nup_, "TargetElectronsUp=");
+		io.readline(ndown_, "TargetElectronsDown=");
 	}
 
-	// Initialise the impurity solver and bath decomposition.
-	// For L=0: delegates to ExactDiag (Lehmann representation).
-	// For L>0: also builds the extended Fock space and seeds time-propagated states.
-	void solve(const VectorRealType& bathParams) override
+	// Initialise the positive-rank two-bath GBEK solver directly.  Its
+	// real-time Green's functions are supplied solely by propagated extended
+	// Fock-space states, not by the removed Keldysh-Matsubara ED solver.
+	void solve(const VectorRealType& bathParams)
 	{
-		const RealType beta = params_.grid.ficticiousBeta;
-		const RealType mu   = 0;
-
-		decomp_ = std::make_unique<DecompType>(
-		    bathRank_,
-		    beta,
-		    mu,
-		    bathParams,
-		    params_.nT,
-		    params_.grid.nMatsubaras,
-		    params_.dt,
-		    params_.grid.ficticiousBeta / static_cast<RealType>(params_.grid.nMatsubaras));
-
-		exactDiag_.solve(bathParams);
-
-		if (bathRank_ > 0)
-			solveLplus(bathParams);
+		validatePhysicalInput(bathParams);
+		decomp_ = std::make_unique<DecompType>(bathRank_,
+		                                      params_.grid.ficticiousBeta,
+		                                      RealType(0),
+		                                      bathParams,
+		                                      params_.nT,
+		                                      params_.dt);
+		solveLplus(bathParams);
 	}
 
 	// Advance the Cholesky decomposition to step n and (for L>0) invalidate
 	// the propagated state so the next computeGimp call re-propagates.
-	void prepareTimeStep(int n, const KBType& delta) override
+	void prepareTimeStep(int n, const RealTimeGfType& delta)
 	{
-		if (decomp_)
-			decomp_->update(n, delta);
-		if (bathRank_ > 0 && n > 0) {
+		decomp_->update(n, delta);
+		if (n > 0) {
 			// V[n] just changed; invalidate cached PsiHist[n] and beyond, for
 			// both spin configurations.
 			sectorAlpha_.propagatedThrough
@@ -158,16 +138,10 @@ public:
 		}
 	}
 
-	// Fill G_imp KB components for all (t_n, t_j) with j <= n.
-	// For L=0: delegates to ExactDiag (Lehmann).
-	// For L>0: ExactDiag fills G^{Left}; GBEK inner products overwrite G^< and G^R.
-	void computeGimp(KBType& gimp, int n) const override
+	// Fill G^R and G^< for all (t_n,t_j), j <= n, directly from GBEK
+	// propagated states.
+	void computeGimp(RealTimeGfType& gimp, int n) const
 	{
-		// Always call ExactDiag for G^{Left} and Matsubara components
-		exactDiag_.computeGimp(gimp, n);
-		if (bathRank_ == 0)
-			return;
-
 		// Ensure states are propagated up to step n (lazy, idempotent)
 		ensurePropagated(n);
 
@@ -198,27 +172,20 @@ public:
 			        gimp.lesser(static_cast<SizeType>(n), static_cast<SizeType>(j)));
 	}
 
-	// Matsubara components come from ExactDiag in both L=0 and L>0 cases.
-	const KBType& gimp() const override { return exactDiag_.gimp(); }
-
 	const DecompType* decomposition() const { return decomp_.get(); }
 
-	void dumpPlusBath(const std::string& filename) const override
+	void dumpPlusBath(const std::string& filename) const
 	{
-		if (decomp_)
-			decomp_->dumpPlusBath(filename);
+		decomp_->dumpPlusBath(filename);
 	}
 
 	// Write one line per time step actually visited (n=0..propagatedThrough):
-	// "t docc Ekin Eint Etot", fixed precision, mirroring KadanoffBaym::dump's
-	// plain-text style. Eint/Etot are trivial derived quantities
-	// (Eint=U*(docc-1/4), Etot=Ekin+Eint); docc/Ekin come from doccHistory_/
+	// "t docc Ekin Eint Etot", fixed precision. Eint/Etot are trivial
+	// derived quantities (Eint=U*(docc-1/4), Etot=Ekin+Eint); docc/Ekin come from doccHistory_/
 	// ekinHistory_, filled progressively by computeGimp. See paper Figs. 9-10
-	// and project_gbek_ekin_factor2_bugfix for the 0.5 factor in Ekin.
-	void dumpDoccAndEnergy(const std::string& filename) const override
+	// The 0.5 factor in Ekin is derived below from the two auxiliary sites.
+	void dumpDoccAndEnergy(const std::string& filename) const
 	{
-		if (bathRank_ == 0)
-			return;
 		std::ofstream fout(filename.c_str());
 		const int     nMax = sectorAlpha_.propagatedThrough;
 		for (int n = 0; n <= nMax; ++n) {
@@ -235,13 +202,46 @@ public:
 
 	// Raw Cholesky factor V_(n,p), for row-by-row comparison against an
 	// independent offline trace (see NeqBathDecomposition::dumpV).
-	void dumpV(const std::string& filename) const override
+	void dumpV(const std::string& filename) const
 	{
-		if (decomp_)
-			decomp_->dumpV(filename);
+		decomp_->dumpV(filename);
 	}
 
 private:
+
+	// Contracts formerly enforced by the Keldysh-Matsubara ED helper.  The
+	// positive-rank GBEK path owns them now, including the atomic-limit
+	// restrictions, while its actual R/< values remain entirely GBEK-derived.
+	void validatePhysicalInput(const VectorRealType& bathParams) const
+	{
+		if (bathParams.size() % 2 != 0)
+			err("ImpuritySolverNeqGBEK: bath parameter vector must contain equal "
+			    "numbers of hoppings and energies\n");
+
+		const SizeType nBath  = bathParams.size() / 2;
+		const SizeType nsites = nBath + 1;
+		if (nup_ + ndown_ != nsites)
+			err("ImpuritySolverNeqGBEK: only half-filling (nup+ndown==nsites) is "
+			    "supported; got nup="
+			    + ttos(nup_) + " ndown=" + ttos(ndown_) + " nsites=" + ttos(nsites)
+			    + "\n");
+		if (nBath != 0) {
+			if (nup_ == 0)
+				err("ImpuritySolverNeqGBEK: nup=0 is not supported for a non-atomic "
+				    "initial bath (N-1 sector required)\n");
+			return;
+		}
+		if (params_.uInitial != params_.uFinal)
+			err("ImpuritySolverNeqGBEK (NeqAtomicLimit): U must be fixed "
+			    "(the atomic limit here is a hopping quench carried by the bath, "
+			    "not an interaction quench); got uInitial="
+			    + ttos(params_.uInitial) + " uFinal=" + ttos(params_.uFinal) + "\n");
+		const RealType muExpected = RealType(0.5) * params_.uInitial;
+		if (std::abs(params_.grid.mu - muExpected) > RealType(1e-10))
+			err("ImpuritySolverNeqGBEK (NeqAtomicLimit): requires "
+			    "ChemicalPotential=HubbardU/2 (" + ttos(muExpected)
+			    + "); got ChemicalPotential=" + ttos(params_.grid.mu) + "\n");
+	}
 
 	// Position and update info for one second-bath variable entry in the CSR matrix.
 	struct VarEntry {
@@ -361,9 +361,8 @@ private:
 		// time/memory -- infeasible well before L=5, dim~213k); for larger
 		// systems use Lanczos GS, seeded with the KNOWN atomic-limit product
 		// state (see lanczosGS's doc comment) rather than a naive uniform
-		// vector -- see project memory project_gbek_cpp_lanczosGS_bug for the
-		// bug this fixes (uniform-vector Lanczos converged to the WRONG
-		// extremal state at L=4: reported energy -2807.96 vs. the true -4000).
+		// vector: uniform-vector Lanczos converged to the wrong extremal state
+		// at L=4 (reported energy -2807.96 vs. the true -4000).
 		VectorRealType energiesN;
 		MatrixType     eigvecsN;
 		if (nsites_ext_ <= 8) {
@@ -384,8 +383,7 @@ private:
 		// Build N-1 and N+1 sector bases for the extended system.
 		// model owns the returned basis pointers via its internal garbage_
 		// list; do not wrap in unique_ptr (double-delete crashes
-		// ~HubbardOneOrbital) -- same footgun documented in
-		// ImpuritySolverNeqExactDiag.h's solve().
+		// ~HubbardOneOrbital).
 		const BasisBaseType& bNm1 = *model.createBasis(nupExt - 1, ndownExt);
 		const BasisBaseType& bNp1 = *model.createBasis(nupExt + 1, ndownExt);
 
@@ -1271,9 +1269,8 @@ private:
 	// conservation law <Etot(t)> = <Etot(0)> = -U/4 for t > t_q, which the
 	// raw (uncorrected) value badly violated -- see
 	// cincuenta/TestSuite/gbek_reference/gbek_selfconsistency.py
-	// (compute_energy_observables) and project memory
-	// project_gbek_ekin_factor2_bugfix. The conservation-law regression
-	// test in test_ImpuritySolverNeqGBEK.cpp guards this factor directly.
+	// (compute_energy_observables). The conservation-law regression test in
+	// test_ImpuritySolverNeqGBEK.cpp guards this factor directly.
 	RealType computeKineticEnergyGBEKSector(const ExtendedSector& sector, int n) const
 	{
 		assert(n >= 0 && n < static_cast<int>(sector.PhiNHist.size()));
@@ -1473,8 +1470,7 @@ private:
 	// uniform vector (1/sqrt(dim) on every basis state), confirmed to
 	// converge to the WRONG extremal state for L>=4 (reported ground
 	// energy -2807.96 vs. the true -4000 for L=4's fully-polarized product
-	// state) -- see project memory project_gbek_cpp_lanczosGS_bug for the
-	// full diagnosis. A seed with substantial overlap with the true ground
+	// state). A seed with substantial overlap with the true ground
 	// state, rather than an unbiased guess, is the fix.
 	static MatrixType lanczosGS(const ModelBaseType& model,
 	                            const GeometryType&  geom,
@@ -1543,7 +1539,6 @@ private:
 
 	SizeType                    bathRank_;
 	const ParamsNeqType&        params_;
-	ExactDiagType               exactDiag_;
 	std::unique_ptr<DecompType> decomp_;
 
 	// Electron counts (read from io for L>0)

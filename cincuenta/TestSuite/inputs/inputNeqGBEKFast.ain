@@ -1,0 +1,53 @@
+##Ainur1.0
+
+# Fast end-to-end GBEK regression: one fitted equilibrium bath plus a
+# rank-2 second bath (six sites in the extended real-time problem).
+# The non-atomic equilibrium bath deliberately leaves Lambda^- nonzero.
+FicticiousBeta=16;
+ChemicalPotential=1.;
+Matsubaras=16;
+LatticeGf="energy,semicircular,4";
+NumberOfBathPoints=1;
+
+DmftNumberOfIterations=1;
+DmftTolerance=0.01;
+ImpuritySolver="exactdiag";
+
+FitOptions=particleholesymmetric;
+MinParamsDelta=0.01;
+MinParamsMaxIter=100;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-3;
+MinParamsVerbose=0;
+
+# One impurity plus one fitted bath site has two sites, so one electron of
+# each spin is a valid half-filled equilibrium sector.
+TargetElectronsUp=1;
+TargetElectronsDown=1;
+
+int ImpuritySite=0;
+real HubbardU=2.;
+
+# Required ParamsDmftSolver settings; unused by the exact-diagonalization path.
+RootOutputname="NeqGBEKFast";
+InfiniteLoopKeptStates=20;
+matrix FiniteLoopsGs=[[@auto, 20, 0],[@auto, 20, 0]];
+real OmegaBegin=-4.;
+integer OmegaTotal=20;
+real OmegaStep=0.2;
+real OmegaDelta=0.2;
+integer TridiagSteps=40;
+real TridiagEps=1e-6;
+TruncationTolerance="1e-6,20";
+CorrectionVectorEta=0.;
+GsWeight=0.1;
+matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];
+
+# No interaction quench. The positive rank activates the GBEK path.
+HubbardUFinal=2.;
+TmaxNeq=0.3;
+NtNeq=3;
+NeqDmftIter=2;
+NeqBathRank=2;
+BandwidthFinal=4.;
+NeqOutputPrefix="neq-gbek-fast";

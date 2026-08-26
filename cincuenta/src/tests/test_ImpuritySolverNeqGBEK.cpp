@@ -57,7 +57,6 @@ static const std::string kConfig = "##Ainur1.0\n\n"
                                    "TmaxNeq=0.2;\n"
                                    "NtNeq=2;\n"
                                    "NeqDmftIter=1;\n"
-                                   "NeqDmftTolerance=1e-4;\n"
                                    "NeqBathRank=1;\n"
                                    "BandwidthFinal=3.;\n";
 
@@ -86,6 +85,67 @@ static GBEKFixture& fixture()
 {
 	static GBEKFixture f;
 	return f;
+}
+
+TEST_CASE("GBEK owns the positive-rank and half-filling contracts", "[GBEK][validation]")
+{
+	std::string rankZero = kConfig;
+	rankZero.replace(rankZero.find("NeqBathRank=1;"), std::string("NeqBathRank=1;").size(),
+	                 "NeqBathRank=0;");
+	InputNgType::Writeable rankZeroW(Dmft::CincuentaInputCheck {}, rankZero);
+	InputNgType::Readable  rankZeroIo(rankZeroW);
+	ParamsType             rankZeroParams(rankZeroIo);
+	CHECK_THROWS(SolverType(rankZeroParams, rankZeroIo));
+
+	std::string nonHalfFilled = kConfig;
+	nonHalfFilled.replace(nonHalfFilled.find("TargetElectronsDown=1;"),
+	                      std::string("TargetElectronsDown=1;").size(),
+	                      "TargetElectronsDown=0;");
+	InputNgType::Writeable nonHalfFilledW(Dmft::CincuentaInputCheck {}, nonHalfFilled);
+	InputNgType::Readable  nonHalfFilledIo(nonHalfFilledW);
+	ParamsType             nonHalfFilledParams(nonHalfFilledIo);
+	SolverType             nonHalfFilledSolver(nonHalfFilledParams, nonHalfFilledIo);
+	CHECK_THROWS(nonHalfFilledSolver.solve({ 0.5, 0.0 }));
+}
+
+TEST_CASE("GBEK owns atomic-limit fixed-U and chemical-potential contracts",
+          "[GBEK][validation][atomic]")
+{
+	auto atomicConfig = kConfig;
+	atomicConfig.replace(atomicConfig.find("TargetElectronsDown=1;"),
+	                     std::string("TargetElectronsDown=1;").size(),
+	                     "TargetElectronsDown=0;");
+
+	std::string changingU = atomicConfig;
+	changingU.replace(changingU.find("HubbardUFinal=2.;"),
+	                  std::string("HubbardUFinal=2.;").size(), "HubbardUFinal=3.;");
+	InputNgType::Writeable changingUW(Dmft::CincuentaInputCheck {}, changingU);
+	InputNgType::Readable  changingUIo(changingUW);
+	ParamsType             changingUParams(changingUIo);
+	SolverType             changingUSolver(changingUParams, changingUIo);
+	CHECK_THROWS(changingUSolver.solve({}));
+
+	std::string wrongMu = atomicConfig;
+	wrongMu.replace(wrongMu.find("ChemicalPotential=1.;"),
+	                std::string("ChemicalPotential=1.;").size(), "ChemicalPotential=0.;");
+	InputNgType::Writeable wrongMuW(Dmft::CincuentaInputCheck {}, wrongMu);
+	InputNgType::Readable  wrongMuIo(wrongMuW);
+	ParamsType             wrongMuParams(wrongMuIo);
+	SolverType             wrongMuSolver(wrongMuParams, wrongMuIo);
+	CHECK_THROWS(wrongMuSolver.solve({}));
+
+	std::string spinDown = atomicConfig;
+	spinDown.replace(spinDown.find("TargetElectronsUp=1;"),
+	                 std::string("TargetElectronsUp=1;").size(),
+	                 "TargetElectronsUp=0;");
+	spinDown.replace(spinDown.find("TargetElectronsDown=0;"),
+	                 std::string("TargetElectronsDown=0;").size(),
+	                 "TargetElectronsDown=1;");
+	InputNgType::Writeable spinDownW(Dmft::CincuentaInputCheck {}, spinDown);
+	InputNgType::Readable  spinDownIo(spinDownW);
+	ParamsType             spinDownParams(spinDownIo);
+	SolverType             spinDownSolver(spinDownParams, spinDownIo);
+	CHECK_NOTHROW(spinDownSolver.solve({}));
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -442,7 +502,6 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 	      "TmaxNeq=0.2;\n"
 	      "NtNeq=4;\n"
 	      "NeqDmftIter=1;\n"
-	      "NeqDmftTolerance=1e-4;\n"
 	      "NeqBathRank=2;\n"
 	      "BandwidthFinal=4.;\n";
 
@@ -453,11 +512,8 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 
 	solver.solve({}); // empty bathParams: nBath=0, true atomic limit
 
-	using KBType = SolverType::KBType;
-	KBType slice(params.nT,
-	             params.grid.nMatsubaras,
-	             params.dt,
-	             params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras));
+	using RealTimeGfType = SolverType::RealTimeGfType;
+	RealTimeGfType slice(params.nT, params.dt);
 
 	for (int n = 0; n <= static_cast<int>(params.nT); ++n) {
 		solver.computeGimp(slice, n);
@@ -471,10 +527,10 @@ TEST_CASE("Gimp(t,t) plateaus at 1/2 for a spin-imbalanced atomic-limit seed",
 
 // ── Hamiltonian-construction regression check ────────────────────────────────
 // Added 2026-07-13 while investigating a "wrong phase in the reconstructed
-// Weiss field" bug (see cincuenta/TestSuite/gbek_reference/README.md). Row-
-// by-row comparisons of the Cholesky factor V, or end-to-end comparisons of
-// the converged Weiss field, cannot cleanly localize a Hamiltonian bug: V
-// and the converged Weiss field both depend on the whole self-consistency
+// hybridization-target Lambda bug (see cincuenta/TestSuite/gbek_reference/README.md).
+// Row-by-row comparisons of the Cholesky factor V, or end-to-end comparisons of
+// the converged hybridization target Lambda, cannot cleanly localize a Hamiltonian
+// bug: V and the converged target both depend on the whole self-consistency
 // loop's history and are not gauge/basis invariant, so a mismatch there
 // could come from many places. Eigenvalues of a single, FIXED (externally
 // supplied, not self-consistently derived) V are different: they are
@@ -531,7 +587,6 @@ TEST_CASE("Hamiltonian eigenvalue spectrum matches an independent Python "
 	      "TmaxNeq=0.2;\n"
 	      "NtNeq=2;\n"
 	      "NeqDmftIter=1;\n"
-	      "NeqDmftTolerance=1e-4;\n"
 	      "NeqBathRank=1;\n"
 	      "BandwidthFinal=4.;\n";
 
@@ -601,7 +656,7 @@ TEST_CASE("Time propagation matches an independent Python reconstruction "
 	      "real OmegaDelta=0.2;\ninteger TridiagSteps=100;\nreal TridiagEps=1e-6;\n"
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
-	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
+	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\n"
 	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
@@ -709,7 +764,7 @@ TEST_CASE("G^< two-time construction matches an independent Python "
 	      "real OmegaDelta=0.2;\ninteger TridiagSteps=100;\nreal TridiagEps=1e-6;\n"
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
-	      "TmaxNeq=0.3;\nNtNeq=6;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
+	      "TmaxNeq=0.3;\nNtNeq=6;\nNeqDmftIter=1;\n"
 	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
@@ -848,8 +903,7 @@ TEST_CASE("G^< two-time construction matches an independent Python "
 
 // ── Double occupation / energy observable tests (paper Figs. 9-10) ──────────
 // Added 2026-07-15, alongside the C++ port of the Python reference's Fig.
-// 9/10 observables (see project memory project_gbek_ekin_factor2_bugfix and
-// project_gbek_double_occupation_next). Both tests below hand-drive PhiNHist
+// 9/10 observables. Both tests below hand-drive PhiNHist
 // directly (same style as the seed-scheme test above), bypassing
 // NeqBathDecomposition/self-consistency entirely, so they are fast and
 // deterministic.
@@ -884,7 +938,7 @@ TEST_CASE("docc/Ekin are exactly zero when the second-bath coupling is never "
 	      "real OmegaDelta=0.2;\ninteger TridiagSteps=100;\nreal TridiagEps=1e-6;\n"
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
-	      "TmaxNeq=0.5;\nNtNeq=10;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
+	      "TmaxNeq=0.5;\nNtNeq=10;\nNeqDmftIter=1;\n"
 	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
@@ -956,7 +1010,7 @@ TEST_CASE("Etot(t) stays roughly close to its analytic -U/4 value shortly "
 	      "real OmegaDelta=0.2;\ninteger TridiagSteps=100;\nreal TridiagEps=1e-6;\n"
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
-	      "TmaxNeq=1.5;\nNtNeq=30;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
+	      "TmaxNeq=1.5;\nNtNeq=30;\nNeqDmftIter=1;\n"
 	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);
@@ -1042,7 +1096,7 @@ TEST_CASE("computeKineticEnergyGBEKSector matches an independent dense-matrix "
 	      "real OmegaDelta=0.2;\ninteger TridiagSteps=100;\nreal TridiagEps=1e-6;\n"
 	      "TruncationTolerance=\"1e-6,20\";\nCorrectionVectorEta=0.;\nGsWeight=0.1;\n"
 	      "matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];\n"
-	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\nNeqDmftTolerance=1e-4;\n"
+	      "TmaxNeq=0.2;\nNtNeq=2;\nNeqDmftIter=1;\n"
 	      "NeqBathRank=1;\nBandwidthFinal=4.;\n";
 
 	InputNgType::Writeable ioW(Dmft::CincuentaInputCheck {}, kConfig);

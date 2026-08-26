@@ -57,11 +57,8 @@ TmaxNeq=4.0;
 NtNeq=100;
 
 NeqDmftIter=3;
-NeqDmftTolerance=1e-8;
 
-# ED solver with GBEK second bath, rank L=3 (NeqSolver="exactdiag" is the default;
-# written here for clarity)
-NeqSolver="exactdiag";
+# GBEK second bath, rank L=3.
 NeqBathRank=3;
 
 # BandwidthFinal=4 -> t*_f = 1 -> tStarFinalSq_ = 1.
