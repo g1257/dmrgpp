@@ -60,8 +60,7 @@ void mainLoop1(GeometryType&                   geometry,
 	using LeftRightSuperType     = LeftRightSuper<BasisWithOperatorsType, BasisType>;
 	using ModelHelperType        = ModelHelperTemplate<LeftRightSuperType>;
 	using ComplexOrRealType      = typename MySparseMatrix::value_type;
-	using QnType                 = Qn;
-	using VectorWithOffsetType   = VectorWithOffsets<ComplexOrRealType, QnType>;
+	using VectorWithOffsetType   = VectorWithOffsets<ComplexOrRealType>;
 
 	mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(geometry, io, params, list);
 }

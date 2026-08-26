@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
 #include "ProgramGlobals.h"
+#include "Qn.h"
 #include <PsimagLite/Complex.h>
 #include <PsimagLite/ProgressIndicator.h>
 #include <cassert>
@@ -93,24 +94,25 @@ namespace Dmrg {
  * sectors are listed in nzMsAndQns_; offsets_ maps each sector to its position in the
  * full vector, and index2Sector_ provides the inverse mapping for element access.
  *
+ * Quantum numbers for populated sectors are represented by Dmrg::Qn.
+ *
  * \tparam ComplexOrRealType Scalar type stored by the vector.
- * \tparam QnType_ Quantum-number type associated with each populated sector.
  */
 
 // forward declaration for friendship
 template <typename T> class OffsetVectorAny;
 
-template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
+template <typename ComplexOrRealType> class VectorWithOffsets {
 
-	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
-	using VectorSizeType = typename QnType_::VectorSizeType;
-	using PairSizeType   = typename QnType_::PairSizeType;
+	using ThisType       = VectorWithOffsets<ComplexOrRealType>;
+	using VectorSizeType = typename Qn::VectorSizeType;
+	using PairSizeType   = typename Qn::PairSizeType;
 
 	static ComplexOrRealType const zero_;
 
 public:
 
-	using QnType           = QnType_;
+	using QnType           = Qn;
 	using value_type       = ComplexOrRealType;
 	using RealType         = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using PairQnType       = std::pair<SizeType, QnType>;
@@ -878,8 +880,8 @@ private:
 	typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns_;
 }; // class VectorWithOffset
 
-template <typename ComplexOrRealType, typename EffectiveQnType>
-const ComplexOrRealType VectorWithOffsets<ComplexOrRealType, EffectiveQnType>::zero_ = 0;
+template <typename ComplexOrRealType>
+const ComplexOrRealType VectorWithOffsets<ComplexOrRealType>::zero_ = 0;
 }
 /*@}*/
 #endif

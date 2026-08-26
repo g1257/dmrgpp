@@ -20,7 +20,7 @@ template <typename ComplexOrRealType>
 class OffsetVectorAny : public OffsetVectorBase<ComplexOrRealType> {
 public:
 
-	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
+	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType>;
 
 	OffsetVectorAny(const VectorWithOffsetsType& v)
 	    : v_(v)
@@ -41,7 +41,7 @@ template <typename ComplexOrRealType>
 class OffsetVectorOne : public OffsetVectorBase<ComplexOrRealType> {
 public:
 
-	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
+	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType>;
 
 	OffsetVectorOne(const VectorWithOffsetsType& v)
 	    : v_(v)
@@ -69,7 +69,7 @@ private:
 template <typename ComplexOrRealType> class OffsetVector {
 public:
 
-	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType, Qn>;
+	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType>;
 
 	const OffsetVectorBase<ComplexOrRealType>& makeOffsetVector(const VectorWithOffsetsType& v)
 	{
