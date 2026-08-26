@@ -575,8 +575,8 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		bool from_infinite = (numberOfSites < 5 && !isRestart);
-		if (lastSite == 1 && !from_infinite && !latticeIsOdd) {
+		bool small_from_infinite = (numberOfSites < 5 && !isRestart);
+		if (lastSite == 1 && !small_from_infinite && !latticeIsOdd) {
 			lastSite = 0;
 		}
 
