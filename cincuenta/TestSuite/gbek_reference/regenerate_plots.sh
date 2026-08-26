@@ -31,6 +31,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 REPO_ROOT="$(cd ../../.. && pwd)"
 BUILD_DIR="$REPO_ROOT/build"
+# Keep Python diagnostics and the C++ runner on the same configurable build tree.
+export DMRGPP_BUILD_DIR="$BUILD_DIR"
 UV_NUMPY="uv run --with numpy --with scipy --with matplotlib python3"
 
 GROUP_A=1
@@ -86,7 +88,7 @@ if [ "$GROUP_B" = "1" ]; then
 
 	need_cincuenta_run() {
 		local prefix="$1"
-		[ ! -f "${prefix}-weiss-delta-lesser" ] || [ ! -f "${prefix}-plus-bath-lesser" ]
+		[ ! -f "${prefix}-lambda-lesser" ] || [ ! -f "${prefix}-plus-bath-lesser" ]
 	}
 
 	if need_cincuenta_run "$AL_PREFIX" || need_cincuenta_run "$FIG3_PREFIX"; then
@@ -111,10 +113,8 @@ if [ "$GROUP_B" = "1" ]; then
 			--L 3 --N 100 --dt 0.04 --U 2.0 --tq 0.25 --out gbek-atomic-limit-exact-lesser
 	fi
 
-	# Each of these has its input paths hardcoded as module-level constants
-	# pointing at $BUILD_DIR/atomic-limit-gbek-L3-* or
-	# $BUILD_DIR/gebk-fig3-L3-* -- see each script's own header if you need
-	# to point it elsewhere.
+	# Diagnostics use DMRGPP_BUILD_DIR (exported above), defaulting to this
+	# checkout's build/ directory when run independently.
 	$UV_NUMPY plot_atomic_limit_2d.py
 	$UV_NUMPY plot_collapse_evidence_summary.py
 	$UV_NUMPY plot_errstep_t3scan.py
@@ -124,8 +124,8 @@ if [ "$GROUP_B" = "1" ]; then
 	# reference" / "cincuenta rank-L Cholesky approx"), which is correct
 	# ONLY because arg1 here is genuinely the independent, undecomposed
 	# Python target and arg2 is genuinely cincuenta's reconstruction of it.
-	# gbek_reference_comparison.png is embedded in the GBEK progress report
-	# artifact -- if you ever repoint either argument at something else
+	# gbek_reference_comparison.png is embedded in the GBEK report -- if you
+	# ever repoint either argument at something else
 	# (e.g. comparing two cincuenta runs against each other), you MUST add
 	# --ref-label/--approx-label explicitly, or the report will silently
 	# ship a mislabeled plot (this happened once already -- see

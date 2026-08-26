@@ -6,7 +6,7 @@ eigenvalue-decay inset.
 
 Paper text (Sec. VI.A, around Eq. 62-66):
     "FIG. 4. Time evolution of the hybridization V+_0p(t). Both panels show
-    a rank L=3 approximation that corresponds to the input Weiss field
+    a rank L=3 approximation that corresponds to the input hybridization target Lambda
     -iLambda^<_+ displayed in Fig. 3. To obtain V^ch_0p(t), in the top
     panel, we used the low-rank Cholesky approach. In the lower panel, we
     plot the hybridization V^ev_0p(t), calculated using the low-rank
@@ -70,7 +70,7 @@ def main():
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", default="gbek-atomic-limit-exact-lesser",
                      help="gbek_selfconsistency.py dump_lesser output (Lambda_+, "
-                          "NOT a cincuenta C++ weiss-delta-lesser dump)")
+                          "NOT a cincuenta C++ lambda-lesser dump)")
     ap.add_argument("--rank", type=int, default=3)
     ap.add_argument("--out", default="fig4_hybridization.png")
     args = ap.parse_args()

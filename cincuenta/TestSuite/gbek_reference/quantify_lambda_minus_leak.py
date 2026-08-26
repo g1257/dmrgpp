@@ -26,7 +26,7 @@ for actually diagnosing a Lambda^+ discrepancy.
 Usage:
     python3 quantify_lambda_minus_leak.py <prefix>
     # e.g. prefix = /path/to/gebk-fig3-L3   (looks for
-    #   <prefix>-weiss-delta-lesser and <prefix>-plus-bath-lesser)
+    #   <prefix>-lambda-lesser and <prefix>-plus-bath-lesser)
 """
 import argparse
 import numpy as np
@@ -43,12 +43,12 @@ def main():
     ap.add_argument("--out", default="lambda_minus_leak_check.png")
     args = ap.parse_args()
 
-    ts, raw_re, raw_im = read_lesser_file(f"{args.prefix}-weiss-delta-lesser")
+    ts, raw_re, raw_im = read_lesser_file(f"{args.prefix}-lambda-lesser")
     ts2, plus_re, plus_im = read_lesser_file(f"{args.prefix}-plus-bath-lesser")
-    assert np.allclose(ts, ts2), "weiss-delta-lesser and plus-bath-lesser grids differ"
+    assert np.allclose(ts, ts2), "lambda-lesser and plus-bath-lesser grids differ"
 
-    # weiss-delta-lesser stores the raw lesser component itself (KadanoffBaym
-    # convention: Re, Im columns are its real/imag parts). plus-bath-lesser
+    # lambda-lesser stores the raw lesser component itself (the real-time
+    # dump convention: Re, Im columns are its real/imag parts). plus-bath-lesser
     # stores Lambda^+_< directly (dumpPlusBath's own convention). Put both on
     # the same footing as -i*X: -i*(a+ib) = b - ia.
     lam_total = raw_im - 1j * raw_re       # Lambda(t,t')

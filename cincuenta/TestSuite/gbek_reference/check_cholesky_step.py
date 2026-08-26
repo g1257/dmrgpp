@@ -4,7 +4,7 @@ Isolate whether cincuenta's second-bath failure (Lambda^+ collapsing to ~0
 well before the paper's expected L=3 accuracy horizon) is in the Cholesky
 DECOMPOSITION step or the real-time PROPAGATION step.
 
-Method: read cincuenta's own dumped total Lambda (weiss-delta-lesser) for a
+Method: read cincuenta's own dumped total Lambda (lambda-lesser) for a
 run, subtract the analytic first-bath Lambda^- (computed directly from the
 run's own fitted equilibrium bath parameters -- confirmed tiny, ~3e-4, via
 check_analytic_deltaminus.py), and feed the result through our own
@@ -17,7 +17,7 @@ cincuenta's own dump, there's a real discrepancy to chase down separately
 from rank-truncation.
 
 Usage:
-    python3 check_cholesky_step.py <weiss-delta-lesser> <plus-bath-lesser> \\
+    python3 check_cholesky_step.py <lambda-lesser> <plus-bath-lesser> \\
         --V <v0,v1,...> --eps <e0,e1,...> --beta <beta> --L <rank> --dt <dt>
 """
 import argparse
@@ -49,7 +49,7 @@ def analytic_lambda_minus_lesser(ts, V, eps, beta):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("delta_file", help="cincuenta's weiss-delta-lesser dump (total Lambda)")
+    ap.add_argument("delta_file", help="cincuenta's lambda-lesser dump (total Lambda)")
     ap.add_argument("plus_file", help="cincuenta's plus-bath-lesser dump (its own Lambda^+)")
     ap.add_argument("--V", required=True, help="comma-separated fitted hoppings")
     ap.add_argument("--eps", required=True, help="comma-separated fitted bath energies")

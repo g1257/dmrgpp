@@ -7,7 +7,7 @@ test. That C++ test exists specifically to catch Hamiltonian-construction
 bugs (wrong Jordan-Wigner sign, wrong site layout, wrong occ/empty coupling
 polarity, wrong diagonal/potential terms) that row-by-row V comparisons or
 end-to-end self-consistency comparisons cannot cleanly localize, because V
-and the converged Weiss field both depend on the self-consistency loop's own
+and the converged hybridization target Lambda both depend on the self-consistency loop's own
 history and are not themselves gauge/basis invariant. Eigenvalues of a
 FIXED, externally-supplied-V Hamiltonian are: this script and the C++ test
 build the identical physical system independently (this script never calls

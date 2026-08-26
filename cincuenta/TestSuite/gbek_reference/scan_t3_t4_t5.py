@@ -21,9 +21,11 @@ import numpy as np
 
 from compare_reference import read_lesser_file
 from gbek_cholesky import _solve_optimal_update, reconstruct
+from gbek_paths import default_build_dir
 
-TARGET_L4 = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L4-weiss-delta-lesser"
-TARGET_L5 = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L5-weiss-delta-lesser"
+BUILD_DIR = default_build_dir()
+TARGET_L4 = str(BUILD_DIR / "atomic-limit-gbek-L4-lambda-lesser")
+TARGET_L5 = str(BUILD_DIR / "atomic-limit-gbek-L5-lambda-lesser")
 
 
 def load_lambda_from_delta(path):

@@ -23,9 +23,11 @@ import matplotlib.pyplot as plt
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
-TARGET_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
-CPP_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-plus-bath-lesser"
+BUILD_DIR = default_build_dir()
+TARGET_FILE = str(BUILD_DIR / "atomic-limit-gbek-L3-lambda-lesser")
+CPP_FILE = str(BUILD_DIR / "atomic-limit-gbek-L3-plus-bath-lesser")
 OUT = "atomic_limit_2d_rank_comparison.png"
 
 

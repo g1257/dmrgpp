@@ -4,7 +4,7 @@ One-off check (2026-07-09): compare err[ch]/err[ev] at rank L=3 for two
 different candidate "targets":
 
   (A) cincuenta's own C++ atomic-limit reference dump
-      (atomic-limit-gbek-L3-weiss-delta-lesser) -- built from the FULL
+      (atomic-limit-gbek-L3-lambda-lesser) -- built from the FULL
       extended-Fock/exact dynamics, NOT compressed through a rank-3 Cholesky
       loop anywhere upstream.
   (B) gbek_selfconsistency.py's own reference (gbek-atomic-limit-exact-lesser)
@@ -13,7 +13,7 @@ different candidate "targets":
       gbek_selfconsistency.py: `V = cholesky_causal(Lambda, L)` every
       iteration), i.e. a genuine fixed point of a rank-3-compressed loop,
       analogous to what GBEK's own Fig. 3 target actually is (per the
-      "strongest Fable" hypothesis under test: their target is co-generated
+      hypothesis under test: their target is co-generated
       with rank-3 causal compression, not a rank-independent exact target).
 
 If that hypothesis is right, target (B)'s err[ch]/err[ev] ratio should sit
@@ -23,9 +23,9 @@ import numpy as np
 
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct
+from gbek_paths import default_build_dir
 
-TARGET_A = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
-TARGET_B = "/tmp/reconv_check.txt"  # freshly regenerated, post seeding-floor-fix
+TARGET_A = str(default_build_dir() / "atomic-limit-gbek-L3-lambda-lesser")
 L = 3
 
 
@@ -62,8 +62,14 @@ def report(name, ts, lam):
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("target_b", help="fresh rank-3 fixed-point Lambda dump")
+    args = parser.parse_args()
+
     tsA, lamA = load_lambda_from_delta(TARGET_A)
-    tsB, lamB = load_lambda_direct(TARGET_B)
+    tsB, lamB = load_lambda_direct(args.target_b)
 
     print(f"paper (quoted, Fig. 3 L=3): err[ch]=0.17  err[ev]=0.09  ratio=1.9x\n")
     report("(A) cincuenta C++ exact (no rank-3 in loop)", tsA, lamA)

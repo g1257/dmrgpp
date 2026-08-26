@@ -15,8 +15,9 @@ from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct
 from scan_t3_activation import cholesky_forced_t3, global_err
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
-TARGET = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
+TARGET = str(default_build_dir() / "atomic-limit-gbek-L3-lambda-lesser")
 L = 3
 BEST_N3 = 26  # t3=1.04, the scan's minimum
 

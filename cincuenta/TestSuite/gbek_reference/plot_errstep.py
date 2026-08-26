@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 Plot err^step(t) (GBEK PRB 88, 235106 (2013), Eq. 67 -- verified by actually
-compiling the paper's LaTeX source and reading the real REVTeX-assigned
-number from the .aux file's \\newlabel entries; see
-project_gbek_paper_source_reliability memory) for a given target Lambda,
+compiling the paper's LaTeX source and reading the REVTeX-assigned number
+from the .aux file's \\newlabel entries) for a given target Lambda,
 in the same style as the paper's own Fig. 3 bottom-left panel, so a plot
 made here can be visually compared directly against that panel.
 
@@ -26,7 +25,7 @@ NeqBathDecomposition.h changed behavior (for better or worse).
 
 Usage:
     uv run --with numpy --with matplotlib python3 plot_errstep.py \\
-        --target /path/to/..-weiss-delta-lesser \\
+        --target /path/to/..-lambda-lesser \\
         [--cpp-recon /path/to/..-plus-bath-lesser] \\
         [--ranks 2,3] [--out errstep.png] [--title "..."]
 
@@ -42,20 +41,20 @@ import matplotlib.pyplot as plt
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct, eigenvector_decompose
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
-DEFAULT_TARGET = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
+DEFAULT_TARGET = str(default_build_dir() / "atomic-limit-gbek-L3-lambda-lesser")
 
 
 def load_lambda(path):
-    """Read a *-weiss-delta-lesser dump and convert to Lambda (= -i * the
+    """Read a *-lambda-lesser dump and convert to Lambda (= -i * the
     dump's raw lesser component).
 
     Lambda^- == 0 for the true-atomic-limit runs this script targets, so
-    this IS Lambda_+ directly (see project_neq_atomic_limit_implementation
-    memory). If you ever point this at a target where Lambda^- != 0, this
-    conversion is no longer valid as "Lambda_+" and the script would need
-    a Lambda^- subtraction first (cf. gbek_cholesky.py's module docstring
-    and the near-atomic W_i=0.1 analysis in project_gbek_cosine_bug).
+    this IS Lambda_+ directly. If you ever point this at a target where
+    Lambda^- != 0, this conversion is no longer valid as "Lambda_+" and
+    the script needs a Lambda^- subtraction first, as illustrated by the
+    near-atomic analysis in plot_fig3l3_post_fix.py.
     """
     ts, re, im = read_lesser_file(path)
     return ts, -1j * (re + 1j * im)
@@ -94,7 +93,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", default=DEFAULT_TARGET,
-                    help="*-weiss-delta-lesser dump (the exact target Lambda). "
+                    help="*-lambda-lesser dump (the exact target Lambda). "
                          "Ignored if --run is given.")
     ap.add_argument("--cpp-recon", default=None,
                     help="optional *-plus-bath-lesser dump (cincuenta's own "
@@ -111,7 +110,7 @@ def main():
     ap.add_argument("--run", action="append", default=None,
                     metavar="TARGET,RECON,RANK",
                     help="one full cincuenta run to overlay: its own "
-                         "*-weiss-delta-lesser target, its own "
+                         "*-lambda-lesser target, its own "
                          "*-plus-bath-lesser C++ reconstruction, and the rank "
                          "it was run at, comma-separated. Repeat --run for "
                          "each rank/run you want on the same plot (e.g. to "
