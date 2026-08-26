@@ -72,12 +72,10 @@ case "${step}" in
           -GNinja \
           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
           -DCMAKE_CXX_COMPILER=/usr/bin/g++-13 \
-          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wno-unused-parameter" \
           -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
           -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER \
           -DKokkos_ENABLE_CUDA=ON \
           -DKokkos_ARCH_AMPERE80=ON \
-          -DKokkos_ENABLE_CUDA_LAMBDA=ON \
           "${cuda_root_args[@]}"
     ;;
 
