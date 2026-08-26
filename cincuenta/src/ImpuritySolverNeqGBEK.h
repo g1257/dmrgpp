@@ -122,7 +122,7 @@ public:
 	// For L>0: also builds the extended Fock space and seeds time-propagated states.
 	void solve(const VectorRealType& bathParams) override
 	{
-		const RealType beta = params_.eqParams.ficticiousBeta;
+		const RealType beta = params_.grid.ficticiousBeta;
 		const RealType mu   = 0;
 
 		decomp_ = std::make_unique<DecompType>(
@@ -131,10 +131,9 @@ public:
 		    mu,
 		    bathParams,
 		    params_.nT,
-		    params_.eqParams.nMatsubaras,
+		    params_.grid.nMatsubaras,
 		    params_.dt,
-		    params_.eqParams.ficticiousBeta
-		        / static_cast<RealType>(params_.eqParams.nMatsubaras));
+		    params_.grid.ficticiousBeta / static_cast<RealType>(params_.grid.nMatsubaras));
 
 		exactDiag_.solve(bathParams);
 

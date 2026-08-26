@@ -2,8 +2,8 @@
 
 FicticiousBeta=50;
 # Because we're using U nup ndown
-# the mu should be -0.5*U
-ChemicalPotential=0.;
+# the mu should be 0.5*U
+ChemicalPotential=4.;
 Matsubaras=400;
 # LatticeGf: 50 is the number of K points
 #LatticeGf="momentum,1D,50";

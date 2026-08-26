@@ -1,4 +1,5 @@
 #include "BatchedGemmCpu.h"
+#include "BatchedGemmKokkos.h"
 #include "DMRGConfig.h"
 #ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
@@ -240,4 +241,12 @@ TEST_CASE("BatchedGemm matrixVector", "[BatchedGemm]")
 			CHECK(v_p[i] == Catch::Approx(expected[i]).epsilon(1e-12));
 	}
 #endif
+
+	{
+		VectorType                            v_k(6);
+		Dmrg::BatchedGemmKokkos<FakeInitKron> bgk(fk);
+		bgk.matrixVector(v_k, vin);
+		for (size_t i = 0; i < 6; i++)
+			CHECK(v_k[i] == Catch::Approx(expected[i]).epsilon(1e-12));
+	}
 }

@@ -521,13 +521,14 @@ struct ParametersDmrgSolver {
 			lastSite        = (isAllInSys) ? numberOfSites - 2 : numberOfSites / 2 - 1;
 		}
 
-		readFiniteLoops(io, finiteLoop, truncationControl, lastSite);
+		readFiniteLoops(io, finiteLoop, truncationControl, lastSite, isRestart);
 	}
 
 	void readFiniteLoops(InputValidatorType&          io,
 	                     VectorFiniteLoopType&        vfl,
 	                     const TruncationControlType& truncationC,
-	                     int                          lastSite) const
+	                     int                          lastSite,
+	                     bool                         isRestart) const
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
@@ -536,7 +537,7 @@ struct ParametersDmrgSolver {
 		} else {
 			MatrixStringType tmpMat;
 			io.read(tmpMat, "FiniteLoops");
-			readFiniteLoops_(io, vfl, tmpMat, truncationC, lastSite);
+			readFiniteLoops_(io, vfl, tmpMat, truncationC, lastSite, isRestart);
 		}
 	}
 
@@ -562,7 +563,8 @@ struct ParametersDmrgSolver {
 	                      VectorFiniteLoopType&        vfl,
 	                      const MatrixStringType&      tmpMat,
 	                      const TruncationControlType& truncationC,
-	                      int                          lastSite) const
+	                      int                          lastSite,
+	                      bool                         isRestart) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -573,7 +575,9 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		if (lastSite == 1 && numberOfSites > 4) {
+		// For restarts and even (regular lattices), lastSite == 1 indicated
+		// by the previous run is really the leftmost border 0
+		if (lastSite == 1 && isRestart && !latticeIsOdd) {
 			lastSite = 0;
 		}
 
@@ -585,12 +589,7 @@ struct ParametersDmrgSolver {
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
 			if (lastSite >= 0) {
-
 				lastSite += length;
-
-				if (latticeIsOdd && lastSite == 1) {
-					lastSite = 0;
-				}
 			}
 
 			std::cout << length;

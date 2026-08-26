@@ -1,0 +1,104 @@
+classDiagram
+
+    class DmftSolver {
+        +selfConsistencyLoop()
+        +print(ostream&)
+        -computeNewSelfEnergy(VectorRealType&)
+        -computeSiteExcludedG(FunctionOfFrequencyType&)
+    }
+
+    class ImpuritySolverBase {
+        <<interface>>
+        +solve(VectorRealType&) = 0
+        +gimp() const = 0
+    }
+
+    class ImpuritySolverExactDiag {
+        +solve(VectorRealType&)
+        +gimp() const
+        -setupHamiltonian(...)
+        -computeGreenFunction(...)
+        -doType(...)
+        -createOneOverMatrix(...)
+    }
+
+    class ImpuritySolverDmrg {
+        +solve(VectorRealType&)
+        +gimp() const
+    }
+
+    class Fit {
+        +fit(FunctionOfFrequencyType&)
+        +result() const
+        +nBath() const
+        -setResults()
+    }
+
+    class AndersonFunction {
+        +operator()(VectorRealType&) const
+        +df(VectorRealType&, VectorRealType&) const
+        +anderson(VectorRealType&, ComplexOrRealType, SizeType) static
+        -andersonPrime(...)
+    }
+
+    class LatticeGf {
+        +update()
+        +operator()() const
+        +gammaG() const
+        -updateMomentum()
+        -updateEnergy()
+    }
+
+    class ModelParams {
+        +ModelParams(VectorRealType&, InputNgType::Readable&)
+        +geometry()
+        +numberOfSites()
+        +potentialV()
+        +hoppings()
+        +impuritySite()
+    }
+
+    class FunctionOfFrequency {
+        +omega(SizeType) const
+        +operator()(SizeType)
+        +totalMatsubaras()
+    }
+
+    class Matsubaras {
+        +omega(SizeType) const
+        +fictitiousBeta()
+        +total()
+    }
+
+    class ParamsDmftSolver {
+        +ficticiousBeta
+        +mu
+        +nMatsubaras
+        +nBath
+        +dmftIter
+        +dmftError
+        +impuritySolver
+        +minParams
+    }
+
+    DmftSolver --> ImpuritySolverBase : uses (polymorphic)
+    DmftSolver --> Fit : uses
+    DmftSolver --> LatticeGf : uses
+    DmftSolver --> ParamsDmftSolver : holds (const ref)
+    DmftSolver --> AndersonFunction : uses (via Fit)
+    DmftSolver --> FunctionOfFrequency : sigma_, latticeG_, gammaG_
+
+    ImpuritySolverExactDiag ..|> ImpuritySolverBase
+    ImpuritySolverDmrg ..|> ImpuritySolverBase
+
+    Fit --> AndersonFunction : objective function
+    Fit --> FunctionOfFrequency : gammaG (target)
+    Fit --> ModelParams : indirectly (via bathParams)
+
+    LatticeGf --> FunctionOfFrequency : sigma_, latticeG_, gammaG_
+
+    %% ModelParams --> PsimagLite::Star : geometry
+    ModelParams --> VectorRealType : hoppings_, potentialV_
+
+    FunctionOfFrequency --> Matsubaras : uses
+    Matsubaras --> VectorRealType : stores Matsubara frequencies

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -euo pipefail
+
+computeProcsForMake()
+{
+    local nprocs
+
+    if [[ $(uname -s) == Darwin ]]; then
+        nprocs=$(sysctl -n hw.ncpu)
+    else
+        nprocs=$(nproc)
+    fi
+
+    if (( nprocs > 3 )); then
+        echo $((nprocs - 2))
+    else
+        echo 1
+    fi
+}
+
+source_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+build_dir="${source_dir}/build"
+
+mkdir -p "${build_dir}"
+
+cmake -S "${source_dir}" -B "${build_dir}" -DCMAKE_BUILD_TYPE=Release
+cmake --build "${build_dir}" -j "$(computeProcsForMake)"

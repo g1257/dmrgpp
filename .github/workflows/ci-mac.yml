@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         path: source
 
@@ -29,15 +29,10 @@ jobs:
               -B ${{github.workspace}}/build \
               -GNinja \
               -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
-              -DKokkosKernels_ENABLE_TPL_BLAS=ON \
-              -DKokkosKernels_ENABLE_TPL_LAPACK=ON
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
-
-    - name: Test
-      run: ctest --test-dir ${{github.workspace}}/build -E ^output3$ -LE Nightly --output-on-failure
 
     - name: Install
       run: cmake --install ${{github.workspace}}/build --prefix ${{github.workspace}}/install

@@ -5,10 +5,14 @@
 #include <PsimagLite/Matrix.h>
 #include <PsimagLite/Vector.h>
 
+#include <Kokkos_Core.hpp>
+#include <PsimagLite/KokkosType.h>
+
 template <typename T> class BatchedGemm {
 
-	typedef int                                   IntegerType;
-	typedef std::vector<T>                        VectorType;
+	typedef int            IntegerType;
+	typedef std::vector<T> VectorType;
+	using KokkosScalar = PsimagLite::KokkosType<T>::type;
 	typedef PsimagLite::Vector<SizeType>::Type    VectorSizeType;
 	typedef PsimagLite::Vector<IntegerType>::Type VectorIntegerType;
 
@@ -23,7 +27,8 @@ public:
 	            std::vector<T*>& Bmatrix,
 	            VectorSizeType&  ld_Bmatrix);
 
-	void apply_Htarget(T* vin, T* vout);
+	void apply_Htarget(Kokkos::View<const KokkosScalar*, Kokkos::SharedSpace> vin,
+	                   Kokkos::View<KokkosScalar*, Kokkos::SharedSpace>       vout);
 
 	~BatchedGemm();
 

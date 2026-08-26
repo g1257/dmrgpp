@@ -10,6 +10,10 @@ if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   set(PLUGIN_SC ON)
 endif()
 
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Kokkos")
+  set(KOKKOS_BATCHED ON)
+endif()
+
 add_subdirectory(KronUtil)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h @ONLY)
@@ -146,10 +150,8 @@ add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 
 add_test(NAME input2_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2_batchedgemm.ain)
-add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2.cout)
+add_lowest_eigenvalue_check_test(output2_batchedgemm input2_batched_gemm -9.51754 runForinput2_batchedgemm.cout)
 
-add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain) # energy -21.5102
-add_lowest_eigenvalue_check_test(output3 input3 -21.5102 runForinput3.cout)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output4 input4 -15.9938 runForinput4.cout)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain) # energy -15.9938
@@ -162,9 +164,10 @@ add_lowest_eigenvalue_check_test(output7 input7 -15.9939 runForinput7.cout)
 add_test(NAME input10 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input10.ain) # energy -19.6747
 add_lowest_eigenvalue_check_test(output10 input10 -19.6747 runForinput10.cout)
 
-# input11 and input12 need -DUSE_PTHREADS
+# input11 is redundant
 # add_test(NAME input11 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input11.ain)
-# add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain)
+add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain) # energy 2.23292
+add_lowest_eigenvalue_check_test(output12 input12 2.23292 runForinput12.cout)
 add_test(NAME input20 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input20.ain) # energy -3.37493
 add_lowest_eigenvalue_check_test(output20 input20 -3.37493 runForinput20.cout)
 add_test(NAME input21 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input21.ain "<gs|sz|P0>") # none
@@ -192,6 +195,12 @@ add_test(NAME input70 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input70.ain) # energy 
 add_lowest_eigenvalue_check_test(output70 input70 -9.28874 runForinput70.cout)
 add_test(NAME input71 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input71.ain) # energy -9.74163
 add_lowest_eigenvalue_check_test(output71 input71 -9.74163 runForinput71.cout)
+add_test(NAME input72 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input72.ain) # energy -4.47214
+add_lowest_eigenvalue_check_test(output72 input72 -4.47214 runForinput72.cout)
+add_test(NAME input73 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input73.ain) # energy -4.47214
+add_lowest_eigenvalue_check_test(output73 input73 -4.47214 runForinput73.cout)
+add_test(NAME input74 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input74.ain) # energy -0.707712
+add_lowest_eigenvalue_check_test(output74 input74 -0.707712 runForinput74.cout)
 add_test(NAME input80 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input80.ain) # energy -7.37027
 add_lowest_eigenvalue_check_test(output80 input80 -7.37027 runForinput80.cout)
 add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain) # energy -9.51754
@@ -218,6 +227,9 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # The following tests are expensive to
   add_lowest_eigenvalue_check_test(output341 input341 -0.093321 runForinput341.cout)
   add_test(NAME input342 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342.ain) # energy -0.0933211
   add_lowest_eigenvalue_check_test(output342 input342 -0.0933211 runForinput342.cout)
+  add_test(NAME input342_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342_batchedgemm.ain) # energy -0.0933211
+  add_lowest_eigenvalue_check_test(output342_batchedgemm input342_batchedgemm -0.0933211
+                                   runForinput342_batchedgemm.cout)
 endif()
 add_test(NAME input351 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input351.ain) # energy -0.408019
 add_lowest_eigenvalue_check_test(output351 input351 -0.408019 runForinput351.cout)

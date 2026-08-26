@@ -9,56 +9,32 @@
 # ImpuritySolverNeqExactDiag::solveAtomicLimit() and
 # cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py).
 #
-# NumberOfBathPoints=1 keeps the (discarded) equilibrium self-consistency
-# loop's minimizer well-posed (it needs >=1 bath parameter pair; 0 makes
-# GSL's simplex minimizer error out). TargetElectronsUp=1/Down=0 is read
-# by both the eq loop (no half-filling constraint there) and the neq
-# solver (which requires nup_+ndown_==1 for the atomic-limit bypass) from
-# the same keys -- the eq fit result itself is discarded by NeqAtomicLimit.
+# NeqAtomicLimit=1 means there is no equilibrium DMFT stage at all --
+# cincuenta.cpp never even constructs the equilibrium bath-fit machinery.
+# Equilibrium-bath-fit-only keys (NumberOfBathPoints=, ImpuritySolver=,
+# FitOptions=, MinParams*=, DmftNumberOfIterations=, DmftTolerance=, and the
+# whole DMRG omega-scan block) are therefore simply omitted below rather
+# than set to placeholder values -- most of them (NumberOfBathPoints=,
+# ImpuritySolver=, FitOptions=) are now rejected with an error if present at
+# all, since they would otherwise silently do nothing. TargetElectronsUp=1/
+# Down=0 is still required by the neq solver itself (nup_+ndown_==1 for the
+# atomic-limit bypass). LatticeGf= is, like every other calculation, still
+# required; the atomic-limit closed form only supports the zero-bandwidth
+# value below (see ParamsMatsubaraGrid.h).
 #
 # GBEK Fig. 3 parameters: U=2, 100 steps, dt=0.04 (tmax=4),
-# quench to Bethe bandwidth W_f=4 (t*=1), L=3 second bath rank.
+# quench to Bethe bandwidth W_f=4 (v=1), L=3 second bath rank.
 
 FicticiousBeta=16;
-ChemicalPotential=0.;
+ChemicalPotential=1.;  # HubbardU/2, required by the atomic-limit closed form
 Matsubaras=200;
-LatticeGf="energy,semicircular,0.1";
-NumberOfBathPoints=1;
-
-DmftNumberOfIterations=1;
-DmftTolerance=0.001;
-ImpuritySolver="exactdiag";
-
-FitOptions=particleholesymmetric;
-MinParamsDelta=0.01;
-MinParamsMaxIter=10000;
-MinParamsDelta2=0.01;
-MinParamsTolerance=1e-3;
-MinParamsVerbose=1;
+LatticeGf="energy,semicircular,0";  # W_i=0: no pre-quench bath, by construction
 
 TargetElectronsUp=1;
 TargetElectronsDown=0;
 
 int ImpuritySite=0;
 real HubbardU=2.;
-
-# DMRG settings (required by ParamsDmftSolver; unused for exactdiag)
-RootOutputname="NeqAtomicLimitGBEKL3";
-InfiniteLoopKeptStates=200;
-matrix FiniteLoopsGs=[[@auto, 200, 0],[@auto, 200, 0]];
-
-real OmegaBegin=-6.;
-integer OmegaTotal=120;
-real OmegaStep=0.1;
-real OmegaDelta=0.1;
-
-integer TridiagSteps=400;
-real TridiagEps=1e-9;
-TruncationTolerance="1e-10,100";
-CorrectionVectorEta=0.;
-GsWeight=0.1;
-
-matrix FiniteLoopsOmega=[[@auto, 200, 2],[@auto, 200, 2]];
 
 # Non-equilibrium: hopping quench, atomic limit start.  U=2 fixed.
 HubbardUFinal=2.;
@@ -68,12 +44,13 @@ NtNeq=100;
 NeqDmftIter=3;
 NeqDmftTolerance=1e-8;
 
-# GBEK two-bath solver, second bath rank L=3
-NeqSolver="gbek";
+# ED solver with GBEK second bath, rank L=3 (NeqSolver="exactdiag" is the default;
+# written here for clarity)
+NeqSolver="exactdiag";
 NeqBathRank=3;
 NeqAtomicLimit=1;
 
-# BandwidthFinal=4 -> t*_f = 1 -> tStarFinalSq_ = 1.
+# BandwidthFinal=4 -> v_f = 1 -> vHopFinal_ = 1.
 BandwidthFinal=4.;
 QuenchShape="cosine";
 QuenchDuration=0.25;

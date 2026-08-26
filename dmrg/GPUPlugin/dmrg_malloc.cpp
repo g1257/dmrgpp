@@ -76,66 +76,6 @@ void dmrg_memcpy(void* dest, const void* src, size_t count)
 #endif
 }
 
-template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size)
-{
-	T* ptr = NULL;
-#ifdef USE_MAGMA
-	{
-		auto        flags  = cudaMemAttachGlobal;
-		size_t      nbytes = (alloc_size > 0) ? alloc_size : 1;
-		cudaError_t ierr   = cudaMallocManaged(&ptr, nbytes, flags);
-		IntegerType isok   = (ierr == cudaSuccess);
-		if (!isok) {
-			fprintf(stderr, "dmrg_malloc: CUDA ERROR %s\n", cudaGetErrorString(ierr));
-
-			if (ierr == cudaErrorMemoryAllocation) {
-				fprintf(stderr,
-				        "dmrg_malloc:cudaErrorMemoryAllocation, alloc_size=%ld\n",
-				        alloc_size);
-			} else if (ierr == cudaErrorNotSupported) {
-				fprintf(stderr,
-				        "dmrg_malloc:cudaErrorNotSupported, alloc_size=%ld\n",
-				        alloc_size);
-			} else if (ierr == cudaErrorInvalidValue) {
-				fprintf(stderr,
-				        "dmrg_malloc:cudaErrorInvalidValue, alloc_size=%ld\n",
-				        alloc_size);
-			}
-		}
-		assert(isok);
-	}
-
-	if (dmrg_get_ngpu() == 1) {
-#ifdef USE_CUMEMADVISE
-		CUdeviceptr  devPtr = (CUdeviceptr)ptr;
-		size_t       count  = alloc_size;
-		CUmem_advise advice = CU_MEM_ADVISE_SET_PREFERRED_LOCATION;
-		CUdevice     device = 0;
-		CUresult     istat  = cuMemAdvise(devPtr, count, advice, device);
-		assert(istat == CUDA_SUCCESS);
-#else
-		IntegerType     device = 0;
-		cudaMemLocation gpuLocation;
-		gpuLocation.type  = cudaMemLocationTypeDevice; // or cudaMemLocationTypeHostNuma
-		gpuLocation.id    = device;
-		size_t      count = alloc_size;
-		cudaError_t ierr
-		    = cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, gpuLocation);
-		assert(ierr == cudaSuccess);
-#ifdef NDEBUG
-		(void)ierr;
-#endif
-#endif
-	}
-
-#else
-	// ptr = (void *) malloc( alloc_size );
-	ptr = new T[size];
-#endif
-	assert(ptr != 0);
-	return (ptr);
-}
-
 template <typename T>
 void dmrg_lacpy(const char*       uplo,
                 const IntegerType m,
@@ -238,43 +178,7 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 #endif
 }
 
-template <typename T> void dmrg_free(T* ptr)
-{
-#ifdef USE_MAGMA
-	{
-		assert(ptr != 0);
-		cudaError_t ierr = cudaFree(ptr);
-		IntegerType isok = (ierr == cudaSuccess);
-		if (!isok) {
-			fprintf(stderr, "dmrg_free: CUDA ERROR %s\n", cudaGetErrorString(ierr));
-
-			if (ierr == cudaErrorInvalidDevicePointer) {
-				fprintf(stderr, "dmrg_free: cudaErrorInvalidDevicePointer \n");
-			} else if (ierr == cudaErrorIllegalAddress) {
-				fprintf(stderr, "dmrg_free: cudaErrorIllegalAddress \n");
-			} else if (ierr == cudaErrorInitializationError) {
-				fprintf(stderr, "dmrg_free: cudaErrorInitializationError \n");
-			};
-		};
-
-		assert(ierr == cudaSuccess);
-	};
-#else
-	//  free( ptr );
-	delete ptr;
-#endif
-}
-
-template char*        dmrg_malloc<char>(const size_t alloc_size, SizeType size);
-template void         dmrg_free<char>(char*);
-template IntegerType* dmrg_malloc<IntegerType>(const size_t alloc_size, SizeType size);
-template void         dmrg_free<IntegerType>(IntegerType*);
-
-template void     dmrg_free<double>(double*);
-template void     dmrg_free<double*>(double**);
-template double*  dmrg_malloc<double>(const size_t alloc_size, SizeType size);
-template double** dmrg_malloc<double*>(const size_t alloc_size, SizeType size);
-template void     dmrg_lacpy<double>(const char*       uplo,
+template void dmrg_lacpy<double>(const char*       uplo,
                                  const IntegerType m,
                                  const IntegerType n,
                                  const double*     src,
@@ -282,13 +186,7 @@ template void     dmrg_lacpy<double>(const char*       uplo,
                                  double*           dest,
                                  const IntegerType ld_dest);
 
-template void                   dmrg_free<std::complex<double>>(std::complex<double>*);
-template void                   dmrg_free<std::complex<double>*>(std::complex<double>**);
-template std::complex<double>*  dmrg_malloc<std::complex<double>>(const size_t alloc_size,
-                                                                 SizeType     size);
-template std::complex<double>** dmrg_malloc<std::complex<double>*>(const size_t alloc_size,
-                                                                   SizeType     size);
-template void                   dmrg_lacpy<std::complex<double>>(const char*                 uplo,
+template void dmrg_lacpy<std::complex<double>>(const char*                 uplo,
                                                const IntegerType           m,
                                                const IntegerType           n,
                                                const std::complex<double>* src,

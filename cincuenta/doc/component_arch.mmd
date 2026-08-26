@@ -1,0 +1,84 @@
+graph TB
+    subgraph cin ["cincuenta — DMFT Application"]
+        direction TB
+        MAIN["main()\ncincuenta.cpp"]
+
+        subgraph dmft_core ["DMFT Self-Consistency Core"]
+            DS["DmftSolver\n──────────────────────\nselfConsistencyLoop()\ncomputeNewSelfEnergy()"]
+            LG["LatticeGf\n──────────────────────\nG_latt(iωn) via k-sum or DOS\nΓ(iωn) = iωn − 1/G − Σ"]
+            FT["Fit\n──────────────────────\nmin ||Δ(V,ε) − Γ||²\nresult: bathParams"]
+            AF["AndersonFunction\n──────────────────────\nΔ(iωn) = Σ Vα²/(iωn−εα)\ngradient for optimizer"]
+            FF["FunctionOfFrequency\n──────────────────────\ncontainers for Σ, G, Γ\non Matsubara grid"]
+        end
+
+        subgraph lattice_model ["Lattice Model"]
+            DIS["Dispersion\n1D: εk = −2cos(k)"]
+            DOS["DensityOfStates\nsemicircular ρ(ε)"]
+        end
+
+        subgraph impurity_layer ["Impurity Solver Layer"]
+            ISB["«interface» ImpuritySolverBase\n──────────────────────────────\nsolve(bathParams, freqEnum, iter)\ngimp() const"]
+            ISD["ImpuritySolverDmrg\n──────────────────────\nDMRG ground state\n+ correction vector dynamics"]
+            ISE["ImpuritySolverExactDiag\n──────────────────────\nLanczos diagonalization\n+ continued fraction G(ω)"]
+        end
+
+        MP["ModelParams\n──────────────────────\nstar geometry topology\nhoppings Vα, on-site εα"]
+    end
+
+    subgraph dmrg ["DMRG++"]
+        DR["DmrgRunner\n──────────────────\nground state via DMRG\ndoOneRun()"]
+        MO["ManyOmegas\n──────────────────\ndrives frequency loop\nfor spectral functions"]
+        PO["ProcOmegas\n──────────────────\nparses spectral fn output\nbuilds G_imp array"]
+    end
+
+    subgraph lpp ["LanczosPlusPlus"]
+        LE["Engine\n──────────────────\nLanczos diagonalization\nresolvent  (E−H)⁻¹|ψ⟩"]
+        LMS["ModelSelector\n──────────────────\nbuild H for star model\n(HubbardOneBand)"]
+        LCF["ContinuedFraction\n──────────────────\naccumulates spectral wt\nfor G_imp(ω)"]
+    end
+
+    subgraph psl ["PsimagLite — Shared Utilities"]
+        PMAT["Matsubaras\niωn = (2n+1)π/β\nfrequency grid"]
+        PMIN["Minimizer\nconjugate gradient\nor simplex"]
+        PGEO["Geometry/Star\nstar lattice topology\nfor ModelParams"]
+        PCFC["ContinuedFractionCollection\naccumulates Lanczos\ncontinued fractions"]
+        PSIO["InputNg\nI/O framework\nfor all components"]
+    end
+
+    %% Internal cincuenta wiring
+    MAIN --> DS
+    DS --> LG
+    DS --> FT
+    DS --> FF
+    DS --> ISB
+    DS --> MP
+    FT --> AF
+    LG --> DIS
+    LG --> DOS
+
+    %% Polymorphism
+    ISD -. implements .-> ISB
+    ISE -. implements .-> ISB
+
+    %% ImpuritySolverDmrg → DMRG++
+    ISD --> DR
+    ISD --> MO
+    ISD --> PO
+
+    %% ImpuritySolverExactDiag → LanczosPlusPlus
+    ISE --> LE
+    ISE --> LMS
+    ISE --> LCF
+
+    %% Both solvers use PsimagLite
+    LG --> PMAT
+    FF --> PMAT
+    FT --> PMIN
+    MP --> PGEO
+    ISE --> PCFC
+    DS --> PSIO
+    ISD --> PSIO
+
+    %% DMRG++ and LanczosPlusPlus share PsimagLite
+    DR --> PSIO
+    LE --> PCFC
