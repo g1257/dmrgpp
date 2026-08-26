@@ -117,18 +117,3 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 	}
 }
 
-template void dmrg_lacpy<double>(const char*       uplo,
-                                 const IntegerType m,
-                                 const IntegerType n,
-                                 const double*     src,
-                                 const IntegerType ld_src,
-                                 double*           dest,
-                                 const IntegerType ld_dest);
-
-template void dmrg_lacpy<std::complex<double>>(const char*                 uplo,
-                                               const IntegerType           m,
-                                               const IntegerType           n,
-                                               const std::complex<double>* src,
-                                               const IntegerType           ld_src,
-                                               std::complex<double>*       dest,
-                                               const IntegerType           ld_dest);

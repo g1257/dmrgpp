@@ -10,7 +10,6 @@ void dmrg_lacpy(const char*       uplo,
                 T*                dest,
                 const IntegerType ld_dest)
 {
-#ifdef USE_MAGMA
 	const IntegerType is_upper = (*uplo == 'U') || (*uplo == 'u');
 	const IntegerType is_lower = (*uplo == 'L') || (*uplo == 'l');
 	const IntegerType is_full  = (!is_upper) && (!is_lower);
@@ -39,9 +38,6 @@ void dmrg_lacpy(const char*       uplo,
 			}
 		}
 	}
-#else
-	Xlacpy_(uplo, &m, &n, src, &ld_src, dest, &ld_dest);
-#endif
 }
 
 template void dmrg_lacpy<double>(const char*       uplo,
