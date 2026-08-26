@@ -2,10 +2,9 @@
 
 > **Scope note (2026-08-13):** this document was written 2026-05-15 and covers
 > only the **equilibrium** DMFT self-consistency loop (`ImpuritySolverDmrg`,
-> `ImpuritySolverExactDiag`). It predates and does not mention the
-> **non-equilibrium (neq)** solver path — `ImpuritySolverNeqExactDiag`,
-> `ImpuritySolverNeqTdmrg`, `ImpuritySolverNeqGBEK`, `NeqSolver=`, `TmaxNeq=`,
-> etc. For the neq-DMFT ED input format, see
+> `ImpuritySolverExactDiag`). It predates the **non-equilibrium (neq)** GBEK
+> solver path (`ImpuritySolverNeqGBEK`, `TmaxNeq=`, etc.). For the neq-DMFT
+> input format, see
 > [`neq_dmft_ed_input.md`](neq_dmft_ed_input.md). Treat the equilibrium
 > material below as a useful but unverified starting point — it has not been
 > re-checked against the current code.

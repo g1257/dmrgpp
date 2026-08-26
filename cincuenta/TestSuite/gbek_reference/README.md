@@ -7,7 +7,7 @@ cincuenta, Ainur, or LanczosPlusPlus) that computes the "exact"
     Gramsch, Balzer, Eckstein, Kollar, PRB 88, 235106 (2013), Sec. VI.
 
 This is the quantity plotted in the top-left panel of the paper's Fig. 3: a
-self-consistently converged Weiss field, obtained by exact diagonalization of
+self-consistently converged hybridization target Lambda, obtained by exact diagonalization of
 a small SIAM, used as ground truth against which cincuenta's production
 rank-L Cholesky second-bath approximation (`NeqBathDecomposition.h`,
 `ImpuritySolverNeqGBEK.h`, elsewhere in the `cincuenta` C++ tree) is
@@ -15,7 +15,7 @@ validated.
 
 ## Why this exists
 
-Getting an "exact" self-consistent Weiss field equivalent to the one used in
+Getting an "exact" self-consistent hybridization target Lambda equivalent to the one used in
 the paper proved impossible without significant modification to cincuenta:
 producing it there means going through the full Ainur/LanczosPlusPlus
 machinery, which has several incidental limitations at the atomic limit
@@ -26,14 +26,13 @@ machinery, which has several incidental limitations at the atomic limit
 3. Pauli-forbidden zero-dimensional Fock sectors when seeding the impurity
    with a single spin (no valid particle-added/removed sector exists).
 
-Constraints 1 and 3 were resolved on the C++ side once this Python
-reference existed to guide and validate a closed-form atomic-limit bypass
-(`ImpuritySolverNeqExactDiag::solveAtomicLimit`, nBath=0 only). Constraint 2
-remains a general limitation of cincuenta's equilibrium/near-equilibrium
-exact-diagonalization solver (removing it is a tracked follow-up, unrelated
-to the atomic-limit setup specifically).
+Constraints 1 and 3 are handled on the C++ side by the positive-rank GBEK
+extended-system initialization for nBath=0. Constraint 2 remains a general
+limitation of cincuenta's equilibrium/near-equilibrium exact-diagonalization
+solver (removing it is a tracked follow-up, unrelated to the atomic-limit
+setup specifically).
 
-So this directory reimplements the atomic-limit Weiss-field calculation
+So this directory reimplements the atomic-limit hybridization-target calculation
 directly and independently of the production C++ code, to produce a
 trustworthy comparison target and, over time, ended up growing Python
 implementations of the rest of the GBEK pipeline (Cholesky decomposition,
@@ -91,7 +90,7 @@ paper uses to restore particle-hole symmetry.
 - `gbek_selfconsistency.py` -- wires the above into the DMFT
   self-consistency loop; `run_self_consistency()` is the main entry point,
   `dump_lesser()` writes the two-time `t t' Re Im` file format shared with
-  cincuenta's own `KadanoffBaym::dump`.
+  cincuenta's `NeqRealTimeGf::dump`.
 - `atomic_limit_reference.py` -- closed-form analytic atomic-limit Green's
   functions, cross-checked against a direct 4-state ED.
 - `gbek_colormap.py` -- diverging colormap sampled from the paper's own
@@ -206,7 +205,7 @@ scripts documented above are not included in it.
 
     # check the Cholesky update step itself against a run's own dumped data:
     uv run --with numpy --with scipy python3 check_cholesky_step.py \
-        /path/to/gebk-fig3-L3-weiss-delta-lesser /path/to/gebk-fig3-L3-plus-bath-lesser \
+        /path/to/gebk-fig3-L3-lambda-lesser /path/to/gebk-fig3-L3-plus-bath-lesser \
         --V <fitted V_alpha, comma-separated> --eps <fitted eps_alpha, comma-separated> \
         --beta <FicticiousBeta> --L 3
 
@@ -234,8 +233,8 @@ Group A (`fig7_docc.png`, `fig8_docc.png`) is pure Python:
 `investigate_L4_tmax4.py`, then `plot_docc_scan.py --figure 7 --L 2,4` /
 `--figure 8`.
 
-!!!! Nothing below here will work until the follow cincuenta GBEK PR
-lands !!!!
+Group B requires a configured build tree containing the current
+`cincuenta` target; `regenerate_plots.sh` builds that target when needed.
 
 Group B depends on actual `cincuenta` C++ dumps existing in `build/`
 first: `inputNeqAtomicLimitGBEKL3.ain` produces the
@@ -252,8 +251,8 @@ expected inputs.
 
 ## Building the LaTeX report
 
-`report.tex` is the canonical, reproducible write-up of this effort (the
-content previously maintained by hand as a Claude Artifact). It embeds
+`report.tex` is the canonical, reproducible repository-local write-up of
+this effort. It embeds
 groups A+B's plots plus the paper's own Figs. 3, 4, 7, 8, 9, 10, fetched
 directly from the arXiv e-print source (`fetch_arxiv_figures.sh`, arXiv
 1306.6315) rather than checked-in crops -- neither the fetched paper

@@ -6,16 +6,14 @@
 % Neither the paper figures (arxiv_figures/) nor our own plots (*.png) are
 % checked into the repo -- see .gitignore and each script's own header.
 %
-% \PIVERSION toggles the "bug found and fixed" development-history callouts
+% \DEVNOTES toggles the "bug found and fixed" development-history callouts
 % and the bug-count bullet in "Where this leaves us" -- everything else
 % (status, capabilities, limitations) is unaffected. Default (0) is the
-% full internal version. For a status-only copy (e.g. to share with people
-% who aren't interested in development-process detail), build
-% report-summary.tex instead: `latexmk -pdf report-summary.tex`.
+% full internal version. For a status-only copy, build report-summary.tex.
 \documentclass[11pt]{article}
-\providecommand{\PIVERSION}{0}
+\providecommand{\DEVNOTES}{0}
 \newif\ifdevnotes
-\ifnum\PIVERSION=0 \devnotestrue \else \devnotesfalse \fi
+\ifnum\DEVNOTES=0 \devnotestrue \else \devnotesfalse \fi
 
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
@@ -80,7 +78,7 @@ now compares directly against the Python reference for Figs.\ 9--10.
     star-geometry SIAM (\texttt{gbek\_reference/}), with no dependency on
     the production C++ solver --- used as ground truth throughout.
   \item \textbf{Both decomposition schemes.} The causal, row-by-row
-    \textbf{Cholesky} decomposition of the Weiss field (paper Eqs.\
+    \textbf{Cholesky} decomposition of the hybridization target Lambda (paper Eqs.\
     56--63) and the non-causal, globally-optimal \textbf{eigenvector}
     decomposition, both as drop-in low-rank factorizations.
   \item \textbf{Full DMFT self-consistency loop.} The fixed-$t_\text{max}$
@@ -104,14 +102,14 @@ now compares directly against the Python reference for Figs.\ 9--10.
 \section{Fig.\ 3 --- Low-rank decomposition quality}
 \subsection*{Stepwise reconstruction error, atomic limit ($U=2$)}
 The paper's own benchmark for how well a fixed-rank causal (Cholesky) vs.\
-non-causal (eigenvector) decomposition reconstructs the exact Weiss field,
+non-causal (eigenvector) decomposition reconstructs the exact hybridization target Lambda,
 via the global relative error $\mathrm{err}[A]$ and its time-resolved
 analogue $\mathrm{err}^\mathrm{step}(t)$.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.75\textwidth]{arxiv_figures/paper_fig3.png}
-  \caption*{\textbf{Paper} --- input Weiss field, rank-2/3 Cholesky and
+  \caption*{\textbf{Paper} --- input hybridization target Lambda, rank-2/3 Cholesky and
     eigenvector reconstructions, and the stepwise error
     $\mathrm{err}^\mathrm{step}(t)$ (bottom left).}
 \end{figure}
@@ -478,12 +476,12 @@ to fix; some are deliberate scope choices for this stage of the work.
     No multi-orbital Hubbard impurity; the whole GBEK scheme as
     implemented here is built around one impurity site. \\
     \addlinespace
-    Known open bug (unrelated) &
-    Krylov diagonalization crash &
-    \texttt{inputNeqGBEKFig3L3.ain} (the near-atomic-limit approximation
-    with a small real first bath, NOT the \texttt{NeqAtomicLimit=1}
-    bypass) crashes at step 3/100 post the occ/empty conjugation fix ---
-    open, not yet investigated, unrelated to the lanczosGS fix. \\
+    Fig.\ 3 diagnostic runtime &
+    Long-running, not a crash regression &
+    \texttt{inputNeqGBEKFig3L3.ain} is a 100-step near-atomic diagnostic
+    with a five-site fitted first bath. A current five-minute run timed out
+    without reproducing the historical step-3 crash; use the focused fast
+    CTest for routine regression coverage. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -532,11 +530,9 @@ to fix; some are deliberate scope choices for this stage of the work.
     essentially exactly on full self-consistency runs\ifdevnotes\ (after
     fixing the two-time Green's-function seeding bug, eliminating a
     spurious ``wing'' artifact that used to appear in the reconstructed
-    Weiss field)\fi.
-  \item \textbf{Next}: investigate the open $L=3$ near-atomic Krylov
-    crash (see the limitations table above); consider testing $L=5$ now
-    that Lanczos seeding is fixed; arbitrary (non-half) filling remains
-    unimplemented.
+    hybridization target Lambda)\fi.
+  \item \textbf{Next}: consider testing $L=5$ now that Lanczos seeding is
+    fixed; arbitrary (non-half) filling remains unimplemented.
 \end{itemize}
 
 \vfill
