@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputCheck.h"
 #include "LabeledOperators.h"
 #include "ModelLinks.h"
-#include "Su2SymmetryGlobals.h"
 #include <PsimagLite/InputNg.h>
 #include <PsimagLite/NoPthreads.h>
 #include <PsimagLite/Profiling.h>
@@ -128,8 +127,6 @@ public:
 	    , superGeometry_(superGeometry)
 	    , progress_("ModelCommon")
 	{
-		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
-		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 		if (params.options.isSet("OperatorsChangeAll"))
 			OperatorsType::setChangeAll(true);
 	}
