@@ -92,7 +92,7 @@ public:
 
 private:
 
-	std::vector<OffsetVectorBase<ComplexOrRealType>*> base_ptrs_;
+	std::vector<std::unique_ptr<OffsetVectorBase<ComplexOrRealType>>> base_ptrs_;
 };
 
 }
