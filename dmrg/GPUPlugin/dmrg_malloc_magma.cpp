@@ -1,4 +1,3 @@
-#include "dmrg_lapack.h"
 #include "dmrg_vbatch.h"
 
 template <typename T>
