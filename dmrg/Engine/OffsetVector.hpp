@@ -3,6 +3,9 @@
 #include "Qn.h"
 #include "VectorWithOffsets.h"
 
+#include <memory>
+#include <vector>
+
 namespace Dmrg {
 
 template <typename ComplexOrRealType> class OffsetVectorBase {
@@ -70,24 +73,19 @@ public:
 
 	const OffsetVectorBase<ComplexOrRealType>& makeOffsetVector(const VectorWithOffsetsType& v)
 	{
-		OffsetVectorBase<ComplexOrRealType>* base_ptr = nullptr;
+		std::unique_ptr<OffsetVectorBase<ComplexOrRealType>> u_ptr;
 		if (v.sectors() == 1) {
-			base_ptr = new OffsetVectorOne<ComplexOrRealType>(v);
+			u_ptr = std::make_unique<OffsetVectorOne<ComplexOrRealType>>(v);
 		} else {
-			base_ptr = new OffsetVectorAny<ComplexOrRealType>(v);
+			u_ptr = std::make_unique<OffsetVectorAny<ComplexOrRealType>>(v);
 		}
 
-		base_ptrs_.push_back(base_ptr); // for garbage collection
+		base_ptrs_.push_back(std::move(u_ptr));
 
-		return *base_ptr;
-	}
+		assert(base_ptrs_.size() > 0);
+		unsigned int last = base_ptrs_.size() - 1;
 
-	~OffsetVector()
-	{
-		for (SizeType i = 0; i < base_ptrs_.size(); ++i) {
-			delete base_ptrs_[i];
-			base_ptrs_[i] = nullptr;
-		}
+		return *base_ptrs_[last];
 	}
 
 private:
