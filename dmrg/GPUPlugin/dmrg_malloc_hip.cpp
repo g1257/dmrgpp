@@ -116,4 +116,3 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 #endif
 	}
 }
-
