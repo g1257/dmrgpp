@@ -125,6 +125,7 @@ Page* where more or less this feature is used: 2230
 71) Same as 70 but with magnetic field
 72) @auto for 4 sites
 73) @auto restart from 72
+74) @auto for a lattice with 3 sites
 80) Heisenberg spin 1 with 6 sites
 82) Heisenberg spin 1 with 6 sites AnistropyD=4
 84) Heisenberg spin 1 with 6 sites J = 0 AnistropyE=4

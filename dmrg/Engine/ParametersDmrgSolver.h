@@ -575,6 +575,8 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
+		// For restarts and even (regular lattices), lastSite == 1 indicated
+		// by the previous run is really the leftmost border 0
 		if (lastSite == 1 && isRestart && !latticeIsOdd) {
 			lastSite = 0;
 		}
