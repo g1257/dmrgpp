@@ -83,9 +83,7 @@ public:
 		base_ptrs_.push_back(std::move(u_ptr));
 
 		assert(base_ptrs_.size() > 0);
-		unsigned int last = base_ptrs_.size() - 1;
-
-		return *base_ptrs_[last];
+		return *(base_ptrs_.back());
 	}
 
 private:
