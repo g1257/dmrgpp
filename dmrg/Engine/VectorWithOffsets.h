@@ -604,16 +604,18 @@ public:
 		io.readline(x, "nonzero=");
 		if (x < 0)
 			err(msg + ":loadOneSector(...): nonzerosectors<0\n");
-		nzMsAndQns_.resize(x);
+		const SizeType nonzero = x;
+		nzMsAndQns_.clear();
+		nzMsAndQns_.reserve(nonzero);
 
-		for (SizeType jj = 0; jj < nzMsAndQns_.size(); jj++) {
+		for (SizeType jj = 0; jj < nonzero; jj++) {
 			io.readline(x, "sector=");
 			if (x < 0)
 				err(msg + ":loadOneSector(...): sector<0\n");
 
-			QnType y;
+			QnType y = QnType::zero();
 			y.read("qn", io);
-			nzMsAndQns_[jj] = PairQnType(x, y);
+			nzMsAndQns_.push_back(PairQnType(x, y));
 
 			if (static_cast<SizeType>(x) >= data_.size())
 				err(msg + ":loadOneSector(...): sector too big\n");
@@ -771,7 +773,7 @@ public:
 			err(s.c_str());
 
 		for (SizeType ii = 0; ii < v1.nzMsAndQns_.size(); ii++) {
-			SizeType i = v1.nzMsAndQns_[ii];
+			SizeType i = v1.nzMsAndQns_[ii].first;
 			if (i >= v1.data_.size() || i >= v2.data_.size())
 				err(s.c_str());
 			if (v1.data_[i].size() != v2.data_[i].size())
