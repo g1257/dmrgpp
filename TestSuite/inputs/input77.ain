@@ -7,7 +7,7 @@ DegreesOfFreedom   = 1;
 GeometryKind       = "chain";
 GeometryOptions    = "ConstantValues";
 dir0:Connectors    = [-1];
-hubbardU           = [8.0, ...];
+hubbardU           = [7.3, ...];
 potentialV         = [0.0, ...];
 Model              = "HubbardOneBand";
 

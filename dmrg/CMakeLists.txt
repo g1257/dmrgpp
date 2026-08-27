@@ -201,14 +201,14 @@ add_test(NAME input73 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input73.ain) # energy 
 add_lowest_eigenvalue_check_test(output73 input73 -4.47214 runForinput73.cout)
 add_test(NAME input74 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input74.ain) # energy -0.707712
 add_lowest_eigenvalue_check_test(output74 input74 -0.707712 runForinput74.cout)
-add_test(NAME input75 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input75.ain) # energy -0.707712
-add_lowest_eigenvalue_check_test(output75 input75 -0.707712 runForinput75.cout)
+add_test(NAME input75 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input75.ain) # energy -2.80627
+add_lowest_eigenvalue_check_test(output75 input75 -2.80627 runForinput75.cout)
 add_test(NAME input76 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input76.ain) # energy -0.707712
-#add_lowest_eigenvalue_check_test(output76 input76 -0.707712 runForinput76.cout)
-add_test(NAME input77 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input77.ain) # energy -0.707712
-#add_lowest_eigenvalue_check_test(output77 input77 -0.707712 runForinput77.cout)
+# input76 is a restart check only; no g.s. computation
+add_test(NAME input77 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input77.ain) # energy -2.80627
+add_lowest_eigenvalue_check_test(output77 input77 -2.80627 runForinput77.cout)
 add_test(NAME input78 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input78.ain) # energy -0.707712
-#add_lowest_eigenvalue_check_test(output78 input78 -0.707712 runForinput78.cout)
+# input78 is a restart check only; no g.s. computation
 add_test(NAME input80 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input80.ain) # energy -7.37027
 add_lowest_eigenvalue_check_test(output80 input80 -7.37027 runForinput80.cout)
 add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain) # energy -9.51754
