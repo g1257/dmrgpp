@@ -18,10 +18,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 ARXIV_ID="1306.6315"
 OUT_DIR="arxiv_figures"
-WORK_DIR="$(mktemp -d)"
+REPO_ROOT="$(cd ../../.. && pwd)"
+BUILD_DIR="${DMRGPP_BUILD_DIR:-$REPO_ROOT/build}"
+WORK_DIR="$BUILD_DIR/gbek-arxiv-fetch"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
-mkdir -p "$OUT_DIR"
+rm -rf "$WORK_DIR"
+mkdir -p "$OUT_DIR" "$WORK_DIR"
 
 echo "Fetching arXiv:$ARXIV_ID e-print source..."
 curl -sL -o "$WORK_DIR/src.tar.gz" "https://arxiv.org/e-print/$ARXIV_ID"
