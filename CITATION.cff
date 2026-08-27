@@ -7,6 +7,25 @@ type: software
 authors:
   - family-names: Alvarez
     given-names: Gonzalo
+    orcid: https://orcid.org/0000-0002-1496-8261
+  - family-names: Arndt
+    given-names: Daniel
+    orcid: https://orcid.org/0000-0001-8773-4901
+  - family-names: Doak
+    given-names: Peter
+    orcid: https://orcid.org/0000-0001-6039-9752
+  - family-names: Hahn
+    given-names: Steven
+    orcid: https://orcid.org/0000-0002-2018-7904
+  - family-names: Lebrun-Grandie
+    given-names: Damien
+    orcid: https://orcid.org/0000-0003-1952-7219
+  - family-names: Maier
+    given-names: Thomas A.
+    orcid: https://orcid.org/0000-0002-1424-9996
+  - family-names: Prokopenko
+    given-names: Andrey
+    orcid: https://orcid.org/0000-0003-3616-5504
 version: "7.00"
 date-released: 2026-04-02
 repository-code: https://github.com/dmrgpp-project/dmrgpp
