@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TRIDIAGRIXSSTATIC_H
 #define TRIDIAGRIXSSTATIC_H
 #include "ApplyOperatorLocal.h"
-#include "VectorWithOffset.h"
 #include <PsimagLite/LanczosSolver.h>
 
 namespace Dmrg {
@@ -99,8 +98,7 @@ class TridiagRixsStatic {
 	using SparseElementType      = typename SparseMatrixType::value_type;
 	using MatrixType             = PsimagLite::Matrix<SparseElementType>;
 	using ParametersSolverType   = typename LanczosSolverType::ParametersSolverType;
-	using EffectiveQnType        = typename BasisWithOperatorsType::EffectiveQuantumNumberType;
-	using VectorWithOffsetType2  = VectorWithOffset<ComplexOrRealType, EffectiveQnType>;
+	using VectorWithOffsetType2  = VectorWithOffsets<ComplexOrRealType>;
 	using ApplyOperatorLocalType
 	    = ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>;
 	using VectorSizeType = typename VectorWithOffsetType2::VectorSizeType;

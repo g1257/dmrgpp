@@ -19,7 +19,7 @@ add_subdirectory(KronUtil)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h @ONLY)
 
 # DMRG++ as a library so cincuenta can use it
-add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
+add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp Engine/VectorWithOffsets.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)

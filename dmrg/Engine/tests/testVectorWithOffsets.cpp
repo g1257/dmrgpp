@@ -49,7 +49,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets default state and identity",
                    double,
                    std::complex<double>)
 {
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	VectorWithOffsetsType v;
 	CHECK(v.size() == 0);
 	CHECK(v.sectors() == 0);
@@ -62,7 +62,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets constructs populated sectors",
                    double,
                    std::complex<double>)
 {
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	const FakeBasis basis;
 
 	SECTION("weights for all basis sectors")
@@ -108,7 +108,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data",
                    std::complex<double>)
 {
 	using VectorType            = std::vector<TestType>;
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 5.0 });
 	VectorWithOffsetsType v;
@@ -130,16 +130,10 @@ TEMPLATE_TEST_CASE("VectorWithOffsets sets, extracts, and sparsifies data",
 	v.setDataInSector(replacement, 1);
 	checkValue(v.fastAccess(1, 0), 6.0);
 	v.fastAccess(1, 1) = 9.0;
-	checkValue(v.slowAccess(3), 9.0);
-	v.slowAccess(4) = 10.0;
-
-	const VectorWithOffsetsType& constV = v;
-	checkValue(constV.slowAccess(0), 0.0);
-	checkValue(constV.slowAccess(4), 10.0);
 
 	std::vector<TestType> sparse;
 	v.toSparse(sparse);
-	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 6.0, 9.0, 10.0, 0.0 }));
+	CHECK(sparse == std::vector<TestType>({ 0.0, 0.0, 6.0, 9.0, 8.0, 0.0 }));
 
 	v.clear();
 	CHECK(v.size() == 0);
@@ -152,7 +146,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets converts a full vector",
                    std::complex<double>)
 {
 	using VectorType            = std::vector<TestType>;
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	const FakeBasis       basis;
 	VectorWithOffsetsType v;
 	v.fromFull(VectorType({ 1.0, 2.0, 0.0, 0.0, 0.0, 3.0 }), basis);
@@ -172,7 +166,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets populates and collapses sectors",
                    double,
                    std::complex<double>)
 {
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	const FakeBasis       basis;
 	VectorWithOffsetsType v;
 	v.populateSectors(basis);
@@ -202,7 +196,7 @@ TEMPLATE_TEST_CASE("VectorWithOffsets public arithmetic",
                    std::complex<double>)
 {
 	using VectorType            = std::vector<TestType>;
-	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType, Dmrg::Qn>;
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<TestType>;
 	const FakeBasis       basis;
 	VectorType            data({ 3.0, 4.0, 0.0 });
 	VectorWithOffsetsType v;
