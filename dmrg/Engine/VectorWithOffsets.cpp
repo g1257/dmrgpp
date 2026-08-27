@@ -10,11 +10,9 @@ VectorWithOffsets<ComplexOrRealType>::VectorWithOffsets()
     : progress_("VectorWithOffsets")
     , size_(0)
     , index2Sector_(0)
-{
-}
+{ }
 
-template <typename ComplexOrRealType>
-void VectorWithOffsets<ComplexOrRealType>::clear()
+template <typename ComplexOrRealType> void VectorWithOffsets<ComplexOrRealType>::clear()
 {
 	size_ = 0;
 	index2Sector_.clear();
@@ -23,8 +21,7 @@ void VectorWithOffsets<ComplexOrRealType>::clear()
 	nzMsAndQns_.clear();
 }
 
-template <typename ComplexOrRealType>
-void VectorWithOffsets<ComplexOrRealType>::collapseSectors()
+template <typename ComplexOrRealType> void VectorWithOffsets<ComplexOrRealType>::collapseSectors()
 {
 	SizeType np = data_.size();
 	if (np != nzMsAndQns_.size()) {
@@ -51,8 +48,7 @@ void VectorWithOffsets<ComplexOrRealType>::collapseSectors()
 }
 
 template <typename ComplexOrRealType>
-void VectorWithOffsets<ComplexOrRealType>::setDataInSector(const VectorType& v,
-                                                            SizeType         i0)
+void VectorWithOffsets<ComplexOrRealType>::setDataInSector(const VectorType& v, SizeType i0)
 {
 	if (i0 >= data_.size())
 		err("VectorWithOffsets: setDataInSector\n");
@@ -112,8 +108,7 @@ const ComplexOrRealType& VectorWithOffsets<ComplexOrRealType>::fastAccess(SizeTy
 }
 
 template <typename ComplexOrRealType>
-ComplexOrRealType& VectorWithOffsets<ComplexOrRealType>::fastAccess(SizeType i,
-                                                                    SizeType j)
+ComplexOrRealType& VectorWithOffsets<ComplexOrRealType>::fastAccess(SizeType i, SizeType j)
 {
 	assert(i < data_.size());
 	assert(j < data_[i].size());
@@ -135,8 +130,8 @@ VectorWithOffsets<ComplexOrRealType>::sectorAndOffset() const
 }
 
 template <typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType>& VectorWithOffsets<ComplexOrRealType>::operator*=(
-    const ComplexOrRealType& value)
+VectorWithOffsets<ComplexOrRealType>&
+VectorWithOffsets<ComplexOrRealType>::operator*=(const ComplexOrRealType& value)
 {
 	for (SizeType ii = 0; ii < nzMsAndQns_.size(); ++ii) {
 		SizeType i = nzMsAndQns_[ii].first;
@@ -148,8 +143,8 @@ VectorWithOffsets<ComplexOrRealType>& VectorWithOffsets<ComplexOrRealType>::oper
 }
 
 template <typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType> VectorWithOffsets<ComplexOrRealType>::operator+=(
-    const VectorWithOffsets& v)
+VectorWithOffsets<ComplexOrRealType>
+VectorWithOffsets<ComplexOrRealType>::operator+=(const VectorWithOffsets& v)
 {
 	if (nzMsAndQns_.size() == 0) {
 		size_       = v.size_;
@@ -178,11 +173,11 @@ int VectorWithOffsets<ComplexOrRealType>::index2Sector(SizeType i) const
 }
 
 template <typename ComplexOrRealType>
-typename PsimagLite::Real<ComplexOrRealType>::Type norm(
-    const VectorWithOffsets<ComplexOrRealType>& v)
+typename PsimagLite::Real<ComplexOrRealType>::Type
+norm(const VectorWithOffsets<ComplexOrRealType>& v)
 {
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	RealType sum    = 0;
+	RealType sum   = 0;
 	for (SizeType ii = 0; ii < v.nzMsAndQns_.size(); ii++) {
 		SizeType i = v.nzMsAndQns_[ii].first;
 		assert(i < v.data_.size());
@@ -193,8 +188,7 @@ typename PsimagLite::Real<ComplexOrRealType>::Type norm(
 	return std::sqrt(sum);
 }
 
-template <typename ComplexOrRealType>
-void normalize(VectorWithOffsets<ComplexOrRealType>& v)
+template <typename ComplexOrRealType> void normalize(VectorWithOffsets<ComplexOrRealType>& v)
 {
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	RealType norma = norm(v);
@@ -230,9 +224,9 @@ ComplexOrRealType operator*(const VectorWithOffsets<ComplexOrRealType>& v1,
 }
 
 template <typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType> operator*(
-    const ComplexOrRealType&                    value,
-    const VectorWithOffsets<ComplexOrRealType>& v)
+VectorWithOffsets<ComplexOrRealType>
+operator*(const typename VectorWithOffsets<ComplexOrRealType>::value_type& value,
+          const VectorWithOffsets<ComplexOrRealType>&                      v)
 {
 	VectorWithOffsets<ComplexOrRealType> w = v;
 
@@ -246,9 +240,8 @@ VectorWithOffsets<ComplexOrRealType> operator*(
 }
 
 template <typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType> operator+(
-    const VectorWithOffsets<ComplexOrRealType>& v1,
-    const VectorWithOffsets<ComplexOrRealType>& v2)
+VectorWithOffsets<ComplexOrRealType> operator+(const VectorWithOffsets<ComplexOrRealType>& v1,
+                                               const VectorWithOffsets<ComplexOrRealType>& v2)
 {
 	PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
 	if (v1.nzMsAndQns_ != v2.nzMsAndQns_)
@@ -277,8 +270,7 @@ const ComplexOrRealType& VectorWithOffsets<ComplexOrRealType>::slowAccess(SizeTy
 	return data_[j][i - offsets_[j]];
 }
 
-template <typename ComplexOrRealType>
-void VectorWithOffsets<ComplexOrRealType>::setIndex2Sector()
+template <typename ComplexOrRealType> void VectorWithOffsets<ComplexOrRealType>::setIndex2Sector()
 {
 	if (index2Sector_.size() != size_)
 		index2Sector_.resize(size_);
@@ -316,22 +308,19 @@ template class VectorWithOffsets<std::complex<double>>;
 
 template double norm(const VectorWithOffsets<double>& v);
 template double norm(const VectorWithOffsets<std::complex<double>>& v);
-template void normalize(VectorWithOffsets<double>& v);
-template void normalize(VectorWithOffsets<std::complex<double>>& v);
-template double operator*(const VectorWithOffsets<double>& v1,
-                          const VectorWithOffsets<double>& v2);
-template std::complex<double> operator*(
-    const VectorWithOffsets<std::complex<double>>& v1,
-    const VectorWithOffsets<std::complex<double>>& v2);
-template VectorWithOffsets<double> operator*(const double&                     value,
+template void   normalize(VectorWithOffsets<double>& v);
+template void   normalize(VectorWithOffsets<std::complex<double>>& v);
+template double operator*(const VectorWithOffsets<double>& v1, const VectorWithOffsets<double>& v2);
+template std::complex<double>      operator*(const VectorWithOffsets<std::complex<double>>& v1,
+                                        const VectorWithOffsets<std::complex<double>>& v2);
+template VectorWithOffsets<double> operator*(const double&                    value,
                                              const VectorWithOffsets<double>& v);
-template VectorWithOffsets<std::complex<double>> operator*(
-    const std::complex<double>&                    value,
-    const VectorWithOffsets<std::complex<double>>& v);
+template VectorWithOffsets<std::complex<double>>
+operator*(const std::complex<double>& value, const VectorWithOffsets<std::complex<double>>& v);
 template VectorWithOffsets<double> operator+(const VectorWithOffsets<double>& v1,
                                              const VectorWithOffsets<double>& v2);
-template VectorWithOffsets<std::complex<double>> operator+(
-    const VectorWithOffsets<std::complex<double>>& v1,
-    const VectorWithOffsets<std::complex<double>>& v2);
+template VectorWithOffsets<std::complex<double>>
+operator+(const VectorWithOffsets<std::complex<double>>& v1,
+          const VectorWithOffsets<std::complex<double>>& v2);
 
 } // namespace Dmrg

@@ -115,8 +115,9 @@ ComplexOrRealType operator*(const VectorWithOffsets<ComplexOrRealType>& v1,
                             const VectorWithOffsets<ComplexOrRealType>& v2);
 
 template <typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType> operator*(const ComplexOrRealType&                    value,
-                                               const VectorWithOffsets<ComplexOrRealType>& v);
+VectorWithOffsets<ComplexOrRealType>
+operator*(const typename VectorWithOffsets<ComplexOrRealType>::value_type& value,
+          const VectorWithOffsets<ComplexOrRealType>&                      v);
 
 template <typename ComplexOrRealType>
 VectorWithOffsets<ComplexOrRealType> operator+(const VectorWithOffsets<ComplexOrRealType>& v1,
@@ -611,7 +612,9 @@ public:
 	 * \param[in] v Vector to scale.
 	 */
 	template <typename T>
-	friend VectorWithOffsets<T> operator*(const T& value, const VectorWithOffsets<T>& v);
+	friend VectorWithOffsets<T>
+	operator*(const typename VectorWithOffsets<T>::value_type& value,
+	          const VectorWithOffsets<T>&                      v);
 
 	/*!
 	 * \brief Returns the sum of vectors with matching populated sectors.
