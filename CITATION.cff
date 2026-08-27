@@ -1,8 +1,7 @@
 cff-version: 1.2.0
 message: >-
   If you use DMRG++, please cite the preferred general publication below.
-  Please also cite the relevant references for time-evolution or METTS
-  calculations.
+  Please also cite the relevant additional references.
 title: DMRG++
 type: software
 authors:
@@ -62,3 +61,65 @@ references:
     year: 2013
     month: 6
     doi: 10.1103/PhysRevB.87.245130
+  - type: generic
+    authors:
+      - family-names: Alvarez
+        given-names: G.
+    title: >-
+      Diagonalization Solvers for Electronic Collective Phenomena in
+      Nanoscience (Project ID: 0000201185)
+    year: 2011
+    publisher:
+      name: >-
+        U.S. Department of Energy, Office of Science, Early Career Research
+        Program; Oak Ridge National Laboratory
+  - type: generic
+    authors:
+      - family-names: Elwasif
+        given-names: W.
+      - family-names: D'Azevedo
+        given-names: E.
+      - family-names: Alvarez
+        given-names: G.
+      - family-names: Hernandez-Mendoza
+        given-names: O.
+    title: >-
+      Bringing the DMRG++ Scientific Application to Exascale (Project ID:
+      8423; 2017–2018)
+    year: 2017
+    publisher:
+      name: >-
+        Oak Ridge National Laboratory, Laboratory Directed Research and
+        Development
+  - type: article
+    authors:
+      - family-names: Nocera
+        given-names: A.
+      - family-names: Alvarez
+        given-names: G.
+    title: >-
+      Spectral functions with the density matrix renormalization group:
+      Krylov-space approach for correction vectors
+    journal: Physical Review E
+    volume: 94
+    issue: 5
+    start: "053308"
+    year: 2016
+    month: 11
+    doi: 10.1103/PhysRevE.94.053308
+  - type: article
+    authors:
+      - family-names: Nocera
+        given-names: A.
+      - family-names: Alvarez
+        given-names: G.
+    title: >-
+      Symmetry-conserving purification of quantum states within the density
+      matrix renormalization group
+    journal: Physical Review B
+    volume: 93
+    issue: 4
+    start: "045137"
+    year: 2016
+    month: 1
+    doi: 10.1103/PhysRevB.93.045137
