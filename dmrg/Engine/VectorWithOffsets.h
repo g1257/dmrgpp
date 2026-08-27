@@ -167,8 +167,7 @@ public:
 			offsets_[i] = someBasis.partition(i);
 			if (weights[i] > 0) {
 				QnType qn = someBasis.pseudoQn(i);
-				nzMsAndQns_.push_back(PairQnType(i, qn));
-				// firstSector_ = i;
+				nzMsAndQns_.emplace_back(i, qn);
 			}
 		}
 
@@ -199,7 +198,7 @@ public:
 		assert(sector < data_.size());
 		data_[sector].resize(weight);
 		QnType qn = someBasis.pseudoQn(sector);
-		nzMsAndQns_.push_back(PairQnType(sector, qn));
+		nzMsAndQns_.emplace_back(sector, qn);
 
 		setIndex2Sector();
 	}
@@ -233,7 +232,7 @@ public:
 			const SizeType sector = sectors[sectorIndex];
 			data_[sector].resize(compactedWeights[sectorIndex]);
 			QnType qn = someBasis.pseudoQn(sector);
-			nzMsAndQns_.push_back(PairQnType(sector, qn));
+			nzMsAndQns_.emplace_back(sector, qn);
 		}
 
 		setIndex2Sector();
@@ -266,7 +265,7 @@ public:
 
 		data_[sector].swap(v);
 		QnType qn = someBasis.pseudoQn(sector);
-		nzMsAndQns_.push_back(PairQnType(sector, qn));
+		nzMsAndQns_.emplace_back(sector, qn);
 
 		offsets_[n] = size_;
 		setIndex2Sector();
@@ -290,7 +289,7 @@ public:
 			VectorType tmpV(total, 0);
 			data_[i]         = tmpV;
 			const QnType& qn = someBasis.pseudoQn(i);
-			nzMsAndQns_.push_back(PairQnType(i, qn));
+			nzMsAndQns_.emplace_back(i, qn);
 		}
 
 		offsets_[np] = size_;
@@ -329,7 +328,7 @@ public:
 			SizeType   total = someBasis.partition(ip + 1) - offsets_[ip];
 			VectorType tmpV(total, 0);
 			data_[ip] = tmpV;
-			nzMsAndQns_.push_back(PairQnType(ip, v.qn(i)));
+			nzMsAndQns_.emplace_back(ip, v.qn(i));
 		}
 
 		setIndex2Sector();
@@ -549,7 +548,7 @@ public:
 
 			QnType y = QnType::zero();
 			y.read("qn", io);
-			nzMsAndQns_.push_back(PairQnType(x, y));
+			nzMsAndQns_.emplace_back(x, y);
 
 			if (static_cast<SizeType>(x) >= data_.size())
 				err(msg + ":loadOneSector(...): sector too big\n");
@@ -645,7 +644,7 @@ private:
 			if (nonZeroPartition(v, someBasis, i)) {
 				found            = true;
 				const QnType& qn = someBasis.pseudoQn(i);
-				p.push_back(PairQnType(i, qn));
+				p.emplace_back(i, qn);
 			}
 		}
 
