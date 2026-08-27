@@ -199,13 +199,15 @@ scripts documented above are not included in it.
     uv run --with numpy --with scipy python3 gbek_selfconsistency.py \
         --L 3 --N 100 --dt 0.04 --U 2.0 --tq 0.25 --out gbek-atomic-limit-exact-lesser
 
-    # compare against cincuenta's own rank-L Cholesky approximation:
+    # compare against cincuenta's atomic-limit rank-L Cholesky approximation:
     uv run --with numpy --with scipy --with matplotlib python3 compare_reference.py \
-        gbek-atomic-limit-exact-lesser /path/to/gebk-fig3-L3-plus-bath-lesser --tmax 4.0
+        gbek-atomic-limit-exact-lesser \
+        /path/to/atomic-limit-gbek-L3-plus-bath-lesser --tmax 4.0
 
     # check the Cholesky update step itself against a run's own dumped data:
     uv run --with numpy --with scipy python3 check_cholesky_step.py \
-        /path/to/gebk-fig3-L3-lambda-lesser /path/to/gebk-fig3-L3-plus-bath-lesser \
+        /path/to/atomic-limit-gbek-L3-lambda-lesser \
+        /path/to/atomic-limit-gbek-L3-plus-bath-lesser \
         --V <fitted V_alpha, comma-separated> --eps <fitted eps_alpha, comma-separated> \
         --beta <FicticiousBeta> --L 3
 
@@ -221,33 +223,31 @@ diff/review usefully and bit-rot in git history; the source (scripts +
 parameters) is what's checked in. Regenerate anything you need locally:
 
     ./regenerate_plots.sh            # everything (groups A+B)
-    ./regenerate_plots.sh --group-a  # just Fig. 7/8 (pure Python, fast)
-    ./regenerate_plots.sh --group-b  # the older C++-dependent validation
-                                      # plots (builds+runs cincuenta if the
-                                      # prerequisite dumps aren't already
-                                      # in build/)
+    ./regenerate_plots.sh --group-a  # pure-Python Figs. 7/8/9/10
+    ./regenerate_plots.sh --group-b  # atomic-limit Fig. 3/4 and C++ comparison
     ./regenerate_plots.sh --report   # build report.pdf (see below)
 
-Group A (`fig7_docc.png`, `fig8_docc.png`) is pure Python:
-`run_fig7_scan.py --L 2`, `run_fig7_scan.py --L 4`, `run_fig8_scan.py`,
-`investigate_L4_tmax4.py`, then `plot_docc_scan.py --figure 7 --L 2,4` /
-`--figure 8`.
+Group A is pure Python and produces `fig7_docc_L2.png`,
+`fig7_docc_L4.png`, `fig8_docc.png`, `fig9_energy.png`, and
+`fig10_docc.png`, together with their intermediate `.npz` data.
 
-Group B requires a configured build tree containing the current
-`cincuenta` target; `regenerate_plots.sh` builds that target when needed.
+Group B is exclusively atomic-limit validation. It configures a missing
+build tree, builds `cincuenta`, and runs `inputNeqAtomicLimitGBEKL3.ain`
+when the C++ dumps are absent or stale. It also generates the independent
+Python target. The resulting report assets are `fig3_errstep.png`,
+`fig4_hybridization.png`, and `gbek_reference_comparison.png`; the additional
+`atomic_limit_2d_rank_comparison.png` is a focused C++ reconstruction
+diagnostic. Set `DMRGPP_BUILD_DIR` to use a configured build tree other than
+this checkout's `build/` directory.
 
-Group B depends on actual `cincuenta` C++ dumps existing in `build/`
-first: `inputNeqAtomicLimitGBEKL3.ain` produces the
-`build/atomic-limit-gbek-L3-*` files used by `plot_atomic_limit_2d.py`,
-`plot_collapse_evidence_summary.py`, `plot_errstep_t3scan.py`,
-`scan_t3_activation.py`, and (as the `approx` argument) `compare_reference.py`;
-`inputNeqGBEKFig3L3.ain` produces the `build/gebk-fig3-L3-*` files used by
-`plot_fig3l3_post_fix.py`, `plot_collapse_evidence_summary.py`, and (as
-the `prefix` argument) `quantify_lambda_minus_leak.py`. `compare_reference.py`
-also needs the pure-Python exact reference (`gbek_selfconsistency.py --L 3
---N 100 --dt 0.04 --U 2.0 --tq 0.25 --out gbek-atomic-limit-exact-lesser`,
-also in `regenerate_plots.sh`). See each script's own header for its exact
-expected inputs.
+`inputNeqGBEKFig3L3.ain` is intentionally not a figure source. It has a
+fitted first bath and is retained only as the long-running
+`neqGBEKFig3L3NearAtomic` Nightly CTest. The near-atomic and mixed plotting
+utilities (`plot_fig3l3_post_fix.py`, `plot_collapse_evidence_summary.py`,
+and `quantify_lambda_minus_leak.py`) are historical manual diagnostics;
+they are not run by plot or report regeneration. The same is true of the
+atomic investigation utilities `plot_errstep_t3scan.py` and
+`scan_t3_activation.py`.
 
 ## Building the LaTeX report
 
@@ -259,8 +259,8 @@ directly from the arXiv e-print source (`fetch_arxiv_figures.sh`, arXiv
 figures nor the built PDF are committed (see `.gitignore`), same
 reasoning as the plots above.
 
-    ./regenerate_plots.sh --group-a --group-b   # or already-present plots
-    ./regenerate_plots.sh --report
+    ./regenerate_plots.sh             # generate groups A+B
+    ./regenerate_plots.sh --report    # build from those generated plots
 
 Requires network access (arXiv fetch), a TeX install with `latexmk`, and
 `ghostscript` (`brew install ghostscript`) for the EPS-to-PDF conversion
@@ -269,6 +269,6 @@ step. Not part of the cmake build.
 `report-summary.tex` builds `report-summary.pdf` from the same source
 with the development-history callouts omitted -- a status/capabilities-only
 copy for sharing with people who aren't interested in development-process
-detail (see `report.tex`'s `\PIVERSION` header comment). Both PDFs build
+detail (see `report.tex`'s `\DEVNOTES` header comment). Both PDFs build
 together via `--report` above, or individually with `latexmk -pdf
 report.tex` / `latexmk -pdf report-summary.tex`.

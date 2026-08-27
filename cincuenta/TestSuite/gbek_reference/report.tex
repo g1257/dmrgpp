@@ -63,8 +63,9 @@ Rev.\ B \textbf{88}, 235106 (2013), Sec.\ VI
 An independent, from-scratch validation of the paper's low-rank Cholesky /
 eigenvector hybridization decomposition and its atomic-limit DMFT
 self-consistency scheme --- what we built, how closely it reproduces the
-paper's own Figs.\ 3, 4, 7, 8, 9, and 10, and how the C++ production solver
-now compares directly against the Python reference for Figs.\ 9--10.
+paper's own Figs.\ 3, 4, 7, 8, 9, and 10, and how the C++ production
+solver's atomic-limit rank-3 reconstruction compares with the independent
+Python reference.
 \end{minipage}
 \end{center}
 
@@ -125,9 +126,9 @@ analogue $\mathrm{err}^\mathrm{step}(t)$.
   \hfill
   \begin{subfigure}{0.48\textwidth}
     \includegraphics[width=\textwidth]{gbek_reference_comparison.png}
-    \caption*{\textbf{Ours} --- exact reference vs.\ rank-3 Cholesky
-      reconstruction: 2D map (paper's own colormap), residual, and
-      fixed-$t'$ slices.}
+    \caption*{\textbf{Ours} --- independent atomic-limit reference vs.\
+      the production C++ solver's atomic-limit rank-3 Cholesky
+      reconstruction: 2D map, residual, and fixed-$t'$ slices.}
   \end{subfigure}
 \end{figure}
 
@@ -308,26 +309,18 @@ residual drift shrinking as $L_\mathrm{bath}$ grows $4\to6\to8$.
   \end{subfigure}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{cpp_vs_python_fig9.png}
-  \caption*{\textbf{Ours, C++ vs.\ Python} --- same protocol, all three
-    $L_\mathrm{bath}$, Python reference (left) vs.\ production C++ solver
-    (right) --- visually indistinguishable.}
-\end{figure}
-
 \begin{table}[h]
   \centering
-  \begin{tabular}{cccc}
+  \begin{tabular}{ccc}
     \toprule
-    $U$ & $L_\mathrm{bath}$ & $\max|\Etot(t)-\Etot(t_q)|$ for $t>t_q$ (Python) & $\max|\Etot^\mathrm{C++}-\Etot^\mathrm{Python}|$ \\
+    $U$ & $L_\mathrm{bath}$ & $\max|\Etot(t)-\Etot(t_q)|$ for $t>t_q$ \\
     \midrule
-    2 & 4 & 0.291 & 0.0131 \\
-    2 & 6 & 0.197 & 0.0117 \\
-    2 & 8 & 0.038 & 0.0117 \\
-    4 & 4 & 0.138 & 0.0179 \\
-    4 & 6 & 0.134 & 0.0163 \\
-    4 & 8 & 0.125 & 0.0163 \\
+    2 & 4 & 0.291 \\
+    2 & 6 & 0.197 \\
+    2 & 8 & 0.038 \\
+    4 & 4 & 0.138 \\
+    4 & 6 & 0.134 \\
+    4 & 8 & 0.125 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -406,17 +399,6 @@ reliable-time-window with $U$ both match the paper's qualitative
 description.
 \end{callout}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{cpp_vs_python_fig10.png}
-  \caption*{\textbf{Ours, C++ vs.\ Python} --- $d(t)$, Python (solid)
-    overlaid with C++ (dashed) for the $U=0,2,4$ subset the C++ side has
-    data for, one panel per $L_\mathrm{bath}$. Pairs are visually on top
-    of each other; $\max|d^\mathrm{C++}-d^\mathrm{Python}|$ is
-    0.0038--0.0062 across all nine ($U$, $L_\mathrm{bath}$)
-    combinations.}
-\end{figure}
-
 \section{Current scope \& limitations}
 What the current implementation can and cannot do, and where the
 practical boundaries actually sit --- not every constraint here is a bug
@@ -448,11 +430,11 @@ to fix; some are deliberate scope choices for this stage of the work.
     ($U_i=U_f$) --- hopping quench only, no interaction quench. \\
     \addlinespace
     First (equilibrium) bath &
-    Fixed, not itself quenched &
-    The first bath's parameters are set once from the equilibrium fit
-    and held fixed through the whole real-time run; only the second
-    (GBEK Cholesky) bath captures genuinely non-equilibrium/transient
-    hybridization. \\
+    Absent from report validation &
+    Every paper-figure and C++ comparison regenerated for this report uses
+    \texttt{NeqAtomicLimit=1}, hence $\Lambda^-=0$ and no fitted first
+    bath. The broader fitted-first-bath handoff remains covered separately
+    by fast and Nightly CTests. \\
     \addlinespace
     Ground-state solver switch &
     $n_\mathrm{sites,ext}\le8\to$ dense; $>8\to$ Lanczos &
@@ -475,13 +457,6 @@ to fix; some are deliberate scope choices for this stage of the work.
     Single orbital only &
     No multi-orbital Hubbard impurity; the whole GBEK scheme as
     implemented here is built around one impurity site. \\
-    \addlinespace
-    Fig.\ 3 diagnostic runtime &
-    Long-running, not a crash regression &
-    \texttt{inputNeqGBEKFig3L3.ain} is a 100-step near-atomic diagnostic
-    with a five-site fitted first bath. A current five-minute run timed out
-    without reproducing the historical step-3 crash; use the focused fast
-    CTest for routine regression coverage. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -489,10 +464,10 @@ to fix; some are deliberate scope choices for this stage of the work.
 \section*{Where this leaves us}
 
 \begin{itemize}
-  \item \textbf{Figs.\ 3, 4, 7, 8, 9, 10} --- all reproduced to close
-    quantitative/qualitative agreement with the paper. Figs.\ 9--10 now
-    have a direct C++-vs-Python comparison too, not just
-    Python-reference-only.
+  \item \textbf{Figs.\ 3, 4, 7, 8, 9, 10} --- all reproduced from the
+    atomic-limit Python reference to close quantitative/qualitative
+    agreement with the paper; Fig.\ 3 additionally compares directly with
+    the production C++ atomic-limit reconstruction.
   \ifdevnotes
   \item \textbf{Eight bugs found and fixed} across this effort, all
     sign/conjugation/normalization/seeding mistakes in two-time

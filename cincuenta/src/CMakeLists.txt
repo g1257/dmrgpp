@@ -26,6 +26,16 @@ add_test(NAME cincuentaDmrg3Bath COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inp
 add_test(NAME cincuenta1 COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuenta1.ain) # energy 0.456977
 set_tests_properties(cincuenta1 PROPERTIES LABELS "Nightly")
 
+# Large fitted-first-bath/rank-3 stress case. GBEK paper-figure and report
+# generation starts from the true atomic limit and must not depend on this run.
+set(NEQ_GBEK_NEAR_ATOMIC_DIR ${CMAKE_CURRENT_BINARY_DIR}/neqGbekFig3L3NearAtomic)
+file(MAKE_DIRECTORY ${NEQ_GBEK_NEAR_ATOMIC_DIR})
+add_test(
+  NAME neqGBEKFig3L3NearAtomic
+  COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputNeqGBEKFig3L3.ain
+  WORKING_DIRECTORY ${NEQ_GBEK_NEAR_ATOMIC_DIR})
+set_tests_properties(neqGBEKFig3L3NearAtomic PROPERTIES LABELS "Nightly" RUN_SERIAL TRUE)
+
 # Production GBEK must not silently fall back to the obsolete fixed first-bath
 # approximation when NeqBathRank is omitted or explicitly zero.  The wrapper
 # treats the program's intentional uncaught error as the expected result.

@@ -1,8 +1,13 @@
 ##Ainur1.0
 
-# Near-atomic-limit hopping quench for GEBK Fig. 3, L=3 second bath.
+# Nightly fitted-first-bath stress fixture with an L=3 second bath.
 #
-# GEBK Fig. 3 parameters: U=2, 100 steps, dt=0.04 (tmax=4),
+# This deliberately expensive near-atomic calculation exercises the general
+# equilibrium-to-real-time handoff. It is not a GBEK paper-figure source and
+# is not used by plot or report regeneration; those calculations start from
+# the true atomic limit via inputNeqAtomicLimitGBEKL3.ain.
+#
+# GBEK Fig. 3-like parameters: U=2, 100 steps, dt=0.04 (tmax=4),
 # atomic limit start (W_i~0), quench to Bethe bandwidth W_f=4 (t*=1).
 #
 # Approximation: W_i=0.1 (nearly atomic; Λ^- << Λ^+), cosine ramp tq=0.25.
