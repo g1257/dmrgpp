@@ -6,7 +6,7 @@ DMRG++ is a free and open source implementation of the
 density matrix renormalization group (DMRG) algorithm.
 You are welcomed to use it and publish data
  obtained with DMRG++. If you do,
-<i>please cite this work</i> (see next HowToCiteDMRGPP.md).
+*please cite this work* (see [`CITATION.cff`](CITATION.cff)).
 
 ## License and Disclaimers
 
