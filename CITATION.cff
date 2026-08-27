@@ -1,0 +1,64 @@
+cff-version: 1.2.0
+message: >-
+  If you use DMRG++, please cite the preferred general publication below.
+  Please also cite the relevant references for time-evolution or METTS
+  calculations.
+title: DMRG++
+type: software
+authors:
+  - family-names: Alvarez
+    given-names: Gonzalo
+version: "7.00"
+date-released: 2026-04-02
+repository-code: https://github.com/dmrgpp-project/dmrgpp
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Alvarez
+      given-names: G.
+  title: >-
+    The density matrix renormalization group for strongly correlated electron
+    systems: A generic implementation
+  journal: Computer Physics Communications
+  volume: 180
+  issue: 9
+  start: 1572
+  end: 1578
+  year: 2009
+  month: 9
+  doi: 10.1016/j.cpc.2009.02.016
+references:
+  - type: article
+    authors:
+      - family-names: Alvarez
+        given-names: G.
+      - family-names: Dias da Silva
+        given-names: Luis G. G. V.
+      - family-names: Ponce
+        given-names: E.
+      - family-names: Dagotto
+        given-names: E.
+    title: >-
+      Time evolution with the density-matrix renormalization-group algorithm:
+      A generic implementation for strongly correlated electronic systems
+    journal: Physical Review E
+    volume: 84
+    issue: 5
+    start: "056706"
+    year: 2011
+    month: 11
+    doi: 10.1103/PhysRevE.84.056706
+  - type: article
+    authors:
+      - family-names: Alvarez
+        given-names: G.
+    title: >-
+      Production of minimally entangled typical thermal states with the
+      Krylov-space approach
+    journal: Physical Review B
+    volume: 87
+    issue: 24
+    start: "245130"
+    year: 2013
+    month: 6
+    doi: 10.1103/PhysRevB.87.245130
