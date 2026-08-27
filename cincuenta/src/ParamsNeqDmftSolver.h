@@ -42,6 +42,15 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 			io.readline(neqBathRank, "NeqBathRank=");
 		} catch (std::exception&) { }
 
+		if (neqDmftIter == 0)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqDmftIter>0; "
+			    "at least one corrector iteration is required at each time step\n");
+		if (neqBathRank == 0)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqBathRank>0; "
+			    "the frozen rank-zero bath path is no longer supported\n");
+
 		try {
 			io.readline(bandwidthFinal, "BandwidthFinal=");
 		} catch (std::exception&) { }

@@ -256,17 +256,6 @@ int main(int argc, char** argv)
 			std::cout << "\n=== Non-equilibrium DMFT (interaction quench) ===\n";
 			ParamsNeqType neqParams(io);
 
-			// Production neq-DMFT always uses the positive-rank GBEK two-bath
-			// solver. Its low-rank Cholesky second bath must be present so the
-			// bath can respond to the quench (Gramsch/Balzer/Eckstein/Kollar,
-			// PRB 88, 235106 (2013)).
-			if (neqParams.neqBathRank == 0)
-				err("Non-equilibrium GBEK requires NeqBathRank>0; "
-				    "the frozen rank-zero bath path is no longer supported\n");
-			if (neqParams.neqDmftIter == 0)
-				err("Non-equilibrium GBEK requires NeqDmftIter>0; "
-				    "at least one corrector iteration is required at each time step\n");
-
 			if (!neqParams.neqAtomicLimit) {
 				const std::string& p = neqParams.neqOutputPrefix;
 				equilibriumInitialData.writeMatsubara(

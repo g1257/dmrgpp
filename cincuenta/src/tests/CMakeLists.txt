@@ -22,6 +22,14 @@ target_include_directories(
                                      ${CMAKE_SOURCE_DIR}/LanczosPlusPlus/src/Engine ${CMAKE_SOURCE_DIR})
 catch_discover_tests(test_ImpuritySolverNeqGBEK)
 
+add_executable(test_NeqGbekInput test_NeqGbekInput.cpp)
+target_link_libraries(test_NeqGbekInput PRIVATE Catch2::Catch2WithMain dmrgpp_utils lanczos_globals
+                                              dmrg_runner kronutil)
+target_include_directories(
+  test_NeqGbekInput PRIVATE ${CMAKE_SOURCE_DIR}/cincuenta/src ${CMAKE_SOURCE_DIR}/dmrg/Engine
+                            ${CMAKE_SOURCE_DIR}/LanczosPlusPlus/src/Engine ${CMAKE_SOURCE_DIR})
+catch_discover_tests(test_NeqGbekInput)
+
 add_executable(test_DmftSolverEquilibriumInitialData test_DmftSolverEquilibriumInitialData.cpp)
 target_link_libraries(test_DmftSolverEquilibriumInitialData PRIVATE Catch2::Catch2WithMain dmrgpp_utils
                                                                  lanczos_globals dmrg_runner kronutil)

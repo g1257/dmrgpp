@@ -36,28 +36,6 @@ add_test(
   WORKING_DIRECTORY ${NEQ_GBEK_NEAR_ATOMIC_DIR})
 set_tests_properties(neqGBEKFig3L3NearAtomic PROPERTIES LABELS "Nightly" RUN_SERIAL TRUE)
 
-# Production GBEK must not silently fall back to the obsolete fixed first-bath
-# approximation when NeqBathRank is omitted or explicitly zero.  The wrapper
-# treats the program's intentional uncaught error as the expected result.
-if(Python3_FOUND)
-  add_test(
-    NAME neqGBEKRejectRankZero
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/check_neq_gbek_rank_zero_rejected.py
-            $<TARGET_FILE:cincuenta> ${PATH_TO_INPUTS})
-  add_test(
-    NAME neqGBEKRejectIterZero
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/check_neq_gbek_iter_zero_rejected.py
-            $<TARGET_FILE:cincuenta> ${PATH_TO_INPUTS})
-  add_test(
-    NAME neqGBEKRejectRemovedSolver
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/check_neq_gbek_removed_solver_rejected.py
-            $<TARGET_FILE:cincuenta> ${PATH_TO_INPUTS})
-  add_test(
-    NAME neqGBEKRejectRemovedTolerance
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/check_neq_gbek_removed_tolerance_rejected.py
-            $<TARGET_FILE:cincuenta> ${PATH_TO_INPUTS})
-endif()
-
 # ---- U=0 self-consistency tests: G_imp must equal G_cluster_0 ----------------
 # Physical basis: at U=0 the self-energy Sigma=0 exactly, so the DMFT condition
 # G_imp = local lattice GF must hold for any correct impurity solver.
