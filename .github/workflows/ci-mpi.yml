@@ -44,7 +44,9 @@ jobs:
               -DDMRGPP_USE_MPI=ON
 
     - name: Build MPI Targets
-      run: cmake --build ${{github.workspace}}/build --target dmrg omegas
+      # CTest's MPI label includes the cincuenta solver and its check_value
+      # post-processing helper in addition to the dmrg executables.
+      run: cmake --build ${{github.workspace}}/build --target dmrg omegas cincuenta check_value
 
     - name: Test MPI
       run: ctest --test-dir ${{github.workspace}}/build -L MPI --output-on-failure
