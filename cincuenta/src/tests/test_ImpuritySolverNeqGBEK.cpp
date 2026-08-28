@@ -95,8 +95,7 @@ TEST_CASE("GBEK owns the positive-rank and half-filling contracts", "[GBEK][vali
 	                 "NeqBathRank=0;");
 	InputNgType::Writeable rankZeroW(Dmft::CincuentaInputCheck {}, rankZero);
 	InputNgType::Readable  rankZeroIo(rankZeroW);
-	ParamsType             rankZeroParams(rankZeroIo);
-	CHECK_THROWS(SolverType(rankZeroParams, rankZeroIo));
+	CHECK_THROWS(ParamsType(rankZeroIo));
 
 	std::string nonHalfFilled = kConfig;
 	nonHalfFilled.replace(nonHalfFilled.find("TargetElectronsDown=1;"),
