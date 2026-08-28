@@ -85,6 +85,19 @@ private:
 	// preserved), at the cost of a small extra reduction kernel.
 	static const int kPass2Chunks_ = 16;
 
+	// Pass 1 batches one GEMM per non-zero (ip, jp, k) connection triple, but
+	// the number of such triples (tens to low thousands, see setup_) is
+	// often far smaller than what's needed to fill a modern GPU with
+	// concurrent thread-blocks, even though many of those GEMMs have a
+	// sizeable number of output rows (m = rps[ip], which can range into the
+	// hundreds). Since output rows are fully independent (no reduction
+	// needed, unlike the k-split used for Pass 2), we split each triple's m
+	// dimension into row-blocks of at most kPass1RowChunk_ rows and emit one
+	// GEMM per row-block, multiplying the number of pass-1 teams for
+	// large-m triples while leaving small-m triples (m <= kPass1RowChunk_)
+	// unsplit.
+	static const int kPass1RowChunk_ = 16;
+
 public:
 
 	BatchedGemmKokkos(const InitKronType& initKron)
@@ -494,7 +507,21 @@ public:
 						a1.b_off = static_cast<long long>(xyStart[jp]);
 						a1.c_off = static_cast<long long>(BXbatchOff[ip])
 						    + colA * static_cast<long long>(ldB[ip]);
-						pass1_args.push_back(a1);
+
+						// Split the m (=mB) dimension into independent
+						// row-blocks: rows of C/A are not a contraction
+						// dimension, so each row-block is a fully
+						// self-contained GEMM and no reduction step is
+						// needed (unlike the k-split used for Pass 2).
+						for (int r0 = 0; r0 < a1.m; r0 += kPass1RowChunk_) {
+							const int mc
+							    = std::min(kPass1RowChunk_, a1.m - r0);
+							GemmArgs ar = a1;
+							ar.m        = mc;
+							ar.a_off    = a1.a_off + r0;
+							ar.c_off    = a1.c_off + r0;
+							pass1_args.push_back(ar);
+						}
 
 						colA += nAk;
 						colB += nBk;
