@@ -14,6 +14,7 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Profiling_ScopedRegion.hpp>
 
+#include <algorithm>
 #include <memory>
 
 namespace Dmrg {
@@ -72,6 +73,18 @@ private:
 
 	static const int ialign_ = 32;
 
+	// Pass 2 GEMMs have very few batches (one per patch, == npatches, which
+	// can be as low as single digits) but each has a very long contraction
+	// (k) dimension, so a single GEMM per patch leaves the GPU with far too
+	// few concurrent thread-blocks to reach good occupancy. We split the k
+	// dimension of each patch's GEMM into kPass2Chunks_ independent slices,
+	// each accumulated into its own scratch buffer, and sum the partial
+	// results afterwards. This multiplies the number of pass-2 batches (and
+	// thus concurrent thread-blocks) by kPass2Chunks_ without changing the
+	// per-GEMM shape (so the favorable Blocked-algo memory access pattern is
+	// preserved), at the cost of a small extra reduction kernel.
+	static const int kPass2Chunks_ = 16;
+
 public:
 
 	BatchedGemmKokkos(const InitKronType& initKron)
@@ -105,9 +118,11 @@ public:
 			Kokkos::deep_copy(exec, d_vin_, hv);
 		}
 
-		// --- Zero output and work buffers -------------------------------------------
-		Kokkos::deep_copy(exec, d_vout_, KokkosScalar(0));
-		Kokkos::deep_copy(exec, d_flatBXbatch_, KokkosScalar(0));
+		// Note: d_vout_/d_voutChunks_ and d_flatBXbatch_ are NOT explicitly
+		// zeroed here. Every element of both buffers is written with beta=0
+		// by TeamVectorGemmInternal inside Pass 1 / Pass 2 (which zero-fills
+		// C whenever beta==0, even for k==0 slices), so an upfront deep_copy
+		// zeroing would be redundant extra global-memory traffic.
 
 		// --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp]  (NoT x NoT) ----------------
 		{
@@ -120,7 +135,7 @@ public:
 			Kokkos::parallel_for(
 			    "BatchedGemmKokkos_Pass1",
 			    Kokkos::TeamPolicy<ExecutionSpace>(
-			        exec, static_cast<int>(nbatch1_), Kokkos::AUTO, Kokkos::AUTO),
+			        exec, static_cast<int>(nbatch1_), Kokkos::AUTO, 8),
 			    KOKKOS_LAMBDA(const MemberType& member) {
 				    const int       i  = member.league_rank();
 				    const GemmArgs& ag = args(i);
@@ -158,45 +173,57 @@ public:
 			    });
 		}
 
-		// --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T  (NoT x T) ---------------
+		// --- Pass 2: Y_chunk[ip] = BXbatch[ip]_chunk * Abatch[ip]_chunk^T --------
+		// (split-k: each patch's contraction dim is divided into
+		// kPass2Chunks_ independent slices for better GPU occupancy; see
+		// kPass2Chunks_ comment above and the reduction pass below.)
 		{
 			const ScalarView  flatBXbatch = d_flatBXbatch_;
 			const ScalarView  flatAbatch  = d_flatAbatch_;
-			const ScalarView  vout_dev    = d_vout_;
+			const ScalarView  voutChunks  = d_voutChunks_;
 			const DevArgsView args        = d_pass2_;
 
 			using MemberType = typename Kokkos::TeamPolicy<ExecutionSpace>::member_type;
 			Kokkos::parallel_for(
 			    "BatchedGemmKokkos_Pass2",
 			    Kokkos::TeamPolicy<ExecutionSpace>(
-			        exec, static_cast<int>(nbatch2_), Kokkos::AUTO, Kokkos::AUTO),
+			        exec, static_cast<int>(nbatch2_), Kokkos::AUTO, 8),
 			    KOKKOS_LAMBDA(const MemberType& member) {
 				    const int       i  = member.league_rank();
 				    const GemmArgs& ag = args(i);
 
-				    if (ag.k == 0)
-					    return; // no connections for this ipatch; Y[ip] already
-					            // zero
+				    // Note: we deliberately do NOT special-case ag.k == 0 here.
+				    // TeamVectorGemmInternal zero-fills C whenever beta == 0,
+				    // even if k == 0, so every element of this chunk's output
+				    // slice is always written by the invoke() call below.
 
 				    using UV = Kokkos::View<KokkosScalar**,
 				                            Kokkos::LayoutLeft,
 				                            MemorySpace,
 				                            Kokkos::MemoryUnmanaged>;
 
-				    // A = BXbatch[ip]: (lda, k) padded -> subview (m, k)
+				    // A = BXbatch[ip] chunk: (lda, k) padded -> subview (m, k)
 				    UV   A_full(flatBXbatch.data() + ag.a_off, ag.lda, ag.k);
 				    auto A = Kokkos::subview(
 				        A_full, Kokkos::make_pair(0, ag.m), Kokkos::ALL());
 
-				    // B = Abatch[ip]: (ldb, k) padded -> subview (n, k); will be
-				    // transposed
+				    // B = Abatch[ip] chunk: (ldb, k) padded -> subview (n, k); will
+				    // be transposed
 				    UV   B_full(flatAbatch.data() + ag.b_off, ag.ldb, ag.k);
 				    auto B = Kokkos::subview(
 				        B_full, Kokkos::make_pair(0, ag.n), Kokkos::ALL());
 
-				    // C = Y[ip]: (ldc, n) exact -- no padding for output
-				    UV C(vout_dev.data() + ag.c_off, ag.ldc, ag.n);
+				    // C = this chunk's partial Y[ip]: (ldc, n) exact -- no padding
+				    UV C(voutChunks.data() + ag.c_off, ag.ldc, ag.n);
 
+				    // Pass 2 GEMMs have a very "thin" output (m, n are the
+				    // per-patch sizes) with a very long contraction
+				    // dimension k. The Blocked algorithm reuses loaded A/B
+				    // tiles across the register-blocked inner loop, which is
+				    // far more memory-bandwidth efficient for this thin/long
+				    // GEMM shape than assigning one thread per output
+				    // element (tried Unblocked: ~3x slower here because
+				    // every thread re-reads all of A/B from global memory).
 				    KokkosBatched::TeamVectorGemm<
 				        MemberType,
 				        KokkosBatched::Trans::NoTranspose,
@@ -207,6 +234,23 @@ public:
 				                                                    B,
 				                                                    KokkosScalar(0),
 				                                                    C);
+			    });
+		}
+
+		// --- Reduce pass-2 split-k partial sums into d_vout_ -----------------------
+		{
+			const ScalarView voutChunks = d_voutChunks_;
+			const ScalarView vout_dev   = d_vout_;
+			const int        nchunks    = kPass2Chunks_;
+			const long long  stride     = static_cast<long long>(totalXY);
+			Kokkos::parallel_for(
+			    "BatchedGemmKokkos_Pass2Reduce",
+			    Kokkos::RangePolicy<ExecutionSpace>(exec, 0, static_cast<long long>(totalXY)),
+			    KOKKOS_LAMBDA(const long long idx) {
+				    KokkosScalar sum = KokkosScalar(0);
+				    for (int c = 0; c < nchunks; ++c)
+					    sum += voutChunks(static_cast<long long>(c) * stride + idx);
+				    vout_dev(idx) = sum;
 			    });
 		}
 
@@ -468,10 +512,39 @@ public:
 				a2.ldb = static_cast<int>(ldA[ip]); // Abatch leading dim
 				a2.ldc
 				    = static_cast<int>(rps[ip]); // Y[ip] no padding: ld = rps[ip]
-				a2.a_off = static_cast<long long>(BXbatchOff[ip]);
-				a2.b_off = static_cast<long long>(AbatchOff[ip]);
-				a2.c_off = static_cast<long long>(xyStart[ip]);
-				pass2_args.push_back(a2);
+
+				// Split the k (=totalCols) dimension into kPass2Chunks_
+				// slices. Each slice is an independent GEMM writing (with
+				// beta=0) into its own scratch region of d_voutChunks_;
+				// slices with 0 width still get emitted so that
+				// TeamVectorGemmInternal's beta==0 zero-fill covers their
+				// scratch region (see matrixVector()).
+				const int chunkCols
+				    = iceil(totalCols, kPass2Chunks_); // columns per chunk
+				long long colCursor = 0;
+				for (int c = 0; c < kPass2Chunks_; ++c) {
+					const int kc = std::max(
+					    0, std::min(chunkCols, totalCols - static_cast<int>(colCursor)));
+					// Clamp the column offset so pointer arithmetic never
+					// strays past this patch's allocated column range (kc==0
+					// chunks still need a valid, in-bounds offset even
+					// though no data will be read/written there).
+					const long long colOff
+					    = std::min(colCursor, static_cast<long long>(totalCols));
+
+					GemmArgs ac  = a2;
+					ac.k         = kc;
+					ac.a_off     = static_cast<long long>(BXbatchOff[ip])
+					    + colOff * static_cast<long long>(ldB[ip]);
+					ac.b_off = static_cast<long long>(AbatchOff[ip])
+					    + colOff * static_cast<long long>(ldA[ip]);
+					ac.c_off = static_cast<long long>(c)
+					        * static_cast<long long>(xyStart[npatches])
+					    + static_cast<long long>(xyStart[ip]);
+					pass2_args.push_back(ac);
+
+					colCursor += chunkCols;
+				}
 			}
 
 			// Execute pack tasks in parallel on the host mirror
@@ -510,9 +583,12 @@ public:
 			d_vout_ = ScalarView(
 			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vout"),
 			    xyStart[npatches]);
+			d_voutChunks_ = ScalarView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_voutChunks"),
+			    static_cast<size_t>(kPass2Chunks_) * xyStart[npatches]);
 
 			nbatch1_ = pass1_args.size();
-			nbatch2_ = pass2_args.size(); // == npatches
+			nbatch2_ = pass2_args.size(); // == npatches * kPass2Chunks_
 
 			// Copy packed host mirrors to device in a single shot
 			Kokkos::deep_copy(exec, d_flatAbatch_, h_flatAbatch);
@@ -559,6 +635,7 @@ private:
 	mutable ScalarView d_flatBXbatch_; // intermediate BX work buffer, per-call
 	mutable ScalarView d_vin_; // input vector on device, per-call
 	mutable ScalarView d_vout_; // output vector on device, per-call
+	mutable ScalarView d_voutChunks_; // pass-2 split-k partial sums, per-call
 	DevArgsView        d_pass1_; // pass-1 GEMM parameters, persistent
 	DevArgsView        d_pass2_; // pass-2 GEMM parameters, persistent
 };
