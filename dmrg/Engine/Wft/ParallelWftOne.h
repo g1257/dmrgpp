@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_PARALLEL_WFT_ONE_H
 #define DMRG_PARALLEL_WFT_ONE_H
 
+#include "OffsetVector.hpp"
 #include "ProgramGlobals.h"
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/PackIndices.h>
@@ -94,6 +95,8 @@ class ParallelWftOne {
 	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
 	using SparseElementType          = typename SparseMatrixType::value_type;
 	using LeftRightSuperType         = typename DmrgWaveStructType::LeftRightSuperType;
+	using OffsetVectorType           = OffsetVector<SparseElementType>;
+	using OffsetVectorBaseType       = OffsetVectorBase<SparseElementType>;
 
 public:
 
@@ -201,6 +204,9 @@ private:
 		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha == wsT.cols());
 
+		OffsetVectorType src_proxy;
+		const auto&      psiSrc_opt = src_proxy.makeOffsetVector(psiSrc);
+
 		SparseElementType sum        = 0;
 		SizeType          volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
 		SizeType          beta
@@ -214,7 +220,7 @@ private:
 				SizeType j = we.getCol(k2);
 				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(
 				    alpha + j * nalpha);
-				sum += wsT.getValue(k) * we.getValue(k2) * psiSrc.slowAccess(x);
+				sum += wsT.getValue(k) * we.getValue(k2) * psiSrc_opt.slowAccess(x);
 			}
 		}
 
@@ -236,6 +242,9 @@ private:
 		    = dmrgWaveStruct_.lrs().left().permutationInverse().size() / volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip + kp * nip);
 
+		OffsetVectorType src_proxy;
+		const auto&      psiSrc_opt = src_proxy.makeOffsetVector(psiSrc);
+
 		SparseElementType sum = 0;
 
 		for (int k = ws.getRowPtr(alpha); k < ws.getRowPtr(alpha + 1); k++) {
@@ -244,7 +253,7 @@ private:
 				SizeType j = weT.getCol(k2);
 				SizeType x
 				    = dmrgWaveStruct_.lrs().super().permutationInverse(i + j * ni);
-				sum += ws.getValue(k) * weT.getValue(k2) * psiSrc.slowAccess(x);
+				sum += ws.getValue(k) * weT.getValue(k2) * psiSrc_opt.slowAccess(x);
 			}
 		}
 

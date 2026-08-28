@@ -1,0 +1,33 @@
+##Ainur1.0
+
+# --- Model parameters ---
+TotalNumberOfSites = 3;
+NumberOfTerms      = 1;
+DegreesOfFreedom   = 1;
+GeometryKind       = "chain";
+GeometryOptions    = "ConstantValues";
+dir0:Connectors    = [-1];
+hubbardU           = [8.0, ...];
+potentialV         = [0.0, ...];
+Model              = "HubbardOneBand";
+
+# --- Fock Space parameters --- #
+TargetElectronsUp   = 2;
+TargetElectronsDown = 1;
+
+# --- DMRG++ control parameters --- #
+InfiniteLoopKeptStates = 128;
+TruncationTolerance = 1e-09;
+FiniteLoops = [
+    [@auto, 1000, 8],
+    [@auto, 1000, 8],
+    [@auto, 1000, 8],
+    [@auto, 1000, 8],
+    [@auto, 1000, 8],
+    [@auto, 1000, 0]
+];
+
+# --- Solver / run control -- #
+SolverOptions   = "twositedmrg,usecomplex,geometryallinsystem";
+Version         = "Pierls";
+OutputFile=data74;
