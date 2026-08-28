@@ -90,7 +90,8 @@ static GBEKFixture& fixture()
 TEST_CASE("GBEK owns the positive-rank and half-filling contracts", "[GBEK][validation]")
 {
 	std::string rankZero = kConfig;
-	rankZero.replace(rankZero.find("NeqBathRank=1;"), std::string("NeqBathRank=1;").size(),
+	rankZero.replace(rankZero.find("NeqBathRank=1;"),
+	                 std::string("NeqBathRank=1;").size(),
 	                 "NeqBathRank=0;");
 	InputNgType::Writeable rankZeroW(Dmft::CincuentaInputCheck {}, rankZero);
 	InputNgType::Readable  rankZeroIo(rankZeroW);
@@ -118,7 +119,8 @@ TEST_CASE("GBEK owns atomic-limit fixed-U and chemical-potential contracts",
 
 	std::string changingU = atomicConfig;
 	changingU.replace(changingU.find("HubbardUFinal=2.;"),
-	                  std::string("HubbardUFinal=2.;").size(), "HubbardUFinal=3.;");
+	                  std::string("HubbardUFinal=2.;").size(),
+	                  "HubbardUFinal=3.;");
 	InputNgType::Writeable changingUW(Dmft::CincuentaInputCheck {}, changingU);
 	InputNgType::Readable  changingUIo(changingUW);
 	ParamsType             changingUParams(changingUIo);
@@ -127,7 +129,8 @@ TEST_CASE("GBEK owns atomic-limit fixed-U and chemical-potential contracts",
 
 	std::string wrongMu = atomicConfig;
 	wrongMu.replace(wrongMu.find("ChemicalPotential=1.;"),
-	                std::string("ChemicalPotential=1.;").size(), "ChemicalPotential=0.;");
+	                std::string("ChemicalPotential=1.;").size(),
+	                "ChemicalPotential=0.;");
 	InputNgType::Writeable wrongMuW(Dmft::CincuentaInputCheck {}, wrongMu);
 	InputNgType::Readable  wrongMuIo(wrongMuW);
 	ParamsType             wrongMuParams(wrongMuIo);

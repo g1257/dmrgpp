@@ -52,15 +52,15 @@ const std::string config = "##Ainur1.0\n\n"
 TEST_CASE("DmftSolver snapshots equilibrium Matsubara data before real solve",
           "[DmftSolver][EquilibriumInitialData]")
 {
-	InputNgType::Writeable ioWriteable(Dmft::CincuentaInputCheck {}, config);
-	InputNgType::Readable  io(ioWriteable);
-	ParamsType             params(io);
+	InputNgType::Writeable           ioWriteable(Dmft::CincuentaInputCheck {}, config);
+	InputNgType::Readable            io(ioWriteable);
+	ParamsType                       params(io);
 	SolverType::FitType::InitResults initResults(io);
 
-	int    argc = 1;
-	char   name[] = "test_DmftSolverEquilibriumInitialData";
-	char*  argv[] = { name, nullptr };
-	char** argvPtr = argv;
+	int                argc    = 1;
+	char               name[]  = "test_DmftSolverEquilibriumInitialData";
+	char*              argv[]  = { name, nullptr };
+	char**             argvPtr = argv;
 	PsimagLite::PsiApp app("test_DmftSolverEquilibriumInitialData", &argc, &argvPtr, 1);
 
 	SolverType solver(params, initResults, app, io);
@@ -77,10 +77,10 @@ TEST_CASE("DmftSolver snapshots equilibrium Matsubara data before real solve",
 		CHECK(handoff.bathParameters[i] == Catch::Approx(solver.bathResult()[i]));
 
 	for (SizeType i = 0; i < handoff.matsubaraFrequencies.size(); ++i) {
-		const double expected = (i < params.nMatsubaras)
-		    ? -M_PI * (2 * (params.nMatsubaras - i) - 1) / params.ficticiousBeta
-		    : M_PI * (2 * (i - params.nMatsubaras) + 1) / params.ficticiousBeta;
-		const ComplexType value = handoff.gimpMatsubara[i];
+		const double      expected = (i < params.nMatsubaras)
+		         ? -M_PI * (2 * (params.nMatsubaras - i) - 1) / params.ficticiousBeta
+		         : M_PI * (2 * (i - params.nMatsubaras) + 1) / params.ficticiousBeta;
+		const ComplexType value    = handoff.gimpMatsubara[i];
 		const ComplexType mate
 		    = handoff.gimpMatsubara[handoff.gimpMatsubara.size() - 1 - i];
 		CHECK(handoff.matsubaraFrequencies[i] == Catch::Approx(expected));
@@ -95,10 +95,10 @@ TEST_CASE("DmftSolver snapshots equilibrium Matsubara data before real solve",
 	handoff.writeMatsubara(filename);
 	std::ifstream input(filename);
 	REQUIRE(input);
-	SizeType rows = 0;
+	SizeType rows      = 0;
 	double   frequency = 0;
-	double   real = 0;
-	double   imag = 0;
+	double   real      = 0;
+	double   imag      = 0;
 	while (input >> frequency >> real >> imag) {
 		REQUIRE(rows < handoff.matsubaraFrequencies.size());
 		CHECK(frequency == Catch::Approx(handoff.matsubaraFrequencies[rows]));

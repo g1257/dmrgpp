@@ -28,14 +28,14 @@ class NeqDmftSolver {
 
 public:
 
-	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using ComplexType       = std::complex<RealType>;
-	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
-	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
-	using RealTimeGfType    = NeqRealTimeGf<ComplexOrRealType>;
-	using ParamsNeqType     = ParamsNeqDmftSolver<ComplexOrRealType>;
-	using InputNgType       = PsimagLite::InputNg<CincuentaInputCheck>;
-	using ImpSolverType     = ImpSolverTemplate<ComplexOrRealType>;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType             = std::complex<RealType>;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType       = typename PsimagLite::Vector<ComplexType>::Type;
+	using RealTimeGfType          = NeqRealTimeGf<ComplexOrRealType>;
+	using ParamsNeqType           = ParamsNeqDmftSolver<ComplexOrRealType>;
+	using InputNgType             = PsimagLite::InputNg<CincuentaInputCheck>;
+	using ImpSolverType           = ImpSolverTemplate<ComplexOrRealType>;
 	using HybridizationTargetType = NeqHybridizationTarget<ComplexOrRealType>;
 
 	NeqDmftSolver(const ParamsNeqType& params, typename InputNgType::Readable& io)
@@ -122,13 +122,12 @@ private:
 			// with the penultimate bath update.
 			impSolver_.computeGimp(gimp_, n);
 		}
-
 	}
 
-	const ParamsNeqType&      params_;
-	ImpSolverType             impSolver_;
-	HybridizationTargetType   hybridizationTarget_;
-	RealTimeGfType            gimp_; ///< local copy filled step by step
+	const ParamsNeqType&    params_;
+	ImpSolverType           impSolver_;
+	HybridizationTargetType hybridizationTarget_;
+	RealTimeGfType          gimp_; ///< local copy filled step by step
 };
 
 } // namespace Dmft

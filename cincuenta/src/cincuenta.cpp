@@ -29,8 +29,7 @@ void usage(const std::string& name)
 // where the equilibrium DMFT stage never runs at all, so the key would
 // otherwise be silently parsed and ignored. T must match the key's declared
 // Ainur type (see CincuentaInputCheck::import()).
-template <typename T, typename ReadableType>
-bool hasInput(ReadableType& io, const std::string& key)
+template <typename T, typename ReadableType> bool hasInput(ReadableType& io, const std::string& key)
 {
 	T tmp {};
 	try {

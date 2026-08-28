@@ -37,7 +37,6 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 			io.readline(neqDmftIter, "NeqDmftIter=");
 		} catch (std::exception&) { }
 
-
 		try {
 			io.readline(neqBathRank, "NeqBathRank=");
 		} catch (std::exception&) { }

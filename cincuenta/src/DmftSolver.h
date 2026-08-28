@@ -60,7 +60,8 @@ public:
 			}
 
 			if (!output)
-				err("EquilibriumInitialData: failed while writing " + filename + "\n");
+				err("EquilibriumInitialData: failed while writing " + filename
+				    + "\n");
 		}
 	};
 
@@ -205,8 +206,8 @@ private:
 		equilibriumInitialData_.bathParameters = fit_.result();
 		equilibriumInitialData_.gimpMatsubara  = impuritySolver_->gimp();
 
-		const MatsubarasType& matsubaras = impuritySolver_->matsubaras();
-		const SizeType totalMatsubaras   = matsubaras.total();
+		const MatsubarasType& matsubaras      = impuritySolver_->matsubaras();
+		const SizeType        totalMatsubaras = matsubaras.total();
 		assert(equilibriumInitialData_.gimpMatsubara.size() == totalMatsubaras);
 		equilibriumInitialData_.matsubaraFrequencies.resize(totalMatsubaras);
 		for (SizeType i = 0; i < totalMatsubaras; ++i)

@@ -21,10 +21,10 @@ template <typename ComplexOrRealType> class NeqHybridizationTarget {
 
 public:
 
-	using RealType      = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using ComplexType   = std::complex<RealType>;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType    = std::complex<RealType>;
 	using RealTimeGfType = NeqRealTimeGf<ComplexOrRealType>;
-	using ParamsNeqType = ParamsNeqDmftSolver<ComplexOrRealType>;
+	using ParamsNeqType  = ParamsNeqDmftSolver<ComplexOrRealType>;
 
 	explicit NeqHybridizationTarget(const ParamsNeqType& params)
 	    : params_(params)
@@ -42,10 +42,10 @@ public:
 	{
 		const RealType vn = hoppingAt(n);
 		for (int j = 0; j <= n; ++j) {
-			const RealType vj       = hoppingAt(j);
-			lambda_.retarded(n, j)  = vn * vj * gimp.retarded(n, j);
-			lambda_.lesser(n, j)    = vn * vj * gimp.lesser(n, j);
-			lambda_.lesser(j, n)    = vj * vn * gimp.lesser(j, n);
+			const RealType vj      = hoppingAt(j);
+			lambda_.retarded(n, j) = vn * vj * gimp.retarded(n, j);
+			lambda_.lesser(n, j)   = vn * vj * gimp.lesser(n, j);
+			lambda_.lesser(j, n)   = vj * vn * gimp.lesser(j, n);
 		}
 	}
 

@@ -1,13 +1,13 @@
-#include "NeqRealTimeGf.h"
 #include "NeqBathDecomposition.h"
+#include "NeqRealTimeGf.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <complex>
 #include <vector>
 
-using Dmft::NeqRealTimeGf;
 using Dmft::NeqBathDecomposition;
+using Dmft::NeqRealTimeGf;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 

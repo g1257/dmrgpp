@@ -98,10 +98,11 @@ public:
 		// readline() call. Reject removed labels here so they cannot be merely
 		// warned about and then silently ignored by the GBEK-only dispatcher.
 		if (label == "NeqSolver")
-			return error1("NeqSolver= was removed: GBEK is now the only non-equilibrium "
-			              "solver. Remove NeqSolver= and configure GBEK with "
-			              "NeqBathRank>0 and NeqDmftIter>0",
-			              line);
+			return error1(
+			    "NeqSolver= was removed: GBEK is now the only non-equilibrium "
+			    "solver. Remove NeqSolver= and configure GBEK with "
+			    "NeqBathRank>0 and NeqDmftIter>0",
+			    line);
 		if (label == "NeqDmftTolerance")
 			return error1("NeqDmftTolerance= was removed: GBEK uses the fixed "
 			              "corrector count NeqDmftIter, not a convergence tolerance. "
@@ -126,8 +127,7 @@ public:
 	// Every executable using this input check must call this immediately after
 	// constructing its Readable input, so typed legacy labels receive the same
 	// useful migration error as legacy input syntax.
-	template <typename ReadableType>
-	static void rejectRemovedLabels(ReadableType& io)
+	template <typename ReadableType> static void rejectRemovedLabels(ReadableType& io)
 	{
 		PsimagLite::String solver;
 		if (hasLabel(io, solver, "NeqSolver="))
@@ -156,7 +156,6 @@ private:
 		}
 		return true;
 	}
-
 
 	bool checkForVector(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
 	{

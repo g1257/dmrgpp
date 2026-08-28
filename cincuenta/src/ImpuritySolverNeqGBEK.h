@@ -2,7 +2,6 @@
 #define IMPURITYSOLVER_NEQ_GBEK_H
 
 #include "CincuentaInputCheck.h"
-#include "NeqRealTimeGf.h"
 #include "LanczosPlusPlus/src/Engine/DefaultSymmetry.h"
 #include "LanczosPlusPlus/src/Engine/InputCheck.h"
 #include "LanczosPlusPlus/src/Engine/InternalProductStored.h"
@@ -10,6 +9,7 @@
 #include "LanczosPlusPlus/src/Engine/LanczosGlobals.h"
 #include "LanczosPlusPlus/src/Engine/ModelSelector.h"
 #include "NeqBathDecomposition.h"
+#include "NeqRealTimeGf.h"
 #include "ParamsNeqDmftSolver.h"
 #include <PsimagLite/LanczosSolver.h>
 #include <PsimagLite/Matrix.h>
@@ -58,8 +58,7 @@
 // this reduces to a no-op and only one calculation is actually run.
 namespace Dmft {
 
-template <typename ComplexOrRealType>
-class ImpuritySolverNeqGBEK {
+template <typename ComplexOrRealType> class ImpuritySolverNeqGBEK {
 
 public:
 
@@ -114,11 +113,11 @@ public:
 	{
 		validatePhysicalInput(bathParams);
 		decomp_ = std::make_unique<DecompType>(bathRank_,
-		                                      params_.grid.ficticiousBeta,
-		                                      RealType(0),
-		                                      bathParams,
-		                                      params_.nT,
-		                                      params_.dt);
+		                                       params_.grid.ficticiousBeta,
+		                                       RealType(0),
+		                                       bathParams,
+		                                       params_.nT,
+		                                       params_.dt);
 		solveLplus(bathParams);
 	}
 
@@ -174,10 +173,7 @@ public:
 
 	const DecompType* decomposition() const { return decomp_.get(); }
 
-	void dumpPlusBath(const std::string& filename) const
-	{
-		decomp_->dumpPlusBath(filename);
-	}
+	void dumpPlusBath(const std::string& filename) const { decomp_->dumpPlusBath(filename); }
 
 	// Write one line per time step actually visited (n=0..propagatedThrough):
 	// "t docc Ekin Eint Etot", fixed precision. Eint/Etot are trivial
@@ -202,10 +198,7 @@ public:
 
 	// Raw Cholesky factor V_(n,p), for row-by-row comparison against an
 	// independent offline trace (see NeqBathDecomposition::dumpV).
-	void dumpV(const std::string& filename) const
-	{
-		decomp_->dumpV(filename);
-	}
+	void dumpV(const std::string& filename) const { decomp_->dumpV(filename); }
 
 private:
 
@@ -239,8 +232,9 @@ private:
 		const RealType muExpected = RealType(0.5) * params_.uInitial;
 		if (std::abs(params_.grid.mu - muExpected) > RealType(1e-10))
 			err("ImpuritySolverNeqGBEK (NeqAtomicLimit): requires "
-			    "ChemicalPotential=HubbardU/2 (" + ttos(muExpected)
-			    + "); got ChemicalPotential=" + ttos(params_.grid.mu) + "\n");
+			    "ChemicalPotential=HubbardU/2 ("
+			    + ttos(muExpected) + "); got ChemicalPotential=" + ttos(params_.grid.mu)
+			    + "\n");
 	}
 
 	// Position and update info for one second-bath variable entry in the CSR matrix.

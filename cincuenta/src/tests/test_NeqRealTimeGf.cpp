@@ -24,17 +24,17 @@ TEST_CASE("NeqRealTimeGf dump writes the retained real-time format", "[NeqRealTi
 	gf.retarded(0, 0) = { 0.0, -1.0 };
 	gf.retarded(1, 0) = { 0.25, -0.75 };
 	gf.retarded(1, 1) = { 0.0, -1.0 };
-	gf.lesser(0, 0)  = { 0.0, 0.5 };
-	gf.lesser(0, 1)  = { 0.1, 0.2 };
-	gf.lesser(1, 0)  = { -0.1, 0.2 };
-	gf.lesser(1, 1)  = { 0.0, 0.5 };
+	gf.lesser(0, 0)   = { 0.0, 0.5 };
+	gf.lesser(0, 1)   = { 0.1, 0.2 };
+	gf.lesser(1, 0)   = { -0.1, 0.2 };
+	gf.lesser(1, 1)   = { 0.0, 0.5 };
 
 	const std::string prefix = "test-neq-real-time-gf";
 	gf.dump(prefix);
 
 	std::ifstream retarded(prefix + "-retarded");
 	std::ifstream lesser(prefix + "-lesser");
-	std::string line;
+	std::string   line;
 	REQUIRE(std::getline(retarded, line));
 	CHECK(line == "0.0000000000 0.0000000000 0.0000000000 -1.0000000000");
 	REQUIRE(std::getline(lesser, line));

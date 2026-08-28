@@ -1,12 +1,12 @@
 #include "CincuentaInputCheck.h"
 #include "ParamsNeqDmftSolver.h"
-#include <catch2/matchers/catch_matchers_string.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include <complex>
 #include <string>
 
 using ComplexType = std::complex<double>;
-using ParamsType = Dmft::ParamsNeqDmftSolver<ComplexType>;
+using ParamsType  = Dmft::ParamsNeqDmftSolver<ComplexType>;
 using InputNgType = PsimagLite::InputNg<Dmft::CincuentaInputCheck>;
 using Catch::Matchers::ContainsSubstring;
 
@@ -31,7 +31,7 @@ const std::string kGbekInput = "##Ainur1.0\n\n"
 void requireValidGbekParams(const std::string& input)
 {
 	InputNgType::Writeable writable(Dmft::CincuentaInputCheck {}, input);
-	InputNgType::Readable readable(writable);
+	InputNgType::Readable  readable(writable);
 	Dmft::CincuentaInputCheck::rejectRemovedLabels(readable);
 	ParamsType params(readable);
 }
@@ -41,8 +41,8 @@ void requireValidGbekParams(const std::string& input)
 TEST_CASE("GBEK input requires a positive corrector count", "[GBEK][input]")
 {
 	auto input = kGbekInput;
-	input.replace(input.find("NeqDmftIter=1;"), std::string("NeqDmftIter=1;").size(),
-	              "NeqDmftIter=0;");
+	input.replace(
+	    input.find("NeqDmftIter=1;"), std::string("NeqDmftIter=1;").size(), "NeqDmftIter=0;");
 	CHECK_THROWS_WITH(requireValidGbekParams(input),
 	                  ContainsSubstring("Non-equilibrium GBEK requires NeqDmftIter>0"));
 }
@@ -50,8 +50,8 @@ TEST_CASE("GBEK input requires a positive corrector count", "[GBEK][input]")
 TEST_CASE("GBEK input requires a positive bath rank", "[GBEK][input]")
 {
 	auto input = kGbekInput;
-	input.replace(input.find("NeqBathRank=1;"), std::string("NeqBathRank=1;").size(),
-	              "NeqBathRank=0;");
+	input.replace(
+	    input.find("NeqBathRank=1;"), std::string("NeqBathRank=1;").size(), "NeqBathRank=0;");
 	CHECK_THROWS_WITH(requireValidGbekParams(input),
 	                  ContainsSubstring("Non-equilibrium GBEK requires NeqBathRank>0"));
 }
@@ -59,7 +59,8 @@ TEST_CASE("GBEK input requires a positive bath rank", "[GBEK][input]")
 TEST_CASE("GBEK input rejects removed NeqSolver", "[GBEK][input]")
 {
 	const auto input = kGbekInput + "NeqSolver=\"exactdiag\";\n";
-	CHECK_THROWS_WITH(requireValidGbekParams(input), ContainsSubstring("NeqSolver= was removed"));
+	CHECK_THROWS_WITH(requireValidGbekParams(input),
+	                  ContainsSubstring("NeqSolver= was removed"));
 }
 
 TEST_CASE("GBEK input rejects removed NeqDmftTolerance", "[GBEK][input]")
