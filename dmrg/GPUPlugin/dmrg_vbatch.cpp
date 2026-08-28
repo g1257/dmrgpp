@@ -64,21 +64,21 @@ void dmrg_finalize()
 	for (idev = 0; idev < MAXGPUS; idev++) {
 		if (queue_array[idev] != 0) {
 			magma_queue_destroy(queue_array[idev]);
-		};
-	};
+		}
+	}
 	magma_finalize();
 #endif
 }
 
 #ifdef USE_MAGMA
-IntegerType dmrg_get_ngpu() { return ngpu; };
+IntegerType dmrg_get_ngpu() { return ngpu; }
 
 IntegerType dmrg_set_max_gpus(const IntegerType max_gpus_in)
 {
 	const IntegerType prev_max_gpus = max_gpus;
 	if (max_gpus > max_gpus_in) {
 		max_gpus = max_gpus_in;
-	};
+	}
 	return (prev_max_gpus);
 }
 #endif
@@ -99,13 +99,13 @@ void dmrg_init()
 
 		if (idebug >= 1) {
 			printf("dmrg_init: ngpu = %d detected \n", ngpu);
-		};
+		}
 
 		max_gpus = (max_gpus >= MAXGPUS) ? MAXGPUS : max_gpus;
 		ngpu     = (ngpu >= max_gpus) ? max_gpus : ngpu;
 		if (idebug >= 1) {
 			printf("dmrg_init: ngpu = %d used \n", ngpu);
-		};
+		}
 
 		IntegerType idev = 0;
 		for (idev = 0; idev < ngpu; idev++) {
@@ -115,74 +115,14 @@ void dmrg_init()
 			magma_queue_create(device, &queue);
 			assert(queue != 0);
 			queue_array[idev] = queue;
-		};
+		}
 
 		idev   = 0;
 		queue  = queue_array[idev];
 		device = device_array[idev];
 
 #endif
-	};
-}
-
-template <typename T>
-void dmrg_Xgetvector(const IntegerType n,
-                     T*                dx_src,
-                     const IntegerType incx,
-                     T*                hy_dst,
-                     const IntegerType incy)
-{
-#ifdef USE_MAGMA
-	magma_Xgetvector(n, dx_src, incx, hy_dst, incy, queue);
-#else
-	Xcopy_(&n, dx_src, &incx, hy_dst, &incy);
-#endif
-}
-
-template <typename T>
-void dmrg_Xsetvector(const IntegerType n,
-                     const T*          hx_src,
-                     const IntegerType incx,
-                     T*                dy_dst,
-                     const IntegerType incy)
-{
-#ifdef USE_MAGMA
-	magma_Xsetvector(n, hx_src, incx, dy_dst, incy, queue);
-#else
-	Xcopy_(&n, hx_src, &incx, dy_dst, &incy);
-#endif
-}
-
-template <typename T>
-void dmrg_Xgetmatrix(const IntegerType m,
-                     const IntegerType n,
-                     T*                dA_src,
-                     const IntegerType ldda,
-                     T*                hB_dst,
-                     const IntegerType ldb)
-{
-#ifdef USE_MAGMA
-	magma_Xgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
-#else
-	const char* uplo = "A";
-	Xlacpy_(uplo, &m, &n, dA_src, &ldda, hB_dst, &ldb);
-#endif
-}
-
-template <typename T>
-void dmrg_Xsetmatrix(const IntegerType m,
-                     const IntegerType n,
-                     const T*          hA_src,
-                     const IntegerType lda,
-                     T*                dB_dst,
-                     const IntegerType lddb)
-{
-#ifdef USE_MAGMA
-	magma_Xsetmatrix(m, n, hA_src, lda, dB_dst, lddb, queue);
-#else
-	const char* uplo = "A";
-	Xlacpy_(uplo, &m, &n, hA_src, &lda, dB_dst, &lddb);
-#endif
+	}
 }
 
 template <typename T>
@@ -220,9 +160,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 
 			gflops += ((double)m_array[igroup]) * ((double)n_array[igroup])
 			    * ((double)k_array[igroup]) * ((double)group_size[igroup]) * 2.0;
-		};
+		}
 		gflops = gflops / (giga);
-	};
+	}
 
 	/*
 	---------------------
@@ -232,7 +172,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 	IntegerType batch_size = 0;
 	for (SizeType igroup = 0; igroup < group_count; igroup++) {
 		batch_size += group_size[igroup];
-	};
+	}
 
 	/*
    ----------------------------------------------------------
@@ -298,8 +238,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 			c_vbatch[idx] = reinterpret_cast<KokkosScalar*>(c_array[idx]);
 
 			idx = idx + 1;
-		};
-	};
+		}
+	}
 
 #ifdef USE_MAGMA
 	/*
@@ -349,7 +289,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 					    nn,
 					    kk);
 					fflush(stderr);
-				};
+				}
 
 				IntegerType is_ok_lda = (lda >= 1);
 				IntegerType is_ok_ldb = (ldb >= 1);
@@ -367,7 +307,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 					    ldb,
 					    ldc);
 					fflush(stderr);
-				};
+				}
 
 				assert(mm >= 1);
 				assert(nn >= 1);
@@ -376,8 +316,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 				assert(lda >= 1);
 				assert(ldb >= 1);
 				assert(ldc >= 1);
-			};
-		};
+			}
+		}
 
 		if (ngpu == 1) {
 
@@ -394,11 +334,11 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 					max_m = std::max(m, max_m);
 					max_n = std::max(n, max_n);
 					max_k = std::max(k, max_k);
-				};
+				}
 				if (idebug >= 1) {
 					printf(
 					    "max_m=%d, max_n=%d, max_k=%d\n", max_m, max_n, max_k);
-				};
+				}
 
 				magmablas_Xgemm_vbatched_max_nocheck(transA,
 				                                     transB,
@@ -451,7 +391,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 				IntegerType iend   = istart + inc - 1;
 				if (iend >= (batch_size - 1)) {
 					iend = batch_size - 1;
-				};
+				}
 				IntegerType isize = (iend - istart + 1);
 				if (idebug >= 1) {
 					printf("idev=%d, istart=%d, iend=%d, isize=%d\n",
@@ -459,7 +399,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 					       istart,
 					       iend,
 					       isize);
-				};
+				}
 
 				device = device_array[idev];
 				queue  = queue_array[idev];
@@ -505,8 +445,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 						plda_vbatch[i] = lda_vbatch[istart + i];
 						pldb_vbatch[i] = ldb_vbatch[istart + i];
 						pldc_vbatch[i] = ldc_vbatch[istart + i];
-					};
-				};
+					}
+				}
 
 				double      gmem   = 0;
 				double      gflops = 0;
@@ -526,7 +466,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 
 						gmem += m * n + m * k + k * n;
 						gflops += 2.0 * m * n * k;
-					};
+					}
 
 					double gmem_in_bytes = gmem * sizeof(T);
 
@@ -535,7 +475,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 						       idev,
 						       gmem_in_bytes,
 						       gflops);
-					};
+					}
 				}
 
 				/*
@@ -561,7 +501,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 
 				gBatchCount[idev] = isize;
 
-			}; /* end for idev */
+			} /* end for idev */
 
 			/*
 			 * -------------------------
@@ -626,9 +566,9 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 					                                     max_n,
 					                                     max_k,
 					                                     queue);
-				};
+				}
 
-			}; /* end for idev */
+			} /* end for idev */
 
 			/*
 			 * -------------------------------
@@ -640,7 +580,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 				queue  = queue_array[idev];
 				magma_setdevice(device);
 				magma_queue_sync(queue);
-			};
+			}
 
 			for (idev = 0; idev < ngpu; idev++) {
 				KokkosScalar** pa_vbatch = gpa_vbatch[idev];
@@ -656,8 +596,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 			device = device_array[idev];
 			queue  = queue_array[idev];
 
-		}; /* end if (ngpu > 1) */
-	};
+		} /* end if (ngpu > 1) */
+	}
 #else
 	{
 		IntegerType i = 0;
@@ -686,8 +626,8 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 			       &beta,
 			       pc,
 			       &ldc);
-		};
-	};
+		}
+	}
 #endif
 
 	Kokkos::kokkos_free<Kokkos::SharedSpace>(a_vbatch);
@@ -699,14 +639,14 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 		double gflops_per_sec = 0;
 		if (elapsed_time > 0) {
 			gflops_per_sec = gflops / elapsed_time;
-		};
+		}
 
 		printf("dmrg_vbatch: gflops=%lf, elapsed_time=%lf, gflops/sec=%lf\n",
 		       gflops,
 		       elapsed_time,
 		       gflops_per_sec);
 		printf("dmrg_vbatch need %lf GBytes\n", (double)nbytes_total / (giga));
-	};
+	}
 }
 
 template void dmrg_Xgemm_vbatch<double>(char,
@@ -740,52 +680,3 @@ template void dmrg_Xgemm_vbatch<std::complex<double>>(char                      
                                                       IntegerType*                 ldc_array,
                                                       SizeType                     group_count,
                                                       IntegerType*                 group_size);
-
-template void
-dmrg_Xgetvector<double>(const IntegerType, double*, const IntegerType, double*, const IntegerType);
-
-template void dmrg_Xgetvector<std::complex<double>>(const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType);
-
-template void dmrg_Xsetvector<double>(const IntegerType,
-                                      const double*,
-                                      const IntegerType,
-                                      double*,
-                                      const IntegerType);
-
-template void dmrg_Xsetvector<std::complex<double>>(const IntegerType,
-                                                    const std::complex<double>*,
-                                                    const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType);
-
-template void dmrg_Xgetmatrix<double>(const IntegerType,
-                                      const IntegerType,
-                                      double*,
-                                      const IntegerType,
-                                      double*,
-                                      const IntegerType);
-
-template void dmrg_Xgetmatrix<std::complex<double>>(const IntegerType,
-                                                    const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType);
-
-template void dmrg_Xsetmatrix<double>(const IntegerType,
-                                      const IntegerType,
-                                      const double*,
-                                      const IntegerType,
-                                      double*,
-                                      const IntegerType);
-
-template void dmrg_Xsetmatrix<std::complex<double>>(const IntegerType,
-                                                    const IntegerType,
-                                                    const std::complex<double>*,
-                                                    const IntegerType,
-                                                    std::complex<double>*,
-                                                    const IntegerType);

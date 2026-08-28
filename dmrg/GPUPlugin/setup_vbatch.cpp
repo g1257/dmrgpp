@@ -44,7 +44,7 @@ void     print_nnz(SizeType              noperator,
 		    fid_A, "left_patch_size(%lu) = %lu;\n", ipatch, left_patch_size_[(ipatch)-1]);
 		fprintf(
 		    fid_B, "right_patch_size(%lu) = %lu;\n", ipatch, right_patch_size_[(ipatch)-1]);
-	};
+	}
 
 	fprintf(fid_A, "gnnz_A = zeros([%lu,%lu,%lu]);\n", npatches, npatches, noperator);
 	fprintf(fid_B, "gnnz_B = zeros([%lu,%lu,%lu]);\n", npatches, npatches, noperator);
@@ -60,7 +60,7 @@ void     print_nnz(SizeType              noperator,
 					    jpatch,
 					    ioperator,
 					    gnnz_A_[index3(ipatch, jpatch, ioperator, npatches)]);
-				};
+				}
 
 				if (gnnz_B_[index3(ipatch, jpatch, ioperator, npatches)] > 0) {
 					fprintf(
@@ -70,10 +70,10 @@ void     print_nnz(SizeType              noperator,
 					    jpatch,
 					    ioperator,
 					    gnnz_B_[index3(ipatch, jpatch, ioperator, npatches)]);
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 
 	SizeType istat_A = fclose(fid_A);
 	SizeType istat_B = fclose(fid_B);
@@ -128,8 +128,8 @@ void setup_vbatch(
 			nnz_B[i]     = 0;
 			nnz_Adiag[i] = 0;
 			nnz_Bdiag[i] = 0;
-		};
-	};
+		}
+	}
 
 	SizeType left_max_state  = 0;
 	SizeType right_max_state = 0;
@@ -141,7 +141,7 @@ void setup_vbatch(
 
 			assert(left_patch_size_[(ipatch)-1] >= 1);
 			assert(right_patch_size_[(ipatch)-1] >= 1);
-		};
+		}
 	}
 
 	SizeType nrow_Abatch = left_max_state;
@@ -175,20 +175,20 @@ void setup_vbatch(
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		left_patch_start_[ipatch]
 		    = left_patch_start_[(ipatch)-1] + left_patch_size_[(ipatch)-1];
-	};
+	}
 
 	right_patch_start_[0] = 1;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		right_patch_start_[ipatch]
 		    = right_patch_start_[(ipatch)-1] + right_patch_size_[(ipatch)-1];
-	};
+	}
 
 	xy_patch_start_[0] = 1;
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		SizeType nrowX          = right_patch_size_[(ipatch)-1];
 		SizeType ncolX          = left_patch_size_[(ipatch)-1];
 		xy_patch_start_[ipatch] = xy_patch_start_[(ipatch)-1] + (nrowX * ncolX);
-	};
+	}
 
 	/*
 	 ---------------------------
@@ -213,14 +213,10 @@ void setup_vbatch(
 		assert(size_Bbatch >= 1);
 
 		{
-#ifdef USE_GETSET
-			T* hAbatch_ = new T[size_Abatch];
-#else
 			std::vector<T*> hAbatch_(size_Abatch, nullptr);
 			for (SizeType i = 0; i < size_Abatch; i++) {
 				hAbatch_[i] = &(pAbatch[i]);
 			}
-#endif
 
 			SizeType ipatch    = 0;
 			SizeType jpatch    = 0;
@@ -271,7 +267,7 @@ void setup_vbatch(
 								       ld1,
 								       ld2);
 								printf("ia=%lu, ja=%lu\n", ia, ja);
-							};
+							}
 
 							assert(m >= 1);
 							assert(n >= 1);
@@ -302,58 +298,32 @@ void setup_vbatch(
 										           < tiny)
 										    ? 0
 										    : 1;
-									};
-								};
+									}
+								}
 								nnz_A[ioperator - 1] += lnnz_A;
 
 								if (ipatch == jpatch) {
 									nnz_Adiag[ioperator - 1]
 									    += lnnz_A;
-								};
+								}
 
 								gnnz_A_[index3(ipatch,
 								               jpatch,
 								               ioperator,
 								               npatches)]
 								    = lnnz_A;
-							};
-						};
-					};
-				};
-			};
-
-#ifdef USE_GETSET
-			{
-				const SizeType incx = 1;
-				const SizeType incy = 1;
-
-				SizeType       n      = size_Abatch;
-				SizeType       istart = 1;
-				const SizeType nb     = 1024 * 1024 * 1024;
-
-				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = std::min(n, istart + nb - 1);
-					SizeType isize = (iend - istart + 1);
-					T*       src   = &(hAbatch_[istart - 1]);
-					T*       dest  = &(pAbatch[istart - 1]);
-
-					dmrg_Xsetvector(isize, src, incx, dest, incy);
-				};
+							}
+						}
+					}
+				}
 			}
-			delete[] hAbatch_;
-#endif
-		};
+		}
 
 		{
-#ifdef USE_GETSET
-
-			T* hBbatch_ = new T[size_Bbatch];
-#else
 			std::vector<T*> hBbatch_(size_Bbatch, nullptr);
 			for (SizeType i = 0; i < size_Bbatch; i++) {
 				hBbatch_[i] = &(pBbatch[i]);
 			}
-#endif
 
 			SizeType ioperator = 0;
 			for (ioperator = 1; ioperator <= noperator; ioperator++) {
@@ -409,46 +379,24 @@ void setup_vbatch(
 										           < tiny)
 										    ? 0
 										    : 1;
-									};
-								};
+									}
+								}
 								nnz_B[ioperator - 1] += lnnz_B;
 								if (ipatch == jpatch) {
 									nnz_Bdiag[ioperator - 1]
 									    += lnnz_B;
-								};
+								}
 								gnnz_B_[index3(ipatch,
 								               jpatch,
 								               ioperator,
 								               npatches)]
 								    = lnnz_B;
-							};
-						};
-					};
-				};
-			};
-
-#ifdef USE_GETSET
-			{
-				const SizeType incx = 1;
-				const SizeType incy = 1;
-
-				SizeType       n      = size_Bbatch;
-				SizeType       istart = 0;
-				const SizeType nb     = 1024 * 1024 * 1024;
-
-				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = std::min(n, istart + nb - 1);
-					SizeType isize = (iend - istart + 1);
-					T*       src   = &(hBbatch_[istart - 1]);
-					T*       dest  = &(pBbatch[istart - 1]);
-
-					dmrg_Xsetvector(isize, src, incx, dest, incy);
-				};
-			};
-
-			delete[] hBbatch_;
-#endif
-		};
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	if (idebug >= 1) {
@@ -476,7 +424,7 @@ void setup_vbatch(
 
 			assert(1 <= left_size);
 			assert(1 <= right_size);
-		};
+		}
 		assert(left_sum == left_max_state);
 		assert(right_sum == right_max_state);
 		(void)left_sum;
@@ -519,8 +467,8 @@ void setup_vbatch(
 				total_flops_method_1 += flops_method_1;
 				total_flops_method_2 += flops_method_2;
 				total_flops_min += std::min(flops_method_1, flops_method_2);
-			};
-		};
+			}
+		}
 		total_flops_method_1 *= ((double)noperator);
 		total_flops_method_2 *= ((double)noperator);
 		total_flops_min *= ((double)noperator);
@@ -551,8 +499,8 @@ void setup_vbatch(
 				       sparsity_ratio_B,
 				       fraction_in_diag_B);
 				printf(" \n");
-			};
-		};
+			}
+		}
 
 		printf("total_flops_method_1=%le (%6.2lf), ",
 		       total_flops_method_1,
@@ -576,14 +524,14 @@ void setup_vbatch(
 			          gnnz_A_,
 			          gnnz_B_);
 			icall++;
-		};
-	};
+		}
+	}
 
 	if (idebug >= 1) {
 		printf("setup_vbatch:memory Abatch (%f GBytes) Bbatch (%f GBytes)\n",
 		       (double)nbytes_Abatch / (giga),
 		       (double)nbytes_Bbatch / (giga));
-	};
+	}
 
 	pld_Abatch = ld_Abatch;
 	pld_Bbatch = ld_Bbatch;
