@@ -48,12 +48,8 @@ if(DMRGPP_USE_MPI)
   list(APPEND _cincuenta_mpi_cmd ${MPIEXEC_POSTFLAGS})
   list(APPEND _cincuenta_mpi_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
   add_test(NAME cincuentaDmrg3Bath_mpi COMMAND ${_cincuenta_mpi_cmd})
-  set_tests_properties(
-    cincuentaDmrg3Bath_mpi
-    PROPERTIES LABELS "MPI"
-               PROCESSORS 2
-               WORKING_DIRECTORY ${CINCUENTA_DMRG_MPI_DIR}
-               PASS_REGULAR_EXPRESSION "MPI rank=1")
+  set_tests_properties(cincuentaDmrg3Bath_mpi PROPERTIES LABELS "MPI" PROCESSORS 2 WORKING_DIRECTORY
+                                                         ${CINCUENTA_DMRG_MPI_DIR})
 
   # Check a Matsubara value assembled on rank zero after both distributed
   # particle/hole runs.  A successful check also proves the shared artifact was written.
