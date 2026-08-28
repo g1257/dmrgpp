@@ -574,8 +574,8 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		// For restarts and even (regular) lattices, lastSite == 1 indicated
-		// by the previous run is really the leftmost border 0.
+		// For restarts, lastSite == 1 indicated by the previous run is really the
+		// leftmost border site 0.
 		// The algorithm for numberOfSites == 3 is different and special.
 		// DMRG++ currently doesn't support numberOfSites < 3.
 		if (lastSite == 1 && isRestart && numberOfSites > 3) {
