@@ -7,13 +7,9 @@
 
 IntegerType dmrg_is_managed(const void* ptr)
 {
-	const IntegerType lfalse     = (0 == 1);
-	IntegerType       is_managed = lfalse;
-
 	struct cudaPointerAttributes attribute;
 	cudaError_t                  ierr = cudaPointerGetAttributes(&attribute, ptr);
-	is_managed = (ierr == cudaSuccess) && (attribute.type == cudaMemoryTypeManaged);
-	return (is_managed);
+	return (ierr == cudaSuccess) && (attribute.type == cudaMemoryTypeManaged);
 }
 
 #ifdef USE_MAGMA

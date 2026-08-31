@@ -6,15 +6,10 @@
 
 IntegerType dmrg_is_managed(const void* ptr)
 {
-	const IntegerType lfalse     = (0 == 1);
-	IntegerType       is_managed = lfalse;
-
 	struct hipPointerAttribute_t attribute;
 	hipError_t                   ierr = hipPointerGetAttributes(&attribute, ptr);
 
-	is_managed = (ierr == hipSuccess) && (attribute.type == hipMemoryTypeManaged);
-
-	return (is_managed);
+	return (ierr == hipSuccess) && (attribute.type == hipMemoryTypeManaged);
 }
 
 #ifdef USE_MAGMA
