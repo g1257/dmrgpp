@@ -300,17 +300,15 @@ public:
 	                  const PsimagLite::GetBraOrKet&     bra,
 	                  const PsimagLite::GetBraOrKet&     ket) const
 	{
-		// try {
 		const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 		const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
+		// No data seen yet
+		if (src1.size() == 0 || src2.size() == 0) {
+			return 0.0;
+		}
+
 		return bracket_(A, src1, src2, fermionicSign, ptr);
-		/*} catch (std::exception& e) {
-		        std::cerr<<"CAUGHT: "<<e.what();
-		        std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
-		        std::cerr<<" No data seen yet\n";
-		        return 0;
-		}*/
 	}
 
 	FieldType bracketRightCorner(const SparseMatrixType&            A,
@@ -320,16 +318,15 @@ public:
 	                             const PsimagLite::GetBraOrKet&     bra,
 	                             const PsimagLite::GetBraOrKet&     ket) const
 	{
-		try {
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
-			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
-			return bracketRightCorner_(A, B, fermionSign, src1, src2, ptr);
-		} catch (std::exception& e) {
-			std::cerr << "CAUGHT: " << e.what();
-			std::cerr << "WARNING: CorrelationsSkeleton::bracketRightCorner(...):";
-			std::cerr << " No data seen yet\n";
-			return 0;
+
+		const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+		const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
+		// No data seen yet
+		if (src1.size() == 0 || src2.size() == 0) {
+			return 0.0;
 		}
+
+		return bracketRightCorner_(A, B, fermionSign, src1, src2, ptr);
 	}
 
 	FieldType bracketRightCorner(const SparseMatrixType&            A,
@@ -340,16 +337,14 @@ public:
 	                             const PsimagLite::GetBraOrKet&     bra,
 	                             const PsimagLite::GetBraOrKet&     ket) const
 	{
-		try {
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
-			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
-			return bracketRightCorner_(A, B, C, fermionSign, src1, src2, ptr);
-		} catch (std::exception& e) {
-			std::cerr << "CAUGHT: " << e.what();
-			std::cerr << "WARNING: CorrelationsSkeleton::bracketRightCornerABC(...):";
-			std::cerr << " No data seen yet\n";
-			return 0;
+		const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+		const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
+		// No data seen yet
+		if (src1.size() == 0 || src2.size() == 0) {
+			return 0.0;
 		}
+
+		return bracketRightCorner_(A, B, C, fermionSign, src1, src2, ptr);
 	}
 
 	const ObserverHelperType& helper() const { return helper_; }
@@ -714,7 +709,7 @@ private:
 		    || vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brLftCrnrEnviron_(...)\n");
 		if (helper_.leftRightSuper(ptr).right().size() / Bcrs.rows() != Acrs.rows())
-			err("Observe::brLftCrnrEnviron_(...)\n");
+			return 0.; // FIXME
 
 		OffsetVectorType vec2proxy;
 		const auto&      vec2opt = vec2proxy.makeOffsetVector(vec2);
