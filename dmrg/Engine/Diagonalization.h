@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "OneSiteSpaces.hh"
 #include "ParametersDmrgSolver.h"
 #include "ProgramGlobals.h"
-#include "VectorWithOffset.h" // includes the PsimagLite::norm functions
 #include "VectorWithOffsets.h" // includes the PsimagLite::norm functions
 #include <PsimagLite/ArnoldiSaI.hh>
 #include <PsimagLite/Concurrency.h>
@@ -280,7 +279,7 @@ private:
 
 		resizeSavedVectors(energySaved, vecSaved, numberOfExcited);
 
-		const bool       isVwoS = (VectorWithOffsetType::name() == "vectorwithoffsets");
+		const bool       isVwoS = (parameters_.options.isSet("vectorwithoffsets"));
 		VectorVectorType onlyForVwoS;
 		if (isVwoS) {
 			target.initialGuess(onlyForVwoS,

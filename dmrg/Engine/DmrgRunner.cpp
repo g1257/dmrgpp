@@ -106,24 +106,10 @@ template <typename RealType>
 template <typename MatrixVectorType>
 void DmrgRunner<RealType>::doOneRun3(const OptionsForIntrospect& op_options) const
 {
-	assert(dmrg_solver_params_);
-	using ComplexOrRealType = typename MatrixVectorType::ComplexOrRealType;
-	if (dmrg_solver_params_->options.isSet("vectorwithoffsets")) {
-		typedef VectorWithOffsets<ComplexOrRealType, Qn> VectorWithOffsetType;
-		doOneRun4<MatrixVectorType, VectorWithOffsetType>(op_options);
-	} else {
-		typedef VectorWithOffset<ComplexOrRealType, Qn> VectorWithOffsetType;
-		doOneRun4<MatrixVectorType, VectorWithOffsetType>(op_options);
-	}
-}
-
-template <typename RealType>
-template <typename MatrixVectorType, typename VectorWithOffsetType>
-void DmrgRunner<RealType>::doOneRun4(const OptionsForIntrospect& op_options) const
-{
 	using ComplexOrRealType = typename MatrixVectorType::ComplexOrRealType;
 	using SuperGeometryType
 	    = SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>;
+	using VectorWithOffsetsType = VectorWithOffsets<ComplexOrRealType>;
 
 	assert(io_);
 	assert(dmrg_solver_params_);
@@ -146,7 +132,7 @@ void DmrgRunner<RealType>::doOneRun4(const OptionsForIntrospect& op_options) con
 	}
 
 	//! Setup the dmrg solver
-	using DmrgSolverType = DmrgSolver<SolverType, VectorWithOffsetType>;
+	using DmrgSolverType = DmrgSolver<SolverType, VectorWithOffsetsType>;
 	DmrgSolverType dmrgSolver(model, *io_);
 
 	//! Calculate observables:

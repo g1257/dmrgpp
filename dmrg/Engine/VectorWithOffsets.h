@@ -77,9 +77,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
 #include "ProgramGlobals.h"
+#include "Qn.h"
 #include <PsimagLite/Complex.h>
 #include <PsimagLite/ProgressIndicator.h>
 #include <cassert>
+#include <complex>
 #include <typeinfo>
 
 // FIXME: a more generic solution is needed instead of tying
@@ -93,20 +95,45 @@ namespace Dmrg {
  * sectors are listed in nzMsAndQns_; offsets_ maps each sector to its position in the
  * full vector, and index2Sector_ provides the inverse mapping for element access.
  *
+ * Quantum numbers for populated sectors are represented by Dmrg::Qn.
+ *
  * \tparam ComplexOrRealType Scalar type stored by the vector.
- * \tparam QnType_ Quantum-number type associated with each populated sector.
  */
-template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 
-	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
-	using VectorSizeType = typename QnType_::VectorSizeType;
-	using PairSizeType   = typename QnType_::PairSizeType;
+// forward declaration for friendship
+template <typename T> class OffsetVectorAny;
+template <typename ComplexOrRealType> class VectorWithOffsets;
+
+template <typename ComplexOrRealType>
+typename PsimagLite::Real<ComplexOrRealType>::Type
+norm(const VectorWithOffsets<ComplexOrRealType>& v);
+
+template <typename ComplexOrRealType> void normalize(VectorWithOffsets<ComplexOrRealType>& v);
+
+template <typename ComplexOrRealType>
+ComplexOrRealType operator*(const VectorWithOffsets<ComplexOrRealType>& v1,
+                            const VectorWithOffsets<ComplexOrRealType>& v2);
+
+template <typename ComplexOrRealType>
+VectorWithOffsets<ComplexOrRealType>
+operator*(const typename VectorWithOffsets<ComplexOrRealType>::value_type& value,
+          const VectorWithOffsets<ComplexOrRealType>&                      v);
+
+template <typename ComplexOrRealType>
+VectorWithOffsets<ComplexOrRealType> operator+(const VectorWithOffsets<ComplexOrRealType>& v1,
+                                               const VectorWithOffsets<ComplexOrRealType>& v2);
+
+template <typename ComplexOrRealType> class VectorWithOffsets {
+
+	using ThisType       = VectorWithOffsets<ComplexOrRealType>;
+	using VectorSizeType = typename Qn::VectorSizeType;
+	using PairSizeType   = typename Qn::PairSizeType;
 
 	static ComplexOrRealType const zero_;
 
 public:
 
-	using QnType           = QnType_;
+	using QnType           = Qn;
 	using value_type       = ComplexOrRealType;
 	using RealType         = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using PairQnType       = std::pair<SizeType, QnType>;
@@ -118,11 +145,7 @@ public:
 	 *
 	 * Constructs an empty vector with no populated sectors.
 	 */
-	VectorWithOffsets()
-	    : progress_("VectorWithOffsets")
-	    , size_(0)
-	    , index2Sector_(0)
-	{ }
+	VectorWithOffsets();
 
 	/*!
 	 * \brief Constructs sector storage from one weight per basis sector.
@@ -144,8 +167,7 @@ public:
 			offsets_[i] = someBasis.partition(i);
 			if (weights[i] > 0) {
 				QnType qn = someBasis.pseudoQn(i);
-				nzMsAndQns_.push_back(PairQnType(i, qn));
-				// firstSector_ = i;
+				nzMsAndQns_.emplace_back(i, qn);
 			}
 		}
 
@@ -159,10 +181,26 @@ public:
 	 * This overload exists for interface compatibility but always reports a fatal error.
 	 */
 	template <typename SomeBasisType>
-	VectorWithOffsets(SizeType, SizeType, const SomeBasisType&)
-	    : progress_("VectorWithOffset")
+	VectorWithOffsets(SizeType weight, SizeType sector, const SomeBasisType& someBasis)
+	    : progress_("VectorWithOffsets")
+	    , size_(someBasis.size())
+	    , index2Sector_(size_)
+	    , data_(someBasis.partition() - 1)
+	    , offsets_(someBasis.partition())
 	{
-		err("VectorWithOffsets::ctor() FATAL: wrong execution path!\n");
+		for (SizeType i = 0; i < offsets_.size(); ++i)
+			offsets_[i] = someBasis.partition(i);
+
+		assert(data_.size() < offsets_.size());
+		if (offsets_[data_.size()] != size_)
+			err("VectorWithOffsets::ctor(): FATAL: internal error\n");
+
+		assert(sector < data_.size());
+		data_[sector].resize(weight);
+		QnType qn = someBasis.pseudoQn(sector);
+		nzMsAndQns_.emplace_back(sector, qn);
+
+		setIndex2Sector();
 	}
 
 	/*!
@@ -194,21 +232,14 @@ public:
 			const SizeType sector = sectors[sectorIndex];
 			data_[sector].resize(compactedWeights[sectorIndex]);
 			QnType qn = someBasis.pseudoQn(sector);
-			nzMsAndQns_.push_back(PairQnType(sector, qn));
+			nzMsAndQns_.emplace_back(sector, qn);
 		}
 
 		setIndex2Sector();
 	}
 
 	/*! \brief Resets the object to an empty vector with no sectors. */
-	void clear()
-	{
-		size_ = 0;
-		index2Sector_.clear();
-		data_.clear();
-		offsets_.clear();
-		nzMsAndQns_.clear();
-	}
+	void clear();
 
 	/*!
 	 * \brief Replaces the vector with data from one sector.
@@ -234,7 +265,7 @@ public:
 
 		data_[sector].swap(v);
 		QnType qn = someBasis.pseudoQn(sector);
-		nzMsAndQns_.push_back(PairQnType(sector, qn));
+		nzMsAndQns_.emplace_back(sector, qn);
 
 		offsets_[n] = size_;
 		setIndex2Sector();
@@ -258,7 +289,7 @@ public:
 			VectorType tmpV(total, 0);
 			data_[i]         = tmpV;
 			const QnType& qn = someBasis.pseudoQn(i);
-			nzMsAndQns_.push_back(PairQnType(i, qn));
+			nzMsAndQns_.emplace_back(i, qn);
 		}
 
 		offsets_[np] = size_;
@@ -297,7 +328,7 @@ public:
 			SizeType   total = someBasis.partition(ip + 1) - offsets_[ip];
 			VectorType tmpV(total, 0);
 			data_[ip] = tmpV;
-			nzMsAndQns_.push_back(PairQnType(ip, v.qn(i)));
+			nzMsAndQns_.emplace_back(ip, v.qn(i));
 		}
 
 		setIndex2Sector();
@@ -312,45 +343,14 @@ public:
 	 *
 	 * All basis sectors must be represented before this operation is called.
 	 */
-	void collapseSectors()
-	{
-		SizeType np = data_.size();
-		if (np != nzMsAndQns_.size()) {
-			PsimagLite::String str(
-			    "VectorWithOffsets: collapseSectors cannot be called");
-			err(str + " on a partially populated vector\n");
-		}
-
-		typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns;
-		for (SizeType i = 0; i < np; ++i) {
-			if (isZero(data_[i])) {
-				data_[i].resize(0);
-			} else {
-				assert(i < nzMsAndQns_.size());
-				nzMsAndQns.push_back(nzMsAndQns_[i]);
-			}
-		}
-
-		nzMsAndQns_ = nzMsAndQns;
-		setIndex2Sector();
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "Collapsed. Non-zero sectors now are " << nzMsAndQns_.size();
-		progress_.printline(msgg, std::cout);
-	}
+	void collapseSectors();
 
 	/*!
 	 * \brief Replaces the data at a basis-sector index.
 	 * \param[in] v Replacement data.
 	 * \param[in] i0 Basis-sector index in the sector array.
 	 */
-	void setDataInSector(const VectorType& v, SizeType i0)
-	{
-		if (i0 >= data_.size())
-			err("VectorWithOffsets: setDataInSector\n");
-
-		data_[i0] = v;
-	}
+	void setDataInSector(const VectorType& v, SizeType i0);
 
 	/*! \brief Returns the number of populated sectors. */
 	SizeType sectors() const { return nzMsAndQns_.size(); }
@@ -359,21 +359,13 @@ public:
 	 * \brief Returns the basis-sector index of a populated sector.
 	 * \param[in] i Index in the compact list of populated sectors.
 	 */
-	SizeType sector(SizeType i) const
-	{
-		assert(i < nzMsAndQns_.size());
-		return nzMsAndQns_[i].first;
-	}
+	SizeType sector(SizeType i) const;
 
 	/*!
 	 * \brief Returns the quantum number of a populated sector.
 	 * \param[in] i Index in the compact list of populated sectors.
 	 */
-	const QnType& qn(SizeType i) const
-	{
-		assert(i < nzMsAndQns_.size());
-		return nzMsAndQns_[i].second;
-	}
+	const QnType& qn(SizeType i) const;
 
 	/*!
 	 * \brief Builds the sector representation from a full vector.
@@ -416,13 +408,7 @@ public:
 	 * \param[out] v Receives the sector data.
 	 * \param[in] i Basis-sector index.
 	 */
-	void extract(VectorType& v, SizeType i) const
-	{
-		if (i >= data_.size())
-			err("VectorWithOffsets: extract\n");
-
-		v = data_[i];
-	}
+	void extract(VectorType& v, SizeType i) const;
 
 	/*! \brief Returns the size of the corresponding full vector. */
 	SizeType size() const { return size_; }
@@ -431,81 +417,29 @@ public:
 	 * \brief Returns the number of stored elements at a basis-sector index.
 	 * \param[in] i Basis-sector index.
 	 */
-	SizeType effectiveSize(SizeType i) const
-	{
-		if (i >= data_.size())
-			err("VectorWithOffsets: effectiveSize\n");
-
-		return data_[i].size();
-	}
+	SizeType effectiveSize(SizeType i) const;
 
 	/*!
 	 * \brief Returns a sector's starting position in the full vector.
 	 * \param[in] i Basis-sector index.
 	 */
-	SizeType offset(SizeType i) const
-	{
-		if (i >= offsets_.size())
-			err("VectorWithOffsets: offset\n");
-		return offsets_[i];
-	}
+	SizeType offset(SizeType i) const;
 
 	/*!
 	 * \brief Returns a const reference to an element using sector-local indices.
 	 * \param[in] i Basis-sector index.
 	 * \param[in] j Element index within the sector.
 	 */
-	const ComplexOrRealType& fastAccess(SizeType i, SizeType j) const
-	{
-		assert(i < data_.size());
-		assert(j < data_[i].size());
-		return data_[i][j];
-	}
+	const ComplexOrRealType& fastAccess(SizeType i, SizeType j) const;
 
 	/*!
 	 * \brief Returns a mutable reference to an element using sector-local indices.
 	 * \param[in] i Basis-sector index.
 	 * \param[in] j Element index within the sector.
 	 */
-	ComplexOrRealType& fastAccess(SizeType i, SizeType j)
-	{
-		assert(i < data_.size());
-		assert(j < data_[i].size());
-		return data_[i][j];
-	}
+	ComplexOrRealType& fastAccess(SizeType i, SizeType j);
 
-	/*!
-	 * \brief Returns an element using its full-vector index.
-	 *
-	 * Returns a reference to zero when the index belongs to an unpopulated sector.
-	 * \param[in] i Full-vector index.
-	 */
-	const ComplexOrRealType& slowAccess(SizeType i) const
-	{
-		assert(i < index2Sector_.size());
-		int j = index2Sector_[i];
-		if (j < 0)
-			return zero_;
-		return data_[j][i - offsets_[j]];
-	}
-
-	/*!
-	 * \brief Returns a mutable element reference using its full-vector index.
-	 * \param[in] i Full-vector index.
-	 */
-	ComplexOrRealType& slowAccess(SizeType i)
-	{
-		int j = index2Sector_[i];
-		if (j < 0) {
-			PsimagLite::String msg("VectorWithOffsets");
-			std::cerr << msg << " can't build itself dynamically yet (sorry!)\n";
-			return data_[0][0];
-		}
-
-		assert(static_cast<SizeType>(j) < data_.size());
-		assert(i - offsets_[j] < data_[j].size());
-		return data_[j][i - offsets_[j]];
-	}
+	PairSizeType sectorAndOffset() const;
 
 	/*!
 	 * \brief Copies populated sector data into a full sparse-vector representation.
@@ -603,16 +537,18 @@ public:
 		io.readline(x, "nonzero=");
 		if (x < 0)
 			err(msg + ":loadOneSector(...): nonzerosectors<0\n");
-		nzMsAndQns_.resize(x);
+		const SizeType nonzero = x;
+		nzMsAndQns_.clear();
+		nzMsAndQns_.reserve(nonzero);
 
-		for (SizeType jj = 0; jj < nzMsAndQns_.size(); jj++) {
+		for (SizeType jj = 0; jj < nonzero; jj++) {
 			io.readline(x, "sector=");
 			if (x < 0)
 				err(msg + ":loadOneSector(...): sector<0\n");
 
-			QnType y;
+			QnType y = QnType::zero();
 			y.read("qn", io);
-			nzMsAndQns_[jj] = PairQnType(x, y);
+			nzMsAndQns_.emplace_back(x, y);
 
 			if (static_cast<SizeType>(x) >= data_.size())
 				err(msg + ":loadOneSector(...): sector too big\n");
@@ -629,53 +565,21 @@ public:
 	 * \param[in] value Scalar multiplier.
 	 * \return This vector after scaling.
 	 */
-	VectorWithOffsets& operator*=(const ComplexOrRealType& value)
-	{
-		for (SizeType ii = 0; ii < nzMsAndQns_.size(); ++ii) {
-			SizeType i = nzMsAndQns_[ii].first;
-			assert(i < data_.size());
-			data_[i] *= value;
-		}
-
-		return *this;
-	}
+	VectorWithOffsets& operator*=(const ComplexOrRealType& value);
 
 	/*!
 	 * \brief Adds another vector's populated sector data in place.
 	 * \param[in] v Vector to add.
 	 * \return This vector after addition.
 	 */
-	VectorWithOffsets operator+=(const VectorWithOffsets& v)
-	{
-		if (nzMsAndQns_.size() == 0) {
-			size_       = v.size_;
-			data_       = v.data_;
-			offsets_    = v.offsets_;
-			nzMsAndQns_ = v.nzMsAndQns_;
-			setIndex2Sector();
-			return *this;
-		}
-
-		for (SizeType ii = 0; ii < nzMsAndQns_.size(); ii++) {
-			SizeType i = nzMsAndQns_[ii].first;
-			assert(i < data_.size());
-			data_[i] += v.data_[i];
-		}
-
-		setIndex2Sector();
-		return *this;
-	}
+	VectorWithOffsets operator+=(const VectorWithOffsets& v);
 
 	/*!
 	 * \brief Maps a full-vector index to its basis-sector index.
 	 * \param[in] i Full-vector index.
 	 * \return Basis-sector index, or -1 for an unpopulated sector.
 	 */
-	int index2Sector(SizeType i) const
-	{
-		assert(i < index2Sector_.size());
-		return index2Sector_[i];
-	}
+	int index2Sector(SizeType i) const;
 
 	/*! \brief Returns the serialization name for this vector type. */
 	static PsimagLite::String name() { return "vectorwithoffsets"; }
@@ -684,122 +588,50 @@ public:
 	 * \brief Computes the Euclidean norm across all populated sectors.
 	 * \param[in] v Vector to measure.
 	 */
-	friend RealType norm(const VectorWithOffsets& v)
-	{
-		RealType sum = 0;
-		for (SizeType ii = 0; ii < v.nzMsAndQns_.size(); ii++) {
-			SizeType i = v.nzMsAndQns_[ii].first;
-			assert(i < v.data_.size());
-			RealType tmp = PsimagLite::norm(v.data_[i]);
-			sum += tmp * tmp;
-		}
-
-		return sqrt(sum);
-	}
+	template <typename T>
+	friend typename PsimagLite::Real<T>::Type norm(const VectorWithOffsets<T>& v);
 
 	/*!
 	 * \brief Normalizes a vector in place.
 	 * \param[in,out] v Vector to normalize.
 	 */
-	friend void normalize(VectorWithOffsets& v)
-	{
-		RealType norma = norm(v);
-		RealType eps   = 1e-5;
-
-		if (fabs(norma - 1.0) < eps)
-			return;
-
-		assert(fabs(norma) > eps);
-
-		for (SizeType i = 0; i < v.data_.size(); i++)
-			for (SizeType j = 0; j < v.data_[i].size(); j++)
-				v.data_[i][j] /= norma;
-	}
+	template <typename T> friend void normalize(VectorWithOffsets<T>& v);
 
 	/*!
 	 * \brief Computes the inner product over sectors populated in both vectors.
 	 * \param[in] v1 Left vector.
 	 * \param[in] v2 Right vector.
 	 */
-	friend ComplexOrRealType operator*(const VectorWithOffsets& v1, const VectorWithOffsets& v2)
-	{
-		ComplexOrRealType sum = 0;
-		for (SizeType ii = 0; ii < v1.sectors(); ++ii) {
-			SizeType i = v1.sector(ii);
-			for (SizeType jj = 0; jj < v1.sectors(); ++jj) {
-				SizeType j = v2.sector(jj);
-				if (i != j)
-					continue;
-				for (SizeType k = 0; k < v1.effectiveSize(i); ++k)
-					sum += v1.fastAccess(i, k)
-					    * PsimagLite::conj(v2.fastAccess(j, k));
-			}
-		}
-
-		return sum;
-	}
+	template <typename T>
+	friend T operator*(const VectorWithOffsets<T>& v1, const VectorWithOffsets<T>& v2);
 
 	/*!
 	 * \brief Returns a scaled copy of a vector.
 	 * \param[in] value Scalar multiplier.
 	 * \param[in] v Vector to scale.
 	 */
-	friend VectorWithOffsets operator*(const ComplexOrRealType& value,
-	                                   const VectorWithOffsets& v)
-	{
-		VectorWithOffsets w = v;
-
-		for (SizeType ii = 0; ii < w.nzMsAndQns_.size(); ++ii) {
-			SizeType i = w.nzMsAndQns_[ii].first;
-			assert(i < w.data_.size());
-			w.data_[i] *= value;
-		}
-
-		return w;
-	}
+	template <typename T>
+	friend VectorWithOffsets<T>
+	operator*(const typename VectorWithOffsets<T>::value_type& value,
+	          const VectorWithOffsets<T>&                      v);
 
 	/*!
 	 * \brief Returns the sum of vectors with matching populated sectors.
 	 * \param[in] v1 Left vector.
 	 * \param[in] v2 Right vector.
 	 */
-	friend VectorWithOffsets operator+(const VectorWithOffsets& v1, const VectorWithOffsets& v2)
-	{
-		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
-		if (v1.nzMsAndQns_ != v2.nzMsAndQns_)
-			err(s.c_str());
+	template <typename T>
+	friend VectorWithOffsets<T> operator+(const VectorWithOffsets<T>& v1,
+	                                      const VectorWithOffsets<T>& v2);
 
-		for (SizeType ii = 0; ii < v1.nzMsAndQns_.size(); ii++) {
-			SizeType i = v1.nzMsAndQns_[ii];
-			if (i >= v1.data_.size() || i >= v2.data_.size())
-				err(s.c_str());
-			if (v1.data_[i].size() != v2.data_[i].size())
-				err(s.c_str());
-		}
-
-		VectorWithOffsets w = v1;
-		w += v2;
-		return w;
-	}
+	friend class OffsetVectorAny<ComplexOrRealType>;
 
 private:
 
-	void setIndex2Sector()
-	{
-		if (index2Sector_.size() != size_)
-			index2Sector_.resize(size_);
+	// Don't use directly; Use via OffsetVector which is a friend
+	const ComplexOrRealType& slowAccess(SizeType i) const;
 
-		for (SizeType i = 0; i < size_; ++i) {
-			index2Sector_[i] = -1;
-			for (SizeType jj = 0; jj < nzMsAndQns_.size(); ++jj) {
-				SizeType j = nzMsAndQns_[jj].first;
-				assert(j + 1 < offsets_.size());
-				if (i < offsets_[j] || i >= offsets_[j + 1])
-					continue;
-				index2Sector_[i] = j;
-			}
-		}
-	}
+	void setIndex2Sector();
 
 	template <typename SomeBasisType>
 	void findPartitions(typename PsimagLite::Vector<PairQnType>::Type& p,
@@ -812,7 +644,7 @@ private:
 			if (nonZeroPartition(v, someBasis, i)) {
 				found            = true;
 				const QnType& qn = someBasis.pseudoQn(i);
-				p.push_back(PairQnType(i, qn));
+				p.emplace_back(i, qn);
 			}
 		}
 
@@ -837,16 +669,7 @@ private:
 		return false;
 	}
 
-	bool isZero(const VectorType& v) const
-	{
-		RealType eps = 1e-5;
-		for (SizeType i = 0; i < v.size(); ++i)
-			if (fabs(PsimagLite::real(v[i])) > eps
-			    || fabs(PsimagLite::imag(v[i])) > eps)
-				return false;
-
-		return true;
-	}
+	bool isZero(const VectorType& v) const;
 
 	template <typename SomeBasisType>
 	SizeType findPartitionWithThisQn(const QnType& qn, const SomeBasisType& someBasis) const
@@ -867,8 +690,26 @@ private:
 	typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns_;
 }; // class VectorWithOffset
 
-template <typename ComplexOrRealType, typename EffectiveQnType>
-const ComplexOrRealType VectorWithOffsets<ComplexOrRealType, EffectiveQnType>::zero_ = 0;
+extern template class VectorWithOffsets<double>;
+extern template class VectorWithOffsets<std::complex<double>>;
+
+extern template double               norm(const VectorWithOffsets<double>& v);
+extern template double               norm(const VectorWithOffsets<std::complex<double>>& v);
+extern template void                 normalize(VectorWithOffsets<double>& v);
+extern template void                 normalize(VectorWithOffsets<std::complex<double>>& v);
+extern template double               operator*(const VectorWithOffsets<double>& v1,
+                                 const VectorWithOffsets<double>& v2);
+extern template std::complex<double> operator*(const VectorWithOffsets<std::complex<double>>& v1,
+                                               const VectorWithOffsets<std::complex<double>>& v2);
+extern template VectorWithOffsets<double> operator*(const double&                    value,
+                                                    const VectorWithOffsets<double>& v);
+extern template VectorWithOffsets<std::complex<double>>
+operator*(const std::complex<double>& value, const VectorWithOffsets<std::complex<double>>& v);
+extern template VectorWithOffsets<double> operator+(const VectorWithOffsets<double>& v1,
+                                                    const VectorWithOffsets<double>& v2);
+extern template VectorWithOffsets<std::complex<double>>
+operator+(const VectorWithOffsets<std::complex<double>>& v1,
+          const VectorWithOffsets<std::complex<double>>& v2);
 }
 /*@}*/
 #endif
