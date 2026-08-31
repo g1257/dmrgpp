@@ -19,7 +19,7 @@ add_subdirectory(KronUtil)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/DMRGConfig.h @ONLY)
 
 # DMRG++ as a library so cincuenta can use it
-add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
+add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp Engine/VectorWithOffsets.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
@@ -195,6 +195,20 @@ add_test(NAME input70 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input70.ain) # energy 
 add_lowest_eigenvalue_check_test(output70 input70 -9.28874 runForinput70.cout)
 add_test(NAME input71 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input71.ain) # energy -9.74163
 add_lowest_eigenvalue_check_test(output71 input71 -9.74163 runForinput71.cout)
+add_test(NAME input72 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input72.ain) # energy -4.47214
+add_lowest_eigenvalue_check_test(output72 input72 -4.47214 runForinput72.cout)
+add_test(NAME input73 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input73.ain) # energy -4.47214
+add_lowest_eigenvalue_check_test(output73 input73 -4.47214 runForinput73.cout)
+add_test(NAME input74 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input74.ain) # energy -0.707712
+add_lowest_eigenvalue_check_test(output74 input74 -0.707712 runForinput74.cout)
+add_test(NAME input75 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input75.ain) # energy -2.80627
+add_lowest_eigenvalue_check_test(output75 input75 -2.80627 runForinput75.cout)
+add_test(NAME input76 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input76.ain) # energy -0.707712
+# input76 is a restart check only; no g.s. computation
+add_test(NAME input77 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input77.ain) # energy -2.80627
+add_lowest_eigenvalue_check_test(output77 input77 -2.80627 runForinput77.cout)
+add_test(NAME input78 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input78.ain) # energy -0.707712
+# input78 is a restart check only; no g.s. computation
 add_test(NAME input80 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input80.ain) # energy -7.37027
 add_lowest_eigenvalue_check_test(output80 input80 -7.37027 runForinput80.cout)
 add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain) # energy -9.51754

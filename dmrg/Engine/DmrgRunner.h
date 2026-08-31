@@ -16,7 +16,6 @@
 #include "Qn.h"
 #include "RunFinished.h"
 #include "SuperGeometry.h"
-#include "VectorWithOffset.h"
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/PsimagLite.h>
 #include <PsimagLite/RedirectOutput.hh>

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgSerializer.h"
 #include "ProgramGlobals.h"
 #include "TimeSerializer.h"
-#include "VectorWithOffset.h" // to include norm
 #include "VectorWithOffsets.h" // to include norm
 #include <PsimagLite/GetBraOrKet.h>
 #include <PsimagLite/Io/HDF5DisableExceptionPrinting.h>

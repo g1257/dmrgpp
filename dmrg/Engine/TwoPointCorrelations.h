@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallel2PointCorrelations.h"
 #include "ProgramGlobals.h"
 #include "SdhsReinterpret.h"
-#include "VectorWithOffset.h" // for operator*
 #include "VectorWithOffsets.h" // for operator*
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/CrsMatrix.h>

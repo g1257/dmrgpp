@@ -22,7 +22,6 @@
 #include "TargetingGroundState.h"
 #include "TargetingMetts.h"
 #include "TargetingTimeStep.h"
-#include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include <PsimagLite/CrsMatrix.h>
 #include <PsimagLite/Geometry/Geometry.h>

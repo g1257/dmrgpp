@@ -72,6 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DENSITY_MATRIX_SVD_H
 #include "DensityMatrixBase.h"
 #include "MatrixVectorKron/GenIjPatch.h"
+#include "OffsetVector.hpp"
 #include "PersistentSvd.h"
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/NoPthreads.h>
@@ -108,6 +109,8 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
 	using VectorVectorVectorWithOffsetType =
 	    typename TargetingType::VectorVectorVectorWithOffsetType;
+	using OffsetVectorType     = OffsetVector<ComplexOrRealType>;
+	using OffsetVectorBaseType = OffsetVectorBase<ComplexOrRealType>;
 
 	class GroupsStruct {
 
@@ -288,6 +291,7 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 		    : lrs_(lrs)
 		    , ijPatch_(ijPatch)
 		    , v_(v)
+		    , vopt_(offset_vector.makeOffsetVector(v_))
 		    , target_(target)
 		    , sector_(sector)
 		    , sqrtW_(sqrtW)
@@ -332,7 +336,7 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 						continue;
 
 					matrix(ind, jnd + additionalOffset)
-					    += sqrtW_ * v_.slowAccess(r);
+					    += sqrtW_ * vopt_.slowAccess(r);
 				}
 			}
 		}
@@ -344,6 +348,8 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 		const LeftRightSuperType&   lrs_;
 		const GenIjPatchType&       ijPatch_;
 		const VectorWithOffsetType& v_;
+		OffsetVectorType            offset_vector;
+		const OffsetVectorBaseType& vopt_;
 		SizeType                    target_;
 		SizeType                    sector_;
 		RealType                    sqrtW_;

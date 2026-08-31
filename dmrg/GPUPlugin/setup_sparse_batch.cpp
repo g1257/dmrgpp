@@ -43,12 +43,11 @@ void setup_sparse_batch(
  ---------------------------------------------------------
 */
 {
-	const IntegerType idebug     = 1;
-	const IntegerType ialign     = 32;
-	const IntegerType lfalse     = 0;
-	const IntegerType ltrue      = !lfalse;
-	const IntegerType use_Xlacpy = ltrue;
-	const double      giga       = 1000.0 * 1000.0 * 1000.0;
+	const IntegerType idebug = 1;
+	const IntegerType ialign = 32;
+	const IntegerType lfalse = 0;
+	const IntegerType ltrue  = !lfalse;
+	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 
 	double total_time = -dmrg_get_wtime();
 
@@ -313,13 +312,7 @@ void setup_sparse_batch(
 						assert(isok);
 						(void)isok;
 
-						if (use_Xlacpy) {
-							Xlacpy_(
-							    uplo, &m, &n, Asrc, &ld1, Adest, &ld2);
-						} else {
-							dmrg_lacpy(
-							    uplo, m, n, Asrc, ld1, Adest, ld2);
-						};
+						dmrg_lacpy(uplo, m, n, Asrc, ld1, Adest, ld2);
 
 						Adest += (ld2 * n);
 					};
@@ -337,13 +330,7 @@ void setup_sparse_batch(
 						assert(isok);
 						(void)isok;
 
-						if (use_Xlacpy) {
-							Xlacpy_(
-							    uplo, &m, &n, Bsrc, &ld1, Bdest, &ld2);
-						} else {
-							dmrg_lacpy(
-							    uplo, m, n, Bsrc, ld1, Bdest, ld2);
-						}
+						dmrg_lacpy(uplo, m, n, Bsrc, ld1, Bdest, ld2);
 
 						Bdest += (ld2 * n);
 					}
