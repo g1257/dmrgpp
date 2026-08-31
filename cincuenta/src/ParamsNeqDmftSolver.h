@@ -31,6 +31,9 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 		io.readline(uFinal, "HubbardUFinal=");
 		io.readline(tMax, "TmaxNeq=");
 		io.readline(nT, "NtNeq=");
+		if (nT == 0)
+			throw PsimagLite::RuntimeError("Non-equilibrium GBEK requires NtNeq>0; "
+			                               "at least one real-time step is required\n");
 		dt = tMax / static_cast<RealType>(nT);
 
 		try {
@@ -49,6 +52,10 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 			throw PsimagLite::RuntimeError(
 			    "Non-equilibrium GBEK requires NeqBathRank>0; "
 			    "the frozen rank-zero bath path is no longer supported\n");
+		if (neqBathRank > nT)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqBathRank<=NtNeq; "
+			    "every bath column must have a real-time seed\n");
 
 		try {
 			io.readline(bandwidthFinal, "BandwidthFinal=");

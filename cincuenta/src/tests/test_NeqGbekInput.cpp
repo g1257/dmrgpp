@@ -56,6 +56,23 @@ TEST_CASE("GBEK input requires a positive bath rank", "[GBEK][input]")
 	                  ContainsSubstring("Non-equilibrium GBEK requires NeqBathRank>0"));
 }
 
+TEST_CASE("GBEK input requires a positive real-time step count", "[GBEK][input]")
+{
+	auto input = kGbekInput;
+	input.replace(input.find("NtNeq=1;"), std::string("NtNeq=1;").size(), "NtNeq=0;");
+	CHECK_THROWS_WITH(requireValidGbekParams(input),
+	                  ContainsSubstring("Non-equilibrium GBEK requires NtNeq>0"));
+}
+
+TEST_CASE("GBEK input limits bath rank to the real-time step count", "[GBEK][input]")
+{
+	auto input = kGbekInput;
+	input.replace(
+	    input.find("NeqBathRank=1;"), std::string("NeqBathRank=1;").size(), "NeqBathRank=2;");
+	CHECK_THROWS_WITH(requireValidGbekParams(input),
+	                  ContainsSubstring("Non-equilibrium GBEK requires NeqBathRank<=NtNeq"));
+}
+
 TEST_CASE("GBEK input rejects removed NeqSolver", "[GBEK][input]")
 {
 	const auto input = kGbekInput + "NeqSolver=\"exactdiag\";\n";
