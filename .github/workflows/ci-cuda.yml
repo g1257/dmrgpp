@@ -1,0 +1,58 @@
+name: CI - CUDA A30
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  approve-external-pr:
+    name: Approve external PR for CUDA runner
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+    runs-on: ubuntu-24.04
+    environment: cuda-ci-approval
+    steps:
+    - name: Approval received
+      run: echo "External PR approved for CUDA CI"
+
+  build:
+    name: RelWithDebInfo (CUDA, A30)
+    needs: approve-external-pr
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' ||
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+       needs.approve-external-pr.result == 'success')
+    # Register the self-hosted runner with matching labels, e.g.:
+    #   ./config.sh --labels cuda,a30
+    runs-on: [self-hosted, linux, x64, cuda, a30]
+    timeout-minutes: 120
+    env:
+      DMRGPP_CUDA_SPACK_SETUP: ${{ vars.DMRGPP_CUDA_SPACK_SETUP }}
+      DMRGPP_CUDA_SPACK_ENV: ${{ vars.DMRGPP_CUDA_SPACK_ENV }}
+      DMRGPP_CUDA_ROOT: ${{ vars.DMRGPP_CUDA_ROOT }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        path: source
+
+    - name: Configure
+      run: source/scripts/ci/run_cuda_step.sh configure
+
+    - name: Build
+      run: source/scripts/ci/run_cuda_step.sh build
+
+    - name: Test
+      run: source/scripts/ci/run_cuda_step.sh test
+
+    - name: Install
+      run: source/scripts/ci/run_cuda_step.sh install
