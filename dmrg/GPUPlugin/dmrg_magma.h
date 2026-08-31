@@ -1,11 +1,6 @@
 #ifndef DMRG_MAGMA_H
 #define DMRG_MAGMA_H 1
 
-#include "cuda.h"
-#include "cuda_runtime.h"
-#include "cuda_runtime_api.h"
-#include "driver_types.h"
-
 #include "magma_operators.h"
 #include "magma_types.h"
 #include "magma_v2.h"
