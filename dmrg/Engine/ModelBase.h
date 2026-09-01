@@ -431,7 +431,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                              const LeftRightSuperType& lrs,
 	                              RealType                  currentTime) const
 	{
-		PsimagLite::Profiling profiling("addHamiltonianConnection", "", std::cout);
+		PsimagLite::Profiling profiling("addHamiltonianConnection", std::cout);
 
 		assert(lrs.super().partition() > 0);
 		SizeType total = lrs.super().partition() - 1;

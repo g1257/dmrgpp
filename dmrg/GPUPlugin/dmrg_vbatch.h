@@ -54,38 +54,6 @@ void dmrg_lacpy(const char*       uplo,
                 T*                dest,
                 const IntegerType ld_dest);
 
-template <typename T> void dmrg_free(T* a_ptr);
-
-template <typename T>
-void dmrg_Xgetvector(const IntegerType n,
-                     const T*          dx_src,
-                     const IntegerType incx,
-                     T*                hy_dst,
-                     const IntegerType incy);
-
-template <typename T>
-void dmrg_Xsetvector(const IntegerType n,
-                     const T*          hx_src,
-                     const IntegerType incx,
-                     T*                dy_dst,
-                     const IntegerType incy);
-
-template <typename T>
-void dmrg_Xgetmatrix(const IntegerType m,
-                     const IntegerType n,
-                     const T*          dA_src,
-                     const IntegerType ldda,
-                     T*                hB_dst,
-                     const IntegerType ldb);
-
-template <typename T>
-void dmrg_Xsetmatrix(const IntegerType m,
-                     const IntegerType n,
-                     const T*          hA_src,
-                     const IntegerType lda,
-                     T*                dB_dst,
-                     const IntegerType lddb);
-
 template <typename T>
 void apply_Htarget_vbatch(
     SizeType       noperator,

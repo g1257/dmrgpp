@@ -487,9 +487,6 @@ public:
 	//! Returns true if using SU(2) symmetry or false otherwise
 	static bool useSu2Symmetry() { return useSu2Symmetry_; }
 
-	//! Tells this basis to use SU(2) symmetry or not
-	static void useSu2Symmetry(bool flag) { useSu2Symmetry_ = flag; }
-
 	//! Returns true if this basis has been DMRG transformed, or false if it hasn't
 	bool dmrgTransformed() const { return dmrgTransformed_; }
 

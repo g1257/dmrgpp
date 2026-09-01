@@ -2,9 +2,7 @@
 
 namespace Dmrg {
 
-using QnType                = Qn;
-using VectorWithOffset2Type = VectorWithOffset<ComplexType, QnType>;
-using VectorWithOffset4Type = VectorWithOffsets<ComplexType, QnType>;
+using VectorWithOffset2Type = VectorWithOffsets<ComplexType>;
 
 using Geometry1Type = Dmrg::SuperGeometry<RealType, InputNgType::Readable, ProgramGlobals>;
 
@@ -22,11 +20,4 @@ observeOneFullSweep<VectorWithOffset2Type, ModelBase5Type>(IoInputType&         
                                                            const ModelBase5Type&     model,
                                                            const PsimagLite::String& list,
                                                            SizeType                  orbitals);
-
-template bool
-observeOneFullSweep<VectorWithOffset4Type, ModelBase5Type>(IoInputType&              io,
-                                                           const ModelBase5Type&     model,
-                                                           const PsimagLite::String& list,
-                                                           SizeType                  orbitals);
-
 }

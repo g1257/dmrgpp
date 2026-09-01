@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define APPLY_OPERATOR_LOCAL_H
 
 #include "FermionSign.h"
+#include "OffsetVector.hpp"
 #include "OperatorStorage.h"
 #include "ProgramGlobals.h"
 #include <PsimagLite/PackIndices.h> // in PsimagLite
@@ -94,6 +95,8 @@ template <typename LeftRightSuperType_, typename VectorWithOffsetType_> class Ap
 	using ComplexOrRealType      = typename BasisWithOperatorsType::ComplexOrRealType;
 	using PackIndicesType        = PsimagLite::PackIndices;
 	using OperatorType_          = typename BasisWithOperatorsType::OperatorType;
+	using OffsetVectorType       = OffsetVector<ComplexOrRealType>;
+	using OffsetVectorBaseType   = OffsetVectorBase<ComplexOrRealType>;
 
 	class LegacyBug {
 
@@ -219,6 +222,9 @@ public:
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
+		OffsetVectorType src_proxy;
+		const auto&      src_opt = src_proxy.makeOffsetVector(src);
+
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 		for (SizeType i = offset; i < final; ++i) {
@@ -237,7 +243,7 @@ public:
 				SizeType x0prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime + x1 * nx);
 				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
-				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k);
+				dest2[j] += src_opt.slowAccess(i) * A.getCRS().getValue(k);
 			}
 		}
 	}
@@ -292,6 +298,9 @@ private:
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
+		OffsetVectorType src_proxy;
+		const auto&      src_opt = src_proxy.makeOffsetVector(src);
+
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 		for (SizeType i = offset; i < final; ++i) {
@@ -313,7 +322,7 @@ private:
 				SizeType x1prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0 + x1prime * nx);
 				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
-				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
+				dest2[j] += src_opt.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
 		}
 	}
@@ -348,6 +357,9 @@ private:
 	                         const OperatorType&         A,
 	                         SizeType                    i0) const
 	{
+		OffsetVectorType src_proxy;
+		const auto&      src_opt = src_proxy.makeOffsetVector(src);
+
 		SizeType offset = src.offset(i0);
 		SizeType final  = offset + src.effectiveSize(i0);
 
@@ -373,7 +385,7 @@ private:
 				SizeType yprime
 				    = lrs_.right().permutationInverse(y0prime + y1 * nx);
 				SizeType j = lrs_.super().permutationInverse(x + yprime * ns);
-				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
+				dest2[j] += src_opt.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
 		}
 	}
@@ -384,6 +396,9 @@ private:
 	                            const OperatorType&         A,
 	                            SizeType                    i0) const
 	{
+		OffsetVectorType src_proxy;
+		const auto&      src_opt = src_proxy.makeOffsetVector(src);
+
 		SizeType offset = src.offset(i0);
 		SizeType final  = offset + src.effectiveSize(i0);
 
@@ -400,7 +415,7 @@ private:
 			for (SizeType k = start; k < end; ++k) {
 				SizeType xprime = A.getCRS().getCol(k);
 				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
-				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k);
+				dest2[j] += src_opt.slowAccess(i) * A.getCRS().getValue(k);
 			}
 		}
 	}
@@ -416,6 +431,9 @@ private:
 		SizeType ns     = lrs_.left().permutationVector().size();
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
+
+		OffsetVectorType src_proxy;
+		const auto&      src_opt = src_proxy.makeOffsetVector(src);
 
 		PackIndicesType pack(ns);
 
@@ -435,7 +453,7 @@ private:
 			for (SizeType k = start; k < end; ++k) {
 				SizeType yprime = A.getCRS().getCol(k);
 				SizeType j      = lrs_.super().permutationInverse(x + yprime * ns);
-				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
+				dest2[j] += src_opt.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
 		}
 	}

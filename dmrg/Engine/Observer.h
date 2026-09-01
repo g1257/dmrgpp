@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallel4PointDs.h"
 #include "TwoPointCorrelations.h"
 #include "Utils.h"
-#include "VectorWithOffset.h" // for operator*
 #include "VectorWithOffsets.h" // for operator*
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/Parallelizer.h>

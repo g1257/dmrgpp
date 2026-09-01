@@ -23,6 +23,9 @@ Please see full open source license included in file LICENSE.
 #include "MemoryUsage.h"
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
+
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 #include <iostream>
 
 namespace PsimagLite {
@@ -38,6 +41,7 @@ public:
 	    , memoryUsage_("/proc/self/stat")
 	    , isDead_(false)
 	    , os_(os)
+	    , kokkos_region_(caller + (additional.empty() ? "" : (' ' + additional)))
 	{
 		OstringStream msg(std::cout.precision());
 		msg() << "starting clock " << additional;
@@ -45,16 +49,12 @@ public:
 	}
 
 	Profiling(String caller, std::ostream& os)
-	    : progressIndicator_(caller)
-	    , memoryUsage_("/proc/self/stat")
-	    , isDead_(false)
-	    , os_(os)
-	{
-		OstringStream msg(std::cout.precision());
-		msg() << "starting clock";
-		;
-		progressIndicator_.printline(msg, os);
-	}
+	    : Profiling(caller, {}, os)
+	{ }
+
+	Profiling(const Profiling&) = delete;
+
+	Profiling& operator=(const Profiling&) = delete;
 
 	~Profiling() { killIt(""); }
 
@@ -72,10 +72,11 @@ private:
 		isDead_ = true;
 	}
 
-	ProgressIndicator progressIndicator_;
-	MemoryUsage       memoryUsage_;
-	bool              isDead_;
-	std::ostream&     os_;
+	ProgressIndicator               progressIndicator_;
+	MemoryUsage                     memoryUsage_;
+	bool                            isDead_;
+	std::ostream&                   os_;
+	Kokkos::Profiling::ScopedRegion kokkos_region_;
 }; // Profiling
 } // namespace PsimagLite
 
