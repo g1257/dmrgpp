@@ -41,7 +41,7 @@ public:
 	    , memoryUsage_("/proc/self/stat")
 	    , isDead_(false)
 	    , os_(os)
-	    , kokkos_region_(caller + ' ' + additional)
+	    , kokkos_region_(caller + (additional.empty() ? "" : (' ' + additional)))
 	{
 		OstringStream msg(std::cout.precision());
 		msg() << "starting clock " << additional;
@@ -49,16 +49,8 @@ public:
 	}
 
 	Profiling(String caller, std::ostream& os)
-	    : progressIndicator_(caller)
-	    , memoryUsage_("/proc/self/stat")
-	    , isDead_(false)
-	    , os_(os)
-	    , kokkos_region_(caller)
-	{
-		OstringStream msg(std::cout.precision());
-		msg() << "starting clock";
-		progressIndicator_.printline(msg, os);
-	}
+	    : Profiling(caller, {}, os)
+	{ }
 
 	Profiling(const Profiling&) = delete;
 
