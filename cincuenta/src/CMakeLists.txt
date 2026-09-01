@@ -36,7 +36,27 @@ endfunction()
 # exact impurity solver
 add_test(NAME cincuenta0 COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuenta0.ain) # energy 0.456977
 # dmrg impurity solver, 3-bath fast CI check — energy -4.86046
-add_test(NAME cincuentaDmrg3Bath COMMAND ./cincuenta -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
+# Keep the run isolated from all MPI variants because cincuenta uses fixed names
+# for correction-vector and restart artifacts.
+set(CINCUENTA_DMRG_1_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathRank1)
+file(MAKE_DIRECTORY ${CINCUENTA_DMRG_1_DIR})
+
+if(DMRGPP_USE_MPI)
+  # Launch even a one-rank MPI build through mpiexec.  Besides exercising the
+  # same initialization path as multi-rank jobs, this avoids Open MPI singleton
+  # teardown problems in some Kokkos-enabled environments.
+  set(_cincuenta_rank1_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "1")
+  list(APPEND _cincuenta_rank1_cmd ${MPIEXEC_PREFLAGS})
+  list(APPEND _cincuenta_rank1_cmd $<TARGET_FILE:cincuenta>)
+  list(APPEND _cincuenta_rank1_cmd ${MPIEXEC_POSTFLAGS})
+  list(APPEND _cincuenta_rank1_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
+  add_test(NAME cincuentaDmrg3Bath COMMAND ${_cincuenta_rank1_cmd})
+  set_tests_properties(cincuentaDmrg3Bath PROPERTIES LABELS "MPI" PROCESSORS 1 WORKING_DIRECTORY
+                                                     ${CINCUENTA_DMRG_1_DIR})
+else()
+  add_test(NAME cincuentaDmrg3Bath COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3Bath.ain)
+  set_tests_properties(cincuentaDmrg3Bath PROPERTIES WORKING_DIRECTORY ${CINCUENTA_DMRG_1_DIR})
+endif()
 
 if(DMRGPP_USE_MPI)
   set(CINCUENTA_DMRG_MPI_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathMpi)
@@ -56,6 +76,105 @@ if(DMRGPP_USE_MPI)
   add_check(cincuentaDmrg3Bath_mpi_gimp "0\\.0628319 [-0-9.eE+]+ ([-0-9.eE+]+)" "-0.58646" "1e-4"
             ${CINCUENTA_DMRG_MPI_DIR}/gimp_dmrg.txt cincuentaDmrg3Bath_mpi)
   set_tests_properties(cincuentaDmrg3Bath_mpi_gimp PROPERTIES LABELS "MPI")
+
+  # Interacting equilibrium DMFT preflight: two complete self-consistency
+  # iterations, followed by the final real-frequency solve.  Rank counts use
+  # separate directories, and their assembled numerical outputs are compared.
+  if(Python3_FOUND)
+    set(CINCUENTA_SCF2_RANK1_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathScf2Rank1)
+    set(CINCUENTA_SCF2_RANK2_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathScf2Rank2)
+    file(MAKE_DIRECTORY ${CINCUENTA_SCF2_RANK1_DIR} ${CINCUENTA_SCF2_RANK2_DIR})
+
+    set(_cincuenta_scf2_rank1_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "1")
+    list(APPEND _cincuenta_scf2_rank1_cmd ${MPIEXEC_PREFLAGS})
+    list(APPEND _cincuenta_scf2_rank1_cmd $<TARGET_FILE:cincuenta>)
+    list(APPEND _cincuenta_scf2_rank1_cmd ${MPIEXEC_POSTFLAGS})
+    list(APPEND _cincuenta_scf2_rank1_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3BathScf2.ain)
+    add_test(NAME cincuentaDmrg3BathScf2_rank1 COMMAND ${_cincuenta_scf2_rank1_cmd})
+    set_tests_properties(
+      cincuentaDmrg3BathScf2_rank1
+      PROPERTIES FIXTURES_SETUP
+                 CincuentaScf2Rank1
+                 LABELS
+                 "MPI;DMFTPreflight"
+                 PROCESSORS
+                 1
+                 TIMEOUT
+                 300
+                 WORKING_DIRECTORY
+                 ${CINCUENTA_SCF2_RANK1_DIR})
+
+    set(_cincuenta_scf2_rank2_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2")
+    list(APPEND _cincuenta_scf2_rank2_cmd ${MPIEXEC_PREFLAGS})
+    list(APPEND _cincuenta_scf2_rank2_cmd $<TARGET_FILE:cincuenta>)
+    list(APPEND _cincuenta_scf2_rank2_cmd ${MPIEXEC_POSTFLAGS})
+    list(APPEND _cincuenta_scf2_rank2_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3BathScf2.ain)
+    add_test(NAME cincuentaDmrg3BathScf2_rank2 COMMAND ${_cincuenta_scf2_rank2_cmd})
+    set_tests_properties(
+      cincuentaDmrg3BathScf2_rank2
+      PROPERTIES FIXTURES_SETUP
+                 CincuentaScf2Rank2
+                 LABELS
+                 "MPI;DMFTPreflight"
+                 PROCESSORS
+                 2
+                 TIMEOUT
+                 300
+                 WORKING_DIRECTORY
+                 ${CINCUENTA_SCF2_RANK2_DIR})
+
+    set(_scf2_log runForinputCincuentaDmrg3BathScf2.cout)
+    add_check(cincuentaDmrg3BathScf2_rank1_iterations "SelfConsistLoop iter= ([0-9]+)" "1" "0"
+              ${CINCUENTA_SCF2_RANK1_DIR}/${_scf2_log} cincuentaDmrg3BathScf2_rank1)
+    add_check(cincuentaDmrg3BathScf2_rank2_iterations "SelfConsistLoop iter= ([0-9]+)" "1" "0"
+              ${CINCUENTA_SCF2_RANK2_DIR}/${_scf2_log} cincuentaDmrg3BathScf2_rank2)
+    set_tests_properties(cincuentaDmrg3BathScf2_rank1_iterations cincuentaDmrg3BathScf2_rank2_iterations
+                         PROPERTIES LABELS "MPI;DMFTPreflight")
+
+    add_test(
+      NAME cincuentaDmrg3BathScf2_compare_rank2
+      COMMAND
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/compare_dmft_mpi_outputs.py
+        ${CINCUENTA_SCF2_RANK1_DIR} ${CINCUENTA_SCF2_RANK2_DIR} --tolerance 1e-5 --log ${_scf2_log} --iterations 2)
+    set_tests_properties(
+      cincuentaDmrg3BathScf2_compare_rank2 PROPERTIES FIXTURES_REQUIRED "CincuentaScf2Rank1;CincuentaScf2Rank2" LABELS
+                                                      "MPI;DMFTPreflight")
+
+    option(CINCUENTA_MPI_PREFLIGHT_4 "Enable the four-rank cincuenta DMFT preflight" OFF)
+    if(CINCUENTA_MPI_PREFLIGHT_4)
+      set(CINCUENTA_SCF2_RANK4_DIR ${CMAKE_CURRENT_BINARY_DIR}/cincuentaDmrg3BathScf2Rank4)
+      file(MAKE_DIRECTORY ${CINCUENTA_SCF2_RANK4_DIR})
+      set(_cincuenta_scf2_rank4_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "4")
+      list(APPEND _cincuenta_scf2_rank4_cmd ${MPIEXEC_PREFLAGS})
+      list(APPEND _cincuenta_scf2_rank4_cmd $<TARGET_FILE:cincuenta>)
+      list(APPEND _cincuenta_scf2_rank4_cmd ${MPIEXEC_POSTFLAGS})
+      list(APPEND _cincuenta_scf2_rank4_cmd -I ${PATH_TO_INPUTS} -f inputCincuentaDmrg3BathScf2.ain)
+      add_test(NAME cincuentaDmrg3BathScf2_rank4 COMMAND ${_cincuenta_scf2_rank4_cmd})
+      set_tests_properties(
+        cincuentaDmrg3BathScf2_rank4
+        PROPERTIES FIXTURES_SETUP
+                   CincuentaScf2Rank4
+                   LABELS
+                   "MPI;DMFTPreflight"
+                   PROCESSORS
+                   4
+                   TIMEOUT
+                   300
+                   WORKING_DIRECTORY
+                   ${CINCUENTA_SCF2_RANK4_DIR})
+      add_check(cincuentaDmrg3BathScf2_rank4_iterations "SelfConsistLoop iter= ([0-9]+)" "1" "0"
+                ${CINCUENTA_SCF2_RANK4_DIR}/${_scf2_log} cincuentaDmrg3BathScf2_rank4)
+      set_tests_properties(cincuentaDmrg3BathScf2_rank4_iterations PROPERTIES LABELS "MPI;DMFTPreflight")
+      add_test(
+        NAME cincuentaDmrg3BathScf2_compare_rank4
+        COMMAND
+          ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/compare_dmft_mpi_outputs.py
+          ${CINCUENTA_SCF2_RANK1_DIR} ${CINCUENTA_SCF2_RANK4_DIR} --tolerance 1e-5 --log ${_scf2_log} --iterations 2)
+      set_tests_properties(
+        cincuentaDmrg3BathScf2_compare_rank4 PROPERTIES FIXTURES_REQUIRED "CincuentaScf2Rank1;CincuentaScf2Rank4"
+                                                        LABELS "MPI;DMFTPreflight")
+    endif()
+  endif()
 endif()
 
 # dmrg impurity solver — slow; excluded from fast CI, run with: ctest -L Nightly

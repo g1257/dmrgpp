@@ -1,0 +1,45 @@
+##Ainur1.0
+
+# Small interacting two-step DMFT self-consistency preflight.  The deliberately
+# tight tolerance ensures both requested iterations execute; this is an MPI
+# plumbing/regression test, not a converged physics calculation.
+FicticiousBeta=50;
+ChemicalPotential=.0;
+
+Matsubaras=6;
+LatticeGf="energy,semicircular,4";
+NumberOfBathPoints=3;
+DmftNumberOfIterations=2;
+DmftTolerance=1e-12;
+ImpuritySolver="dmrg";
+
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-4;
+MinParamsVerbose=0;
+
+int ImpuritySite=0;
+real HubbardU=8.0;
+
+SolverOptions=doNotCheckDmEigs;
+RootOutputname="CincuentaDmrg3BathScf2";
+InfiniteLoopKeptStates=20;
+matrix FiniteLoopsGs=[[@auto, 20, 0],[@auto, 20, 0]];
+matrix FiniteLoopsOmega=[[@auto, 20, 2],[@auto, 20, 2]];
+
+TargetElectronsUp=2;
+TargetElectronsDown=2;
+
+# Four real frequencies also permit an optional four-rank preflight run.
+real OmegaBegin=-6.;
+integer OmegaTotal=4;
+real OmegaStep=4.0;
+real OmegaDelta=0.1;
+
+integer TridiagSteps=100;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+
+CorrectionVectorEta=0.;
+GsWeight=0.1;
