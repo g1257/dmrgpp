@@ -11,7 +11,7 @@
 # Correlations expected to persist to t≈2.5 (vs t≈1.5 for L=2).
 
 FicticiousBeta=16;
-ChemicalPotential=1.;  # HubbardU/2, required by FitOptions=particleholesymmetric
+ChemicalPotential=0.;  # centered interaction; required by the PH-symmetric fit
 Matsubaras=200;
 LatticeGf="energy,semicircular,0.1";
 NumberOfBathPoints=5;
