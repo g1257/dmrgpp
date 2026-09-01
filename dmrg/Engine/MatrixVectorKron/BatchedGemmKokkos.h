@@ -70,6 +70,8 @@ public:
 private:
 
 	using DevArgsView = Kokkos::View<GemmArgs*, MemorySpace>;
+	using DevLLView   = Kokkos::View<long long*, MemorySpace>;
+	using DevIntView  = Kokkos::View<int*, MemorySpace>;
 
 	static const int ialign_ = 32;
 
@@ -77,13 +79,29 @@ private:
 	// can be as low as single digits) but each has a very long contraction
 	// (k) dimension, so a single GEMM per patch leaves the GPU with far too
 	// few concurrent thread-blocks to reach good occupancy. We split the k
-	// dimension of each patch's GEMM into kPass2Chunks_ independent slices,
-	// each accumulated into its own scratch buffer, and sum the partial
-	// results afterwards. This multiplies the number of pass-2 batches (and
-	// thus concurrent thread-blocks) by kPass2Chunks_ without changing the
-	// per-GEMM shape (so the favorable Blocked-algo memory access pattern is
-	// preserved), at the cost of a small extra reduction kernel.
-	static const int kPass2Chunks_ = 16;
+	// dimension of each patch's GEMM into independent slices, each
+	// accumulated into its own scratch buffer, and sum the partial results
+	// afterwards. This multiplies the number of pass-2 batches (and thus
+	// concurrent thread-blocks) without changing the per-GEMM shape (so the
+	// favorable Blocked-algo memory access pattern is preserved), at the
+	// cost of a small extra reduction kernel.
+	//
+	// Splitting into a *fixed count* of chunks per patch (tried first)
+	// under-performs badly when patches have very different k (contraction)
+	// sizes: every patch still gets the same number of chunks, so patches
+	// with large k get large (slow) chunks while patches with small k get
+	// tiny (fast) chunks. Since all chunks across all patches are launched
+	// in the same kernel, the wall-clock time is dominated by the few
+	// largest chunks while most thread-blocks finish almost instantly and
+	// leave the GPU idle (observed via ncu: waves/SM as low as 0.12-0.30,
+	// achieved occupancy 5-8%, despite ~56% theoretical occupancy).
+	//
+	// Instead we split by a *fixed column width* (kPass2ColChunk_): each
+	// patch gets ceil(k_ip / kPass2ColChunk_) chunks, so patches with larger
+	// k automatically get proportionally more (similarly-sized) chunks.
+	// This balances per-team work across the whole grid regardless of how
+	// unevenly k is distributed across patches.
+	static const int kPass2ColChunk_ = 16;
 
 	// Pass 1 batches one GEMM per non-zero (ip, jp, k) connection triple, but
 	// the number of such triples (tens to low thousands, see setup_) is
@@ -188,8 +206,8 @@ public:
 
 		// --- Pass 2: Y_chunk[ip] = BXbatch[ip]_chunk * Abatch[ip]_chunk^T --------
 		// (split-k: each patch's contraction dim is divided into
-		// kPass2Chunks_ independent slices for better GPU occupancy; see
-		// kPass2Chunks_ comment above and the reduction pass below.)
+		// independent column-width-bounded slices for better GPU occupancy;
+		// see kPass2ColChunk_ comment above and the reduction pass below.)
 		{
 			const ScalarView  flatBXbatch = d_flatBXbatch_;
 			const ScalarView  flatAbatch  = d_flatAbatch_;
@@ -251,18 +269,41 @@ public:
 		}
 
 		// --- Reduce pass-2 split-k partial sums into d_vout_ -----------------------
+		// Each patch may have a different number of chunks (proportional to
+		// its own k), so partial sums are stored per-patch contiguously
+		// (see voutChunkOffset_/voutChunkCount_ built in setup_()); the
+		// reduction kernel binary-searches d_xyStart_ to find which patch
+		// element idx belongs to, then sums that patch's chunks.
 		{
-			const ScalarView voutChunks = d_voutChunks_;
-			const ScalarView vout_dev   = d_vout_;
-			const int        nchunks    = kPass2Chunks_;
-			const long long  stride     = static_cast<long long>(totalXY);
+			const ScalarView      voutChunks = d_voutChunks_;
+			const ScalarView      vout_dev   = d_vout_;
+			const DevLLView       xyStart    = d_xyStart_;
+			const DevLLView       chunkOff   = d_voutChunkOffset_;
+			const DevIntView      chunkCnt   = d_voutChunkCount_;
+			const int             npatchesI  = static_cast<int>(nPatchesForReduce_);
 			Kokkos::parallel_for(
 			    "BatchedGemmKokkos_Pass2Reduce",
 			    Kokkos::RangePolicy<ExecutionSpace>(exec, 0, static_cast<long long>(totalXY)),
 			    KOKKOS_LAMBDA(const long long idx) {
+				    // Binary search: find ip such that xyStart(ip) <= idx <
+				    // xyStart(ip+1).
+				    int lo = 0, hi = npatchesI - 1;
+				    while (lo < hi) {
+					    const int mid = (lo + hi + 1) / 2;
+					    if (xyStart(mid) <= idx)
+						    lo = mid;
+					    else
+						    hi = mid - 1;
+				    }
+				    const int      ip       = lo;
+				    const long long patchSize = xyStart(ip + 1) - xyStart(ip);
+				    const long long base = chunkOff(ip) + (idx - xyStart(ip));
+				    const int      nchunks   = chunkCnt(ip);
+
 				    KokkosScalar sum = KokkosScalar(0);
 				    for (int c = 0; c < nchunks; ++c)
-					    sum += voutChunks(static_cast<long long>(c) * stride + idx);
+					    sum += voutChunks(
+					        base + static_cast<long long>(c) * patchSize);
 				    vout_dev(idx) = sum;
 			    });
 		}
@@ -400,6 +441,24 @@ public:
 		const SizeType totalAbatch  = AbatchOff[npatches];
 		const SizeType totalBbatch  = BbatchOff[npatches];
 		const SizeType totalBXbatch = BXbatchOff[npatches];
+
+		// Pass-2 split-k chunk counts/offsets: patch ip's contraction dim
+		// (AbatchCols[ip]) is split into ceil(AbatchCols[ip] /
+		// kPass2ColChunk_) chunks (at least 1), so patches with a larger
+		// contraction dimension automatically get proportionally more
+		// (similarly-sized) chunks -- see kPass2ColChunk_ comment above.
+		// voutChunkOffset[ip] is this patch's contiguous base offset into
+		// d_voutChunks_, storing voutChunkCount[ip] slices of
+		// (lps[ip]*rps[ip]) elements each, back-to-back.
+		VectorSizeType voutChunkCount(npatches, 0);
+		VectorSizeType voutChunkOffset(npatches + 1, 0);
+		for (SizeType ip = 0; ip < npatches; ++ip) {
+			voutChunkCount[ip] = static_cast<SizeType>(std::max(
+			    1, iceil(static_cast<int>(AbatchCols[ip]), kPass2ColChunk_)));
+			voutChunkOffset[ip + 1] = voutChunkOffset[ip]
+			    + voutChunkCount[ip] * (lps[ip] * rps[ip]);
+		}
+		const SizeType totalVoutChunks = voutChunkOffset[npatches];
 
 		// Allocate device buffers early and create host mirrors for efficient H2D
 		ExecutionSpace exec_for_alloc;
@@ -540,16 +599,22 @@ public:
 				a2.ldc
 				    = static_cast<int>(rps[ip]); // Y[ip] no padding: ld = rps[ip]
 
-				// Split the k (=totalCols) dimension into kPass2Chunks_
-				// slices. Each slice is an independent GEMM writing (with
-				// beta=0) into its own scratch region of d_voutChunks_;
-				// slices with 0 width still get emitted so that
-				// TeamVectorGemmInternal's beta==0 zero-fill covers their
-				// scratch region (see matrixVector()).
-				const int chunkCols
-				    = iceil(totalCols, kPass2Chunks_); // columns per chunk
+				// Split the k (=totalCols) dimension into
+				// voutChunkCount[ip] slices (proportional to this patch's
+				// own k -- see kPass2ColChunk_ comment above). Each slice
+				// is an independent GEMM writing (with beta=0) into its own
+				// contiguous scratch region of d_voutChunks_ (base
+				// voutChunkOffset[ip], slices back-to-back); slices with 0
+				// width still get emitted so that TeamVectorGemmInternal's
+				// beta==0 zero-fill covers their scratch region (see
+				// matrixVector()).
+				const SizeType  nChunks = voutChunkCount[ip];
+				const long long patchSize
+				    = static_cast<long long>(lps[ip]) * static_cast<long long>(rps[ip]);
+				const int chunkCols = iceil(
+				    totalCols, static_cast<int>(nChunks)); // columns per chunk
 				long long colCursor = 0;
-				for (int c = 0; c < kPass2Chunks_; ++c) {
+				for (SizeType c = 0; c < nChunks; ++c) {
 					const int kc = std::max(
 					    0, std::min(chunkCols, totalCols - static_cast<int>(colCursor)));
 					// Clamp the column offset so pointer arithmetic never
@@ -565,9 +630,8 @@ public:
 					    + colOff * static_cast<long long>(ldB[ip]);
 					ac.b_off = static_cast<long long>(AbatchOff[ip])
 					    + colOff * static_cast<long long>(ldA[ip]);
-					ac.c_off = static_cast<long long>(c)
-					        * static_cast<long long>(xyStart[npatches])
-					    + static_cast<long long>(xyStart[ip]);
+					ac.c_off = static_cast<long long>(voutChunkOffset[ip])
+					    + static_cast<long long>(c) * patchSize;
 					pass2_args.push_back(ac);
 
 					colCursor += chunkCols;
@@ -612,10 +676,39 @@ public:
 			    xyStart[npatches]);
 			d_voutChunks_ = ScalarView(
 			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_voutChunks"),
-			    static_cast<size_t>(kPass2Chunks_) * xyStart[npatches]);
+			    static_cast<size_t>(totalVoutChunks));
 
 			nbatch1_ = pass1_args.size();
-			nbatch2_ = pass2_args.size(); // == npatches * kPass2Chunks_
+			nbatch2_ = pass2_args.size(); // == sum(voutChunkCount[ip])
+			nPatchesForReduce_ = npatches;
+
+			// Persistent small per-patch tables used by the Pass2Reduce
+			// kernel to look up, for a given output element, which patch it
+			// belongs to and where/how many chunks to sum.
+			d_xyStart_          = DevLLView("d_xyStart", npatches + 1);
+			d_voutChunkOffset_  = DevLLView("d_voutChunkOffset", npatches + 1);
+			d_voutChunkCount_   = DevIntView("d_voutChunkCount", npatches);
+			{
+				PsimagLite::Vector<long long>::Type h_xyStart(npatches + 1);
+				PsimagLite::Vector<long long>::Type h_voutChunkOffset(npatches + 1);
+				PsimagLite::Vector<int>::Type        h_voutChunkCount(npatches);
+				for (SizeType ip = 0; ip <= npatches; ++ip) {
+					h_xyStart[ip]         = static_cast<long long>(xyStart[ip]);
+					h_voutChunkOffset[ip] = static_cast<long long>(voutChunkOffset[ip]);
+				}
+				for (SizeType ip = 0; ip < npatches; ++ip)
+					h_voutChunkCount[ip] = static_cast<int>(voutChunkCount[ip]);
+
+				Kokkos::View<const long long*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+				    hv1(h_xyStart.data(), npatches + 1);
+				Kokkos::View<const long long*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+				    hv2(h_voutChunkOffset.data(), npatches + 1);
+				Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+				    hv3(h_voutChunkCount.data(), npatches);
+				Kokkos::deep_copy(exec, d_xyStart_, hv1);
+				Kokkos::deep_copy(exec, d_voutChunkOffset_, hv2);
+				Kokkos::deep_copy(exec, d_voutChunkCount_, hv3);
+			}
 
 			// Copy packed host mirrors to device in a single shot
 			Kokkos::deep_copy(exec, d_flatAbatch_, h_flatAbatch);
@@ -665,6 +758,16 @@ private:
 	mutable ScalarView d_voutChunks_; // pass-2 split-k partial sums, per-call
 	DevArgsView        d_pass1_; // pass-1 GEMM parameters, persistent
 	DevArgsView        d_pass2_; // pass-2 GEMM parameters, persistent
+
+	// Small per-patch tables for the Pass2Reduce kernel (see setup_()):
+	// d_xyStart_[ip]/[ip+1] bound patch ip's element range in
+	// vin/vout/d_voutChunks_ patch-size terms; d_voutChunkOffset_[ip] is
+	// this patch's base offset into d_voutChunks_; d_voutChunkCount_[ip] is
+	// how many chunks (slices) to sum for this patch.
+	DevLLView       d_xyStart_;
+	DevLLView       d_voutChunkOffset_;
+	DevIntView      d_voutChunkCount_;
+	SizeType        nPatchesForReduce_ = 0;
 };
 
 } // namespace Dmrg
