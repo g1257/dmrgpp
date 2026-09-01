@@ -9,6 +9,7 @@
 #include <PsimagLite/Vector.h>
 
 #include <Kokkos_Core.hpp>
+#include <Kokkos_Profiling_ScopedRegion.hpp>
 
 #include <cassert>
 #include <complex>
@@ -43,6 +44,13 @@ public:
 	{
 		if (!enabled())
 			return;
+		setup_();
+	}
+
+	void setup_()
+	{
+		Kokkos::Profiling::ScopedRegion region("BatchedGemmPluginSc::setup");
+
 		SizeType                        npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType                        nC       = initKron_.connections();
 		const SizeType                  total    = npatches * npatches * nC;
@@ -54,58 +62,63 @@ public:
 		pLeft_.resize(npatches, 0);
 		pRight_.resize(npatches, 0);
 
-		SizeType zeroes = 0;
-		for (SizeType ic = 0; ic < nC; ++ic) {
-			for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
-				for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
+		{
+			Kokkos::Profiling::ScopedRegion region(
+			    "BatchedGemmPluginSc::setup::patch_pointers");
+			SizeType zeroes = 0;
+			for (SizeType ic = 0; ic < nC; ++ic) {
+				for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
+					for (SizeType outPatch = 0; outPatch < npatches;
+					     ++outPatch) {
 
-					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
-					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
+						const ArrayOfMatStructType& xiStruct
+						    = initKron_.xc(ic);
+						const ArrayOfMatStructType& yiStruct
+						    = initKron_.yc(ic);
 
-					const MatrixDenseOrSparseType* Amat
-					    = xiStruct(outPatch, inPatch);
-					const MatrixDenseOrSparseType* Bmat
-					    = yiStruct(outPatch, inPatch);
+						const MatrixDenseOrSparseType* Amat
+						    = xiStruct(outPatch, inPatch);
+						const MatrixDenseOrSparseType* Bmat
+						    = yiStruct(outPatch, inPatch);
 
-					if (!Amat || !Bmat)
-						continue;
+						if (!Amat || !Bmat)
+							continue;
 
-					ComplexOrRealType* a = 0;
-					ComplexOrRealType* b = 0;
-					getMatrixPointers(&a, &b, *Amat, *Bmat);
+						ComplexOrRealType* a = 0;
+						ComplexOrRealType* b = 0;
+						getMatrixPointers(&a, &b, *Amat, *Bmat);
 
-					if (a == 0) {
-						assert(b == 0);
-						++zeroes;
+						if (a == 0) {
+							assert(b == 0);
+							++zeroes;
+						}
+
+						aptr[outPatch + inPatch * npatches
+						     + ic * npatches * npatches]
+						    = a;
+						bptr[outPatch + inPatch * npatches
+						     + ic * npatches * npatches]
+						    = b;
+
+						initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
+						pLeft_[inPatch]  = Amat->cols();
+						pRight_[inPatch] = Bmat->cols();
+
+						ldAptr[outPatch + inPatch * npatches
+						       + ic * npatches * npatches]
+						    = Amat->rows();
+						ldBptr[outPatch + inPatch * npatches
+						       + ic * npatches * npatches]
+						    = Bmat->rows();
 					}
-
-					aptr[outPatch + inPatch * npatches
-					     + ic * npatches * npatches]
-					    = a;
-					bptr[outPatch + inPatch * npatches
-					     + ic * npatches * npatches]
-					    = b;
-
-					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
-					pLeft_[inPatch]  = Amat->cols();
-					pRight_[inPatch] = Bmat->cols();
-
-					ldAptr[outPatch + inPatch * npatches
-					       + ic * npatches * npatches]
-					    = Amat->rows();
-					ldBptr[outPatch + inPatch * npatches
-					       + ic * npatches * npatches]
-					    = Bmat->rows();
 				}
 			}
 		}
 
-		{
-			PsimagLite::OstringStream msg(std::cout.precision());
-			msg() << "PLUGIN_SC: is in use, npatches=" << npatches;
-			msg() << " connections=" << nC << " zeroConnections=" << zeroes;
-			progress_.printline(msg, std::cout);
-		}
+		PsimagLite::OstringStream msg(std::cout.precision());
+		msg() << "PLUGIN_SC: is in use, npatches=" << npatches;
+		msg() << " connections=" << nC << " zeroConnections=" << zeroes;
+		progress_.printline(msg, std::cout);
 
 		batchedGemm_ = new BatchedGemmType(
 		    nC, npatches, pLeft_, pRight_, aptr, ldAptr, bptr, ldBptr);
@@ -114,10 +127,10 @@ public:
 	~BatchedGemmPluginSc()
 	{
 		delete batchedGemm_;
-		batchedGemm_ = 0;
+		batchedGemm_ = nullptr;
 		for (SizeType i = 0; i < garbage_.size(); ++i) {
 			delete garbage_[i];
-			garbage_[i] = 0;
+			garbage_[i] = nullptr;
 		}
 	}
 
@@ -125,6 +138,8 @@ public:
 
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
+		Kokkos::Profiling::ScopedRegion region("BatchedGemmPluginSc::matrixVector");
+
 		assert(enabled());
 		using KokkosScalar = PsimagLite::KokkosType<ComplexOrRealType>::type;
 		Kokkos::DefaultExecutionSpace exec;
@@ -152,7 +167,8 @@ private:
 	                       const MatrixDenseOrSparseType& Amat,
 	                       const MatrixDenseOrSparseType& Bmat) const
 	{
-		*a = *b = 0;
+		*a = nullptr;
+		*b = nullptr;
 		if (Amat.isZero() || Bmat.isZero())
 			return;
 

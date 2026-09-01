@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 #include "dmrg_vbatch.h"
 #include "setup_nC.h"
 
@@ -29,6 +31,7 @@ void setup_nC(SizeType noperator,
               VectorSizeType& gnnz_A_,
               VectorSizeType& gnnz_B_)
 {
+	Kokkos::Profiling::pushRegion("BatchedGemmPluginSc::setup_nC");
 	const IntegerType idebug = 1;
 
 	SizeType ipatch    = 0;
