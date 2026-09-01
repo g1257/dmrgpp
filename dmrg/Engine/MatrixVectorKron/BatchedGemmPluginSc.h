@@ -54,8 +54,8 @@ public:
 		SizeType                        npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType                        nC       = initKron_.connections();
 		const SizeType                  total    = npatches * npatches * nC;
-		std::vector<ComplexOrRealType*> aptr(total, 0);
-		std::vector<ComplexOrRealType*> bptr(total, 0);
+		std::vector<ComplexOrRealType*> aptr(total, nullptr);
+		std::vector<ComplexOrRealType*> bptr(total, nullptr);
 		VectorSizeType                  ldAptr(npatches * npatches * nC);
 		VectorSizeType                  ldBptr(npatches * npatches * nC);
 
@@ -84,12 +84,12 @@ public:
 						if (!Amat || !Bmat)
 							continue;
 
-						ComplexOrRealType* a = 0;
-						ComplexOrRealType* b = 0;
+						ComplexOrRealType* a = nullptr;
+						ComplexOrRealType* b = nullptr;
 						getMatrixPointers(&a, &b, *Amat, *Bmat);
 
-						if (a == 0) {
-							assert(b == 0);
+						if (a == nullptr) {
+							assert(b == nullptr);
 							++zeroes;
 						}
 
@@ -113,15 +113,15 @@ public:
 					}
 				}
 			}
+
+			PsimagLite::OstringStream msg(std::cout.precision());
+			msg() << "PLUGIN_SC: is in use, npatches=" << npatches;
+			msg() << " connections=" << nC << " zeroConnections=" << zeroes;
+			progress_.printline(msg, std::cout);
+
+			batchedGemm_ = new BatchedGemmType(
+			    nC, npatches, pLeft_, pRight_, aptr, ldAptr, bptr, ldBptr);
 		}
-
-		PsimagLite::OstringStream msg(std::cout.precision());
-		msg() << "PLUGIN_SC: is in use, npatches=" << npatches;
-		msg() << " connections=" << nC << " zeroConnections=" << zeroes;
-		progress_.printline(msg, std::cout);
-
-		batchedGemm_ = new BatchedGemmType(
-		    nC, npatches, pLeft_, pRight_, aptr, ldAptr, bptr, ldBptr);
 	}
 
 	~BatchedGemmPluginSc()
