@@ -1,0 +1,42 @@
+##Ainur1.0
+
+# Metallic-side control for the Garcia--Hallberg--Rozenberg star-bath study.
+# Bethe half-bandwidth D=1; centered-interaction convention.
+FicticiousBeta=64;
+ChemicalPotential=0.;
+Matsubaras=64;
+LatticeGf="energy,semicircular,2";
+NumberOfBathPoints=11;
+DmftNumberOfIterations=15;
+DmftTolerance=1e-4;
+ImpuritySolver="dmrg";
+FitOptions=particleholesymmetric;
+
+# Six independent V values followed by five positive bath energies. The fit
+# reconstructs their mirror partners and the zero-energy bath site.
+vector InitBathVector=[0.1507556723,0.1507556723,0.1507556723,0.1507556723,0.1507556723,0.1507556723,0.2,0.4,0.6,0.8,1.];
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-6;
+MinParamsVerbose=0;
+
+int ImpuritySite=0;
+real HubbardU=2.0;
+SolverOptions=doNotCheckDmEigs;
+RootOutputname="GHR2004StarNb11U2p0";
+InfiniteLoopKeptStates=300;
+matrix FiniteLoopsGs=[[@auto,300,0],[@auto,300,0],[@auto,300,0]];
+matrix FiniteLoopsOmega=[[@auto,300,2],[@auto,300,2],[@auto,300,2]];
+TargetElectronsUp=6;
+TargetElectronsDown=6;
+
+real OmegaBegin=-4.;
+integer OmegaTotal=257;
+real OmegaStep=0.03125;
+real OmegaDelta=0.08;
+integer TridiagSteps=300;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;

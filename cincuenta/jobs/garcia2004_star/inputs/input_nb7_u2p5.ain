@@ -1,0 +1,42 @@
+##Ainur1.0
+
+# Pilot star-bath calculation inspired by Garcia, Hallberg, and Rozenberg
+# (PRL 93, 246403). Bethe half-bandwidth D=1; centered-interaction convention.
+FicticiousBeta=64;
+ChemicalPotential=0.;
+Matsubaras=32;
+LatticeGf="energy,semicircular,2";
+NumberOfBathPoints=7;
+DmftNumberOfIterations=8;
+DmftTolerance=1e-4;
+ImpuritySolver="dmrg";
+FitOptions=particleholesymmetric;
+
+# Four independent V values followed by three positive bath energies. The fit
+# reconstructs their mirror partners and the zero-energy bath site.
+vector InitBathVector=[0.1889822365,0.1889822365,0.1889822365,0.1889822365,0.3333333333,0.6666666667,1.];
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-6;
+MinParamsVerbose=0;
+
+int ImpuritySite=0;
+real HubbardU=2.5;
+SolverOptions=doNotCheckDmEigs;
+RootOutputname="GHR2004StarNb7U2p5";
+InfiniteLoopKeptStates=128;
+matrix FiniteLoopsGs=[[@auto,128,0],[@auto,128,0],[@auto,128,0]];
+matrix FiniteLoopsOmega=[[@auto,128,2],[@auto,128,2],[@auto,128,2]];
+TargetElectronsUp=4;
+TargetElectronsDown=4;
+
+real OmegaBegin=-4.;
+integer OmegaTotal=129;
+real OmegaStep=0.0625;
+real OmegaDelta=0.1;
+integer TridiagSteps=200;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;
