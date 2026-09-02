@@ -17,21 +17,18 @@ namespace Dmrg {
 
 template <typename ComplexOrRealType_> struct MatrixVectorTypes {
 
-	using ComplexOrRealType         = ComplexOrRealType_;
-	using InputNgType               = PsimagLite::InputNg<InputCheck>;
-	using InputType                 = typename InputNgType::Readable;
-	using SparseMatrixType          = PsimagLite::CrsMatrix<ComplexOrRealType>;
-	using BasisType                 = Basis<SparseMatrixType>;
-	using RealType                  = typename BasisType::RealType;
-	using BasisWithOperatorsType    = BasisWithOperators<BasisType>;
-	using LeftRightSuperType        = LeftRightSuper<BasisWithOperatorsType, BasisType>;
-	using ModelHelperType           = ModelHelperLocal<LeftRightSuperType>;
-	using ParametersType            = ParametersDmrgSolver<RealType, InputType, Qn>;
-	using SuperGeometryType         = SuperGeometry<ComplexOrRealType, InputType, ProgramGlobals>;
-	using ModelType = ModelBase<ModelHelperType,
-	                            ParametersType,
-	                            InputType,
-	                            SuperGeometryType>;
+	using ComplexOrRealType      = ComplexOrRealType_;
+	using InputNgType            = PsimagLite::InputNg<InputCheck>;
+	using InputType              = typename InputNgType::Readable;
+	using SparseMatrixType       = PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using BasisType              = Basis<SparseMatrixType>;
+	using RealType               = typename BasisType::RealType;
+	using BasisWithOperatorsType = BasisWithOperators<BasisType>;
+	using LeftRightSuperType     = LeftRightSuper<BasisWithOperatorsType, BasisType>;
+	using ModelHelperType        = ModelHelperLocal<LeftRightSuperType>;
+	using ParametersType         = ParametersDmrgSolver<RealType, InputType, Qn>;
+	using SuperGeometryType      = SuperGeometry<ComplexOrRealType, InputType, ProgramGlobals>;
+	using ModelType = ModelBase<ModelHelperType, ParametersType, InputType, SuperGeometryType>;
 	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
 };
 
