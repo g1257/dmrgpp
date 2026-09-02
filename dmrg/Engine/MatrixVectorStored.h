@@ -118,13 +118,7 @@ public:
 		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
 		bool make_hermitian = model.params().options.isSet("makehermitian");
 		if (make_hermitian) {
-			SparseMatrixType a_star;
-			transposeConjugate(a_star, matrixStored_);
-
-			SparseMatrixType c;
-			multiply(c, a_star, matrixStored_);
-			matrixStored_.swap(c);
-			std::cout << "HERE " << isHermitian(matrixStored_) << "\n";
+			transposeConjugate(transpose_, matrixStored_);
 		}
 
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
@@ -149,6 +143,12 @@ public:
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
 		matrixStored_.matrixVectorProduct(x, y);
+		bool make_hermitian = model_.params().options.isSet("makehermitian");
+		if (make_hermitian) {
+			SomeVectorType xx = x;
+			std::fill(x.begin(), x.end(), 0.);
+			transpose_.matrixVectorProduct(x, xx);
+		}
 	}
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
@@ -160,6 +160,7 @@ private:
 
 	const ModelType&              model_;
 	SparseMatrixType              matrixStored_;
+	SparseMatrixType              transpose_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class MatrixVectorStored
 } // namespace Dmrg
