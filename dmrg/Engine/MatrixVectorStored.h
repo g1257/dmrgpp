@@ -114,7 +114,19 @@ public:
 		const bool         debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_.clear();
+
 		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
+		bool make_hermitian = model.params().options.isSet("makehermitian");
+		if (make_hermitian) {
+			SparseMatrixType a_star;
+			transposeConjugate(a_star, matrixStored_);
+
+			SparseMatrixType c;
+			multiply(c, a_star, matrixStored_);
+			matrixStored_.swap(c);
+			std::cout << "HERE " << isHermitian(matrixStored_) << "\n";
+		}
+
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
 		SizeType                                      rows = matrixStored_.rows();
