@@ -85,20 +85,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename ModelType_> class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
+template <typename ComplexOrRealType_>
+class MatrixVectorStored : public MatrixVectorBase<ComplexOrRealType_> {
 
-	using BaseType = MatrixVectorBase<ModelType_>;
+	using BaseType = MatrixVectorBase<ComplexOrRealType_>;
 
 public:
 
-	using ModelType                 = ModelType_;
+	using ModelType                 = typename BaseType::ModelType;
 	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
 	using ParametersType            = typename ModelType::ParametersType;
 	using ModelHelperType           = typename ModelType::ModelHelperType;
 	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
 	using RealType                  = typename ModelHelperType::RealType;
 	using value_type                = typename SparseMatrixType::value_type;
-	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using ComplexOrRealType         = ComplexOrRealType_;
 	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
 	using OptionsType               = typename ParametersType::OptionsType;
 	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
