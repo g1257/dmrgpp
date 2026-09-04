@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -95,6 +96,25 @@ std::filesystem::path writeHermitianInput(const std::filesystem::path& directory
 	return input;
 }
 
+std::filesystem::path writeLiouvillianInput(const std::filesystem::path& directory,
+                                            const std::string&           matrixVectorOption)
+{
+	std::ifstream      source(DMRG_LIOUVILLIAN_INPUT_PATH);
+	std::ostringstream buffer;
+	buffer << source.rdbuf();
+	std::string inputText = buffer.str();
+
+	const std::string storedOption = "matrixvectorstored,";
+	const auto        position     = inputText.find(storedOption);
+	if (position == std::string::npos)
+		throw std::runtime_error("Liouvillian test input lacks matrixvectorstored");
+	inputText.replace(position, storedOption.size(), matrixVectorOption);
+
+	const std::filesystem::path input = directory / "liouvillian.ain";
+	std::ofstream(input) << inputText;
+	return input;
+}
+
 } // namespace
 
 TEST_CASE("LdaggerL rejects Hermitian models", "[LdaggerL]")
@@ -129,4 +149,31 @@ TEST_CASE("Hermitian models run without LdaggerL", "[LdaggerL]")
 
 	INFO(result.output);
 	REQUIRE(exitedSuccessfully(result.status));
+}
+
+TEST_CASE("LdaggerL rejects MatrixVectorKron", "[LdaggerL]")
+{
+	TemporaryDirectory temporaryDirectory;
+	const auto         input = writeLiouvillianInput(temporaryDirectory.path(), "");
+
+	const RunResult result = runDmrg(input, temporaryDirectory.path());
+
+	INFO(result.output);
+	REQUIRE_FALSE(exitedSuccessfully(result.status));
+	REQUIRE(result.output.find("LdaggerL is not implemented for MatrixVectorKron")
+	        != std::string::npos);
+}
+
+TEST_CASE("LdaggerL rejects MatrixVectorOnTheFly", "[LdaggerL]")
+{
+	TemporaryDirectory temporaryDirectory;
+	const auto         input
+	    = writeLiouvillianInput(temporaryDirectory.path(), "MatrixVectorOnTheFly,");
+
+	const RunResult result = runDmrg(input, temporaryDirectory.path());
+
+	INFO(result.output);
+	REQUIRE_FALSE(exitedSuccessfully(result.status));
+	REQUIRE(result.output.find("LdaggerL is not implemented for MatrixVectorOnTheFly")
+	        != std::string::npos);
 }

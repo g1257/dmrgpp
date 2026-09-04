@@ -112,7 +112,7 @@ public:
 	MatrixVectorKron(const ModelType&                     model,
 	                 const HamiltonianConnectionType&     hc,
 	                 const typename ModelHelperType::Aux& aux)
-	    : params_(model.params())
+	    : params_(checkedParams(model))
 	    , initKron_(model, hc, aux)
 	    , kronMatrix_(initKron_, "Hamiltonian")
 	    , time_(0, 0)
@@ -159,6 +159,15 @@ public:
 	}
 
 private:
+
+	static const ParametersType& checkedParams(const ModelType& model)
+	{
+		if (model.params().options.isSet("LdaggerL"))
+			throw PsimagLite::RuntimeError(
+			    "LdaggerL is not implemented for MatrixVectorKron\n");
+
+		return model.params();
+	}
 
 	void checkKron() const
 	{

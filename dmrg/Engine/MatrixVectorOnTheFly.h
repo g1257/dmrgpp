@@ -109,6 +109,10 @@ public:
 	    , hc_(hc)
 	    , aux_(aux)
 	{
+		if (model.params().options.isSet("LdaggerL"))
+			throw PsimagLite::RuntimeError(
+			    "LdaggerL is not implemented for MatrixVectorOnTheFly\n");
+
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
 		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored)
 			return;
