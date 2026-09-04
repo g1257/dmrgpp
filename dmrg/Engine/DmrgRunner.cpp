@@ -130,8 +130,7 @@ void DmrgRunner<RealType>::doOneRun3(const OptionsForIntrospect& op_options) con
 	ModelSelector<ModelBaseType> modelSelector(dmrg_solver_params_->model);
 	ModelBaseType&               model = modelSelector(*dmrg_solver_params_, *io_, geometry);
 	if (dmrg_solver_params_->options.isSet("LdaggerL") && model.isHermitian())
-		throw PsimagLite::RuntimeError(
-		    "LdaggerL cannot be used with a Hermitian model\n");
+		throw PsimagLite::RuntimeError("LdaggerL cannot be used with a Hermitian model\n");
 
 	Introspect introspect(dmrg_solver_params_->options.isSet("introspect"));
 

@@ -21,8 +21,7 @@ catch_discover_tests(test_BatchedGemm)
 add_executable(test_LdaggerL test_LdaggerL.cpp)
 target_link_libraries(test_LdaggerL PRIVATE Catch2::Catch2WithMain)
 target_compile_definitions(
-  test_LdaggerL
-  PRIVATE DMRG_EXECUTABLE_PATH="$<TARGET_FILE:dmrg>"
-          DMRG_LIOUVILLIAN_INPUT_PATH="${CMAKE_SOURCE_DIR}/TestSuite/inputs/input8902.ain")
+  test_LdaggerL PRIVATE DMRG_EXECUTABLE_PATH="$<TARGET_FILE:dmrg>"
+                        DMRG_LIOUVILLIAN_INPUT_PATH="${CMAKE_SOURCE_DIR}/TestSuite/inputs/input8902.ain")
 add_dependencies(test_LdaggerL dmrg)
 catch_discover_tests(test_LdaggerL)
