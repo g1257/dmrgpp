@@ -116,8 +116,8 @@ public:
 		matrixStored_.clear();
 
 		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
-		bool make_hermitian = model.params().options.isSet("makehermitian");
-		if (make_hermitian) {
+		const bool ldaggerL = model.params().options.isSet("LdaggerL");
+		if (ldaggerL) {
 			transposeConjugate(transpose_, matrixStored_);
 		}
 
@@ -143,8 +143,8 @@ public:
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
 		matrixStored_.matrixVectorProduct(x, y);
-		bool make_hermitian = model_.params().options.isSet("makehermitian");
-		if (make_hermitian) {
+		const bool ldaggerL = model_.params().options.isSet("LdaggerL");
+		if (ldaggerL) {
 			SomeVectorType xx = x;
 			std::fill(x.begin(), x.end(), 0.);
 			transpose_.matrixVectorProduct(x, xx);
