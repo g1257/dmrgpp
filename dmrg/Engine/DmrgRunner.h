@@ -6,7 +6,7 @@
 #include "InputCheck.h"
 #include "Introspect.hh"
 #include "LeftRightSuper.h"
-#include "MatrixVector.h"
+#include "MatrixVector.hpp"
 #include "ModelHelperLocal.h"
 #include "ModelSelector.h"
 #include "ParametersDmrgSolver.h"
