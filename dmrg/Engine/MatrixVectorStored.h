@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 template <typename ComplexOrRealType_>
-class MatrixVectorStored : public MatrixVectorBase<ComplexOrRealType_> {
+class MatrixVectorStored final : public MatrixVectorBase<ComplexOrRealType_> {
 
 	using BaseType = MatrixVectorBase<ComplexOrRealType_>;
 
@@ -101,6 +101,7 @@ public:
 	using value_type                = typename SparseMatrixType::value_type;
 	using ComplexOrRealType         = ComplexOrRealType_;
 	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using VectorType                = typename BaseType::VectorType;
 	using OptionsType               = typename ParametersType::OptionsType;
 	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
 
@@ -127,19 +128,18 @@ public:
 			std::cerr << "WARNING: MatrixVectorStored being used for a large run!\n";
 	}
 
-	SizeType rows() const { return matrixStored_.rows(); }
+	SizeType rows() const override { return matrixStored_.rows(); }
 
-	SizeType cols() const { return matrixStored_.cols(); }
+	SizeType cols() const override { return matrixStored_.cols(); }
 
-	const SparseMatrixType& toCRS() const { return matrixStored_; }
+	const SparseMatrixType& toCRS() const override { return matrixStored_; }
 
-	template <typename SomeVectorType>
-	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
 		matrixStored_.matrixVectorProduct(x, y);
 	}
 
-	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const override
 	{
 		BaseType::fullDiag(eigs, fm, matrixStored_, model_.params().maxMatrixRankStored);
 	}

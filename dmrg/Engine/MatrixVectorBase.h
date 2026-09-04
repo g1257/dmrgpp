@@ -95,17 +95,26 @@ public:
 	using RealType          = typename TypesType::RealType;
 	using SparseMatrixType  = typename TypesType::SparseMatrixType;
 	using ComplexOrRealType = ComplexOrRealType_;
+	using value_type        = ComplexOrRealType;
 	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
 	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using FullMatrixType    = PsimagLite::Matrix<ComplexOrRealType>;
+
+	virtual ~MatrixVectorBase() = default;
+
+	virtual SizeType rows() const = 0;
+
+	virtual SizeType cols() const = 0;
+
+	virtual void matrixVectorProduct(VectorType& x, const VectorType& y) const = 0;
 
 	SizeType reflectionSector() const { return 0; }
 
 	void reflectionSector(SizeType) { }
 
-	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
+	virtual void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const = 0;
 
-	const SparseMatrixType& toCRS() const
+	virtual const SparseMatrixType& toCRS() const
 	{
 		throw PsimagLite::RuntimeError("This MatrixVector class doesn't support toCRS()\n");
 	}

@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 template <typename ComplexOrRealType_>
-class MatrixVectorKron : public MatrixVectorBase<ComplexOrRealType_> {
+class MatrixVectorKron final : public MatrixVectorBase<ComplexOrRealType_> {
 
 	using BaseType = MatrixVectorBase<ComplexOrRealType_>;
 
@@ -127,17 +127,16 @@ public:
 		checkKron();
 	}
 
-	~MatrixVectorKron()
+	~MatrixVectorKron() override
 	{
 		std::cout << "DeltaClock matrixVectorProduct " << time_.millis() << "\n";
 	}
 
-	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
+	SizeType rows() const override { return initKron_.size(InitKronType::NEW); }
 
-	SizeType cols() const { return rows(); }
+	SizeType cols() const override { return rows(); }
 
-	template <typename SomeVectorType>
-	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
 		const PsimagLite::MemoryUsage::TimeHandle time1
 		    = PsimagLite::ProgressIndicator::time();
@@ -153,7 +152,7 @@ public:
 		time_ += deltaTime;
 	}
 
-	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const override
 	{
 		BaseType::fullDiag(eigs, fm, matrixStored_, params_.maxMatrixRankStored);
 	}

@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009, 2026, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 6+]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,87 +68,79 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 
 */
-/** \ingroup DMRG */
-/*@{*/
+#ifndef DMRG_MATRIX_VECTOR_H
+#define DMRG_MATRIX_VECTOR_H
 
-/*! \file MatrixVectorOnTheFly.h
- *
- *  A class to encapsulate the product x+=Hy,
- *  where x and y are vectors and H is the Hamiltonian matrix
- *
- */
-#ifndef MATRIX_VECTOR_OTF_H
-#define MATRIX_VECTOR_OTF_H
-
-#include "MatrixVectorBase.h"
-#include <vector>
+#include "MatrixVectorKron/MatrixVectorKron.h"
+#include "MatrixVectorOnTheFly.h"
+#include "MatrixVectorStored.h"
+#include <memory>
 
 namespace Dmrg {
-template <typename ComplexOrRealType_>
-class MatrixVectorOnTheFly final : public MatrixVectorBase<ComplexOrRealType_> {
 
-	using BaseType = MatrixVectorBase<ComplexOrRealType_>;
+template <typename ComplexOrRealType_> class MatrixVector {
 
 public:
 
+	using BaseType                  = MatrixVectorBase<ComplexOrRealType_>;
+	using TypesType                 = typename BaseType::TypesType;
 	using ModelType                 = typename BaseType::ModelType;
-	using ModelHelperType           = typename ModelType::ModelHelperType;
-	using RealType                  = typename ModelHelperType::RealType;
-	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
-	using value_type                = typename SparseMatrixType::value_type;
-	using ComplexOrRealType         = ComplexOrRealType_;
-	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using ParametersType            = typename ModelType::ParametersType;
+	using ModelHelperType           = typename BaseType::ModelHelperType;
+	using RealType                  = typename BaseType::RealType;
+	using SparseMatrixType          = typename BaseType::SparseMatrixType;
+	using ComplexOrRealType         = typename BaseType::ComplexOrRealType;
+	using value_type                = typename BaseType::value_type;
+	using VectorRealType            = typename BaseType::VectorRealType;
 	using VectorType                = typename BaseType::VectorType;
-	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
+	using FullMatrixType            = typename BaseType::FullMatrixType;
 	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
 	using AuxType                   = typename ModelHelperType::Aux;
 
-	MatrixVectorOnTheFly(const ModelType&                 model,
-	                     const HamiltonianConnectionType& hc,
-	                     const AuxType&                   aux)
-	    : model_(model)
-	    , hc_(hc)
-	    , aux_(aux)
-	{
-		int maxMatrixRankStored = model.params().maxMatrixRankStored;
-		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored)
-			return;
+	MatrixVector(const ModelType&                 model,
+	             const HamiltonianConnectionType& hc,
+	             const AuxType&                   aux)
+	    : ptr_(create(model, hc, aux))
+	{ }
 
-		hc.fullHamiltonian(matrixStored_, aux_, model_.isHermitian());
-		assert(isHermitian(matrixStored_, true));
+	SizeType rows() const { return ptr_->rows(); }
+
+	SizeType cols() const { return ptr_->cols(); }
+
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const
+	{
+		ptr_->matrixVectorProduct(x, y);
 	}
 
-	SizeType rows() const override { return hc_.modelHelper().size(aux_.m()); }
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const { ptr_->fullDiag(eigs, fm); }
 
-	SizeType cols() const override { return rows(); }
-
-	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
-	{
-		if (matrixStored_.rows() > 0)
-			matrixStored_.matrixVectorProduct(x, y);
-		else
-			model_.matrixVectorProduct(x, y, hc_, aux_);
-	}
-
-	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const override
-	{
-		int mrs = model_.params().maxMatrixRankStored;
-		if (mrs < static_cast<int>(rows())) {
-			std::cerr << "Full diag will likely fail, it would need ";
-			std::cerr << rows() << " but you gave only " << mrs << "\n";
-		}
-
-		BaseType::fullDiag(eigs, fm, matrixStored_, mrs);
-	}
+	const SparseMatrixType& toCRS() const { return ptr_->toCRS(); }
 
 private:
 
-	const ModelType&                 model_;
-	const HamiltonianConnectionType& hc_;
-	const AuxType&                   aux_;
-	SparseMatrixType                 matrixStored_;
-}; // class MatrixVectorOnTheFly
+	static std::unique_ptr<BaseType>
+	create(const ModelType& model, const HamiltonianConnectionType& hc, const AuxType& aux)
+	{
+		if (model.params().options.isSet("MatrixVectorStored"))
+			return std::make_unique<MatrixVectorStored<ComplexOrRealType>>(
+			    model, hc, aux);
+
+		if (model.params().matrix_solver_enum
+		    == ParametersType::MatrixSolverEnum::ARNOLDISAI) {
+			throw PsimagLite::RuntimeError(
+			    "MatrixSolver=ArnoldiSaI requires MatrixVectorStored\n");
+		}
+
+		if (model.params().options.isSet("MatrixVectorOnTheFly"))
+			return std::make_unique<MatrixVectorOnTheFly<ComplexOrRealType>>(
+			    model, hc, aux);
+
+		return std::make_unique<MatrixVectorKron<ComplexOrRealType>>(model, hc, aux);
+	}
+
+	std::unique_ptr<BaseType> ptr_;
+};
+
 } // namespace Dmrg
 
-/*@}*/
-#endif
+#endif // DMRG_MATRIX_VECTOR_H
