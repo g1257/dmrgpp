@@ -94,7 +94,7 @@ void DmrgRunner<RealType>::doOneRun2(const OptionsForIntrospect& op_options) con
 	                                         InputNgType::Readable,
 	                                         SuperGeometryType>;
 	using MatrixVectorModelType  = typename MatrixVectorTypes<ComplexOrRealType>::ModelType;
-	static_assert(std::is_same<ModelBaseType, MatrixVectorModelType>::value,
+	static_assert(std::is_same_v<ModelBaseType, MatrixVectorModelType>,
 	              "DmrgRunner and MatrixVectorTypes must use the same model type");
 
 	assert(dmrg_solver_params_);
