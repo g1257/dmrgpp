@@ -1,13 +1,6 @@
 #ifndef LANCZOSDRIVER_H
 #define LANCZOSDRIVER_H
 #include "../Version.h"
-#include <PsimagLite/AllocatorCpu.h>
-#include <PsimagLite/PsimagLite.h>
-#include <PsimagLite/Version.h>
-#include <cstdlib>
-#include <getopt.h>
-#include <unistd.h>
-#define USE_PTHREADS_OR_NOT_NG
 #include "DefaultSymmetry.h"
 #include "Engine.h"
 #include "InputCheck.h"
@@ -19,11 +12,17 @@
 #include "ReducedDensityMatrix.h"
 #include "ReflectionSymmetry.h"
 #include "TranslationSymmetry.h"
+#include <PsimagLite/AllocatorCpu.h>
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/ContinuedFraction.h> // in PsimagLite
 #include <PsimagLite/ContinuedFractionCollection.h> // in PsimagLite
 #include <PsimagLite/Geometry/Geometry.h>
 #include <PsimagLite/InputNg.h> // in PsimagLite
+#include <PsimagLite/PsimagLite.h>
+#include <PsimagLite/Version.h>
+#include <cstdlib>
+#include <getopt.h>
+#include <unistd.h>
 
 #ifndef USE_FLOAT
 typedef double RealType;

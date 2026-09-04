@@ -1,6 +1,5 @@
 #ifndef DMRG_INTROSPECT_H
 #define DMRG_INTROSPECT_H
-#define USE_PTHREADS_OR_NOT_NG
 #include "OperatorSpec.h"
 #include "OptionsForIntrospect.hh"
 #include <PsimagLite/CanonicalExpression.h>
