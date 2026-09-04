@@ -86,22 +86,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <PsimagLite/Vector.h>
 
 namespace Dmrg {
-template <typename ModelType_> class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
+template <typename ComplexOrRealType_>
+class MatrixVectorKron : public MatrixVectorBase<ComplexOrRealType_> {
 
-	using BaseType = MatrixVectorBase<ModelType_>;
+	using BaseType = MatrixVectorBase<ComplexOrRealType_>;
 
 	static const bool CHECK_KRON = true;
 
 public:
 
-	using ModelType                 = ModelType_;
+	using ModelType                 = typename BaseType::ModelType;
 	using ModelHelperType           = typename ModelType::ModelHelperType;
 	using ParametersType            = typename ModelType::ParametersType;
 	using RealType                  = typename ModelHelperType::RealType;
 	using InitKronType              = InitKronHamiltonian<ModelType>;
 	using KronMatrixType            = KronMatrix<InitKronType>;
 	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
-	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using ComplexOrRealType         = ComplexOrRealType_;
 	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
 	using VectorType                = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;

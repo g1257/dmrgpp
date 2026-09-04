@@ -80,19 +80,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_MATRIX_VECTOR_BASE_H
 #define DMRG_MATRIX_VECTOR_BASE_H
 
+#include "MatrixVectorTypes.hpp"
 #include <PsimagLite/PsimagLite.h>
 #include <vector>
 
 namespace Dmrg {
-template <typename ModelType_> class MatrixVectorBase {
+template <typename ComplexOrRealType_> class MatrixVectorBase {
 
 public:
 
-	using ModelType         = ModelType_;
-	using ModelHelperType   = typename ModelType::ModelHelperType;
-	using RealType          = typename ModelHelperType::RealType;
-	using SparseMatrixType  = typename ModelHelperType::SparseMatrixType;
-	using ComplexOrRealType = typename SparseMatrixType::value_type;
+	using TypesType         = MatrixVectorTypes<ComplexOrRealType_>;
+	using ModelType         = typename TypesType::ModelType;
+	using ModelHelperType   = typename TypesType::ModelHelperType;
+	using RealType          = typename TypesType::RealType;
+	using SparseMatrixType  = typename TypesType::SparseMatrixType;
+	using ComplexOrRealType = ComplexOrRealType_;
 	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
 	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using FullMatrixType    = PsimagLite::Matrix<ComplexOrRealType>;
