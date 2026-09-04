@@ -112,7 +112,8 @@ public:
 	MatrixVectorKron(const ModelType&                     model,
 	                 const HamiltonianConnectionType&     hc,
 	                 const typename ModelHelperType::Aux& aux)
-	    : params_(model.params())
+	    : BaseType(hc, aux)
+	    , params_(model.params())
 	    , initKron_(model, hc, aux)
 	    , kronMatrix_(initKron_, "Hamiltonian")
 	    , time_(0, 0)
@@ -131,10 +132,6 @@ public:
 	{
 		std::cout << "DeltaClock matrixVectorProduct " << time_.millis() << "\n";
 	}
-
-	SizeType rows() const override { return initKron_.size(InitKronType::NEW); }
-
-	SizeType cols() const override { return rows(); }
 
 	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
@@ -168,7 +165,7 @@ private:
 		return;
 #endif
 
-		SizeType n = rows();
+		SizeType n = this->rows();
 		std::cout << n << "\n";
 		FullMatrixType m(n, n);
 		for (SizeType i = 0; i < n; ++i) {

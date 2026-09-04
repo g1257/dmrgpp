@@ -108,7 +108,8 @@ public:
 	MatrixVectorStored(const ModelType&                     model,
 	                   const HamiltonianConnectionType&     hc,
 	                   const typename ModelHelperType::Aux& aux)
-	    : model_(model)
+	    : BaseType(hc, aux)
+	    , model_(model)
 	    , progress_("MatrixVectorStored")
 	{
 		const OptionsType& options     = model.params().options;
@@ -127,10 +128,6 @@ public:
 		if (rows > 5000)
 			std::cerr << "WARNING: MatrixVectorStored being used for a large run!\n";
 	}
-
-	SizeType rows() const override { return matrixStored_.rows(); }
-
-	SizeType cols() const override { return matrixStored_.cols(); }
 
 	const SparseMatrixType& toCRS() const override { return matrixStored_; }
 

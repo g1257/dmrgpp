@@ -106,7 +106,8 @@ public:
 	MatrixVectorOnTheFly(const ModelType&                 model,
 	                     const HamiltonianConnectionType& hc,
 	                     const AuxType&                   aux)
-	    : model_(model)
+	    : BaseType(hc, aux)
+	    , model_(model)
 	    , hc_(hc)
 	    , aux_(aux)
 	{
@@ -117,10 +118,6 @@ public:
 		hc.fullHamiltonian(matrixStored_, aux_, model_.isHermitian());
 		assert(isHermitian(matrixStored_, true));
 	}
-
-	SizeType rows() const override { return hc_.modelHelper().size(aux_.m()); }
-
-	SizeType cols() const override { return rows(); }
 
 	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
@@ -133,9 +130,9 @@ public:
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const override
 	{
 		int mrs = model_.params().maxMatrixRankStored;
-		if (mrs < static_cast<int>(rows())) {
+		if (mrs < static_cast<int>(this->rows())) {
 			std::cerr << "Full diag will likely fail, it would need ";
-			std::cerr << rows() << " but you gave only " << mrs << "\n";
+			std::cerr << this->rows() << " but you gave only " << mrs << "\n";
 		}
 
 		BaseType::fullDiag(eigs, fm, matrixStored_, mrs);

@@ -72,7 +72,7 @@ public:
 	/*!
 	 * \brief Return the number of matrix rows
 	 *
-	 * \returns The row count of the selected implementation
+	 * \returns The dimension of the current sector
 	 */
 	SizeType rows() const { return ptr_->rows(); }
 
@@ -80,7 +80,7 @@ public:
 	/*!
 	 * \brief Return the number of matrix columns
 	 *
-	 * \returns The column count of the selected implementation
+	 * \returns The dimension of the current sector
 	 */
 	SizeType cols() const { return ptr_->cols(); }
 

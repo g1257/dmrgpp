@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "MatrixVectorTypes.hpp"
 #include <PsimagLite/PsimagLite.h>
+#include <cassert>
 #include <vector>
 
 namespace Dmrg {
@@ -100,11 +101,18 @@ public:
 	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using FullMatrixType    = PsimagLite::Matrix<ComplexOrRealType>;
 
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
+	using AuxType                   = typename ModelHelperType::Aux;
+
+	MatrixVectorBase(const HamiltonianConnectionType& hc, const AuxType& aux)
+	    : rows_(computeRows(hc, aux))
+	{ }
+
 	virtual ~MatrixVectorBase() = default;
 
-	virtual SizeType rows() const = 0;
+	SizeType rows() const { return rows_; }
 
-	virtual SizeType cols() const = 0;
+	SizeType cols() const { return rows_; }
 
 	virtual void matrixVectorProduct(VectorType& x, const VectorType& y) const = 0;
 
@@ -148,6 +156,21 @@ public:
 		fm = matrixStored.toDense();
 		diag(fm, eigs, 'V');
 	}
+
+private:
+
+	static SizeType computeRows(const HamiltonianConnectionType& hc, const AuxType& aux)
+	{
+		const auto&    lrs    = hc.modelHelper().leftRightSuper();
+		const SizeType m      = aux.m();
+		const SizeType offset = lrs.super().partition(m);
+		assert(lrs.super().partition(m + 1) >= offset);
+		const SizeType rows = lrs.super().partition(m + 1) - offset;
+		assert(rows > 0);
+		return rows;
+	}
+
+	const SizeType rows_;
 }; // class MatrixVectorBase
 } // namespace Dmrg
 
