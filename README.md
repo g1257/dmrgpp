@@ -1,5 +1,10 @@
 # Quick Start
 
+[![CI - Ubuntu 24.04](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci.yml)
+[![CI - Ubuntu 24.04 MPI](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci-mpi.yml/badge.svg?branch=master)](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci-mpi.yml)
+[![CI - MacOS 26](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci-mac.yml/badge.svg?branch=master)](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/ci-mac.yml)
+[![pre-commit](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/clang-format.yml/badge.svg?branch=master)](https://github.com/dmrgpp-project/dmrgpp/actions/workflows/clang-format.yml)
+
 ## Description
 
 DMRG++ is a free and open source implementation of the
