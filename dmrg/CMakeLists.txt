@@ -146,6 +146,22 @@ function(add_lowest_eigenvalue_check_test name dependent_name expected output_fi
   endif()
 endfunction()
 
+function(add_observable_gold_check_test name dependent_name output_file observable_label reference_file)
+  set(options)
+  set(one_value_args TOLERANCE)
+  set(multivalue_args)
+  cmake_parse_arguments(PARSE "${options}" "${one_value_args}" "${multivalue_args}" ${ARGN})
+
+  if("${PARSE_TOLERANCE}" STREQUAL "")
+    message(FATAL_ERROR "add_observable_gold_check_test(${name}) requires TOLERANCE")
+  endif()
+
+  add_test(NAME ${name} COMMAND $<TARGET_FILE:checkTextAndNumbers> ${reference_file}
+                                ${CMAKE_CURRENT_BINARY_DIR}/${output_file} ${PARSE_TOLERANCE}
+                                "--observable-label=${observable_label}")
+  set_tests_properties(${name} PROPERTIES DEPENDS ${dependent_name})
+endfunction()
+
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 input2 -9.51754 runForinput2.cout)
 
@@ -171,6 +187,9 @@ add_lowest_eigenvalue_check_test(output12 input12 2.23292 runForinput12.cout)
 add_test(NAME input20 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input20.ain) # energy -3.37493
 add_lowest_eigenvalue_check_test(output20 input20 -3.37493 runForinput20.cout)
 add_test(NAME input21 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input21.ain "<gs|sz|P0>") # none
+set_tests_properties(input21 PROPERTIES DEPENDS input20)
+add_observable_gold_check_test(output21_sz_P0 input21 runForinput21.cout "<gs|sz|P0>"
+                               ${PATH_TO_INPUTS}/input21_sz_P0_ref.txt TOLERANCE 2e-5)
 add_test(NAME input22 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input22.ain "<gs|sz|P0>") # none
 add_test(NAME input30 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input30.ain) # energy -4.29307
 add_lowest_eigenvalue_check_test(output30 input30 -4.29307 runForinput30.cout)
