@@ -1,8 +1,6 @@
 #ifndef OBSERVEDRIVER_H
 #define OBSERVEDRIVER_H
 
-#include <unistd.h>
-#define USE_PTHREADS_OR_NOT_NG
 #include "BasisWithOperators.h"
 #include "DmrgSolver.h" // only used for types
 #include "InputCheck.h"
@@ -27,6 +25,7 @@
 #include <PsimagLite/Geometry/Geometry.h>
 #include <PsimagLite/InputNg.h>
 #include <PsimagLite/Io/IoSelector.h>
+#include <unistd.h>
 
 namespace Dmrg {
 

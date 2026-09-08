@@ -1,6 +1,5 @@
 #ifndef DMRG_QN_HASH_H
 #define DMRG_QN_HASH_H
-#define USE_PTHREADS_OR_NOT_NG
 #include "Array.h"
 #include "Qn.h"
 #include <PsimagLite/Concurrency.h>

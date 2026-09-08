@@ -22,7 +22,6 @@
  *
  */
 
-#define USE_PTHREADS_OR_NOT_NG
 #include <PsimagLite/Concurrency.h>
 #include <PsimagLite/Parallelizer.h>
 
