@@ -6,9 +6,7 @@
 #include "InputCheck.h"
 #include "Introspect.hh"
 #include "LeftRightSuper.h"
-#include "MatrixVectorKron/MatrixVectorKron.h"
-#include "MatrixVectorOnTheFly.h"
-#include "MatrixVectorStored.h"
+#include "MatrixVector.hpp"
 #include "ModelHelperLocal.h"
 #include "ModelSelector.h"
 #include "ParametersDmrgSolver.h"
@@ -47,7 +45,7 @@ private:
 	template <typename ComplexOrRealType>
 	void doOneRun2(const OptionsForIntrospect& op_options) const;
 
-	template <typename MatrixVectorType>
+	template <typename ComplexOrRealType>
 	void doOneRun3(const OptionsForIntrospect& op_options) const;
 
 	template <typename MatrixVectorType, typename VectorWithOffsetType>
