@@ -114,7 +114,13 @@ public:
 		const bool         debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_.clear();
+
 		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
+		const bool ldaggerL = model.params().options.isSet("LdaggerL");
+		if (ldaggerL) {
+			transposeConjugate(transpose_, matrixStored_);
+		}
+
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
 		SizeType                                      rows = matrixStored_.rows();
@@ -137,6 +143,12 @@ public:
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
 		matrixStored_.matrixVectorProduct(x, y);
+		const bool ldaggerL = model_.params().options.isSet("LdaggerL");
+		if (ldaggerL) {
+			SomeVectorType xx = x;
+			std::fill(x.begin(), x.end(), 0.);
+			transpose_.matrixVectorProduct(x, xx);
+		}
 	}
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
@@ -148,6 +160,7 @@ private:
 
 	const ModelType&              model_;
 	SparseMatrixType              matrixStored_;
+	SparseMatrixType              transpose_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class MatrixVectorStored
 } // namespace Dmrg
