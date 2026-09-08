@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSI_INPUTCHECK_BASE_H
 #define PSI_INPUTCHECK_BASE_H
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace PsimagLite {

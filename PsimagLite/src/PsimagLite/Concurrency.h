@@ -87,6 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/syscall.h>
 #include <unistd.h>
 
+#ifdef USE_PTHREADS
+#include <pthread.h>
+#endif
+
 namespace PsimagLite {
 
 class Concurrency {
@@ -114,8 +118,6 @@ public:
 	static PthreadtType threadSelf() { return 0; }
 
 #else
-
-#include <pthread.h>
 
 	using MutexType    = pthread_mutex_t;
 	using PthreadtType = pthread_t;
