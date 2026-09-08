@@ -254,12 +254,11 @@ TEST_CASE("TextAndNumbersChecker reports files that cannot be opened", "[TextAnd
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker reports generic stream read errors",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker reports generic stream read errors", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
-	const auto            firstDirectory = files.path("first-directory");
+	const auto            firstDirectory  = files.path("first-directory");
 	const auto            secondDirectory = files.path("second-directory");
 	std::filesystem::create_directory(firstDirectory);
 	std::filesystem::create_directory(secondDirectory);
@@ -411,18 +410,15 @@ TEST_CASE("TextAndNumbersChecker compares real numbers with absolute tolerance",
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker compares complex numbers by magnitude",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker compares complex numbers by magnitude", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles files;
 
 	SECTION("equivalent representations match")
 	{
 		TextAndNumbersChecker checker(0.0);
-		const auto file1
-		    = files.write("first.txt", "(1.0,-2.0) (1e0,-2e0) (1,0)");
-		const auto file2
-		    = files.write("second.txt", "(1.00,-2.00) (1.0,-2.0) (1.0,0.0)");
+		const auto file1 = files.write("first.txt", "(1.0,-2.0) (1e0,-2e0) (1,0)");
+		const auto file2 = files.write("second.txt", "(1.00,-2.00) (1.0,-2.0) (1.0,0.0)");
 		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 
@@ -463,8 +459,7 @@ TEST_CASE("TextAndNumbersChecker compares complex numbers by magnitude",
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker classifies complex tokens strictly",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker classifies complex tokens strictly", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.0);
@@ -489,15 +484,14 @@ TEST_CASE("TextAndNumbersChecker classifies complex tokens strictly",
 	{
 		const auto file1 = files.write("first.txt", "(1,2)");
 		const auto file2 = files.write("second.txt", "word");
-		CHECK_THROWS_MATCHES(
-		    checker.run(file1, file2),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("different token classes (complex and word)")));
+		CHECK_THROWS_MATCHES(checker.run(file1, file2),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "different token classes (complex and word)")));
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker rejects invalid complex components",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker rejects invalid complex components", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.0);
@@ -506,9 +500,10 @@ TEST_CASE("TextAndNumbersChecker rejects invalid complex components",
 	{
 		const auto file1 = files.write("first.txt", "(1e9999,0)");
 		const auto file2 = files.write("second.txt", "(1e9999,0)");
-		CHECK_THROWS_MATCHES(checker.run(file1, file2),
-		                     std::runtime_error,
-		                     MessageMatches(ContainsSubstring("Complex component is out of range")));
+		CHECK_THROWS_MATCHES(
+		    checker.run(file1, file2),
+		    std::runtime_error,
+		    MessageMatches(ContainsSubstring("Complex component is out of range")));
 	}
 
 	SECTION("non-finite values")
@@ -526,9 +521,10 @@ TEST_CASE("TextAndNumbersChecker rejects invalid complex components",
 		const std::string value = "(" + std::string(200000, '9') + ",0)";
 		const auto        file1 = files.write("first.txt", value);
 		const auto        file2 = files.write("second.txt", value);
-		CHECK_THROWS_MATCHES(checker.run(file1, file2),
-		                     std::runtime_error,
-		                     MessageMatches(ContainsSubstring("Complex component is out of range")));
+		CHECK_THROWS_MATCHES(
+		    checker.run(file1, file2),
+		    std::runtime_error,
+		    MessageMatches(ContainsSubstring("Complex component is out of range")));
 	}
 }
 
@@ -537,19 +533,17 @@ TEST_CASE("TextAndNumbersChecker compares final indexed observable records",
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(1e-6);
-	const std::string     label = "<gs|sz|P0>";
-	const auto reference = files.write(
-	    "reference.txt",
-	    "DMRG++ reference log\n"
-	    "5 (9,9) 0.300000 <gs|sz|P0> (8,8)\n"
-	    "4 (0.25,0) 0.3 <gs|sz|P0> (0,0)\n"
-	    "5 (-0.18,0.05) 0.300000 <gs|sz|P0> (0,0)\n");
-	const auto actual = files.write(
-	    "actual.txt",
-	    "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n"
-	    "5 (-7,-7) 0.3 <gs|sz|P0> (-6,-6)\n"
-	    "5 (-0.18,0.05) 0.3 <gs|sz|P0> (0,0)\n"
-	    "4 (0.250000,0.000000) 0.300000 <gs|sz|P0> (0.0,0.0)\n");
+	const std::string     label     = "<gs|sz|P0>";
+	const auto            reference = files.write("reference.txt",
+                                           "DMRG++ reference log\n"
+	                                              "5 (9,9) 0.300000 <gs|sz|P0> (8,8)\n"
+	                                              "4 (0.25,0) 0.3 <gs|sz|P0> (0,0)\n"
+	                                              "5 (-0.18,0.05) 0.300000 <gs|sz|P0> (0,0)\n");
+	const auto            actual    = files.write("actual.txt",
+                                        "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n"
+	                                              "5 (-7,-7) 0.3 <gs|sz|P0> (-6,-6)\n"
+	                                              "5 (-0.18,0.05) 0.3 <gs|sz|P0> (0,0)\n"
+	                                              "4 (0.250000,0.000000) 0.300000 <gs|sz|P0> (0.0,0.0)\n");
 
 	CHECK_NOTHROW(checker.runObservables(reference, actual, label));
 }
@@ -560,59 +554,52 @@ TEST_CASE("TextAndNumbersChecker compares both final observable data fields",
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.11);
 	const std::string     label = "<gs|sz|P0>";
-	const auto reference = files.write(
-	    "reference.txt",
-	    "5 (1,2) 0.3 <gs|sz|P0> (3,4)\n");
+	const auto reference = files.write("reference.txt", "5 (1,2) 0.3 <gs|sz|P0> (3,4)\n");
 
 	SECTION("early agreement cannot hide a final value mismatch")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "5 (1,2) 0.3 <gs|sz|P0> (3,4)\n"
-		    "5 (1.2,2) 0.3 <gs|sz|P0> (3,4)\n");
+		const auto actual = files.write("actual.txt",
+		                                "5 (1,2) 0.3 <gs|sz|P0> (3,4)\n"
+		                                "5 (1.2,2) 0.3 <gs|sz|P0> (3,4)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("observable value mismatch at (site=5, time=0.3, label=<gs|sz|P0>)")));
+		    MessageMatches(ContainsSubstring(
+		        "observable value mismatch at (site=5, time=0.3, label=<gs|sz|P0>)")));
 	}
 
 	SECTION("superdensity is compared independently")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "5 (1,2) 0.3 <gs|sz|P0> (3.2,4)\n");
+		const auto actual = files.write("actual.txt", "5 (1,2) 0.3 <gs|sz|P0> (3.2,4)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("superdensity mismatch at (site=5, time=0.3, label=<gs|sz|P0>)")));
+		    MessageMatches(ContainsSubstring(
+		        "superdensity mismatch at (site=5, time=0.3, label=<gs|sz|P0>)")));
 	}
 
 	SECTION("complex magnitude tolerance applies to both fields")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "5 (1.06,2.08) 0.3 <gs|sz|P0> (3.06,4.08)\n");
+		const auto actual
+		    = files.write("actual.txt", "5 (1.06,2.08) 0.3 <gs|sz|P0> (3.06,4.08)\n");
 		CHECK_NOTHROW(checker.runObservables(reference, actual, label));
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker requires exact observable index sets",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker requires exact observable index sets", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(1.0);
-	const std::string     label = "<gs|sz|P0>";
-	const auto reference = files.write(
-	    "reference.txt",
-	    "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n"
-	    "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n");
+	const std::string     label     = "<gs|sz|P0>";
+	const auto            reference = files.write("reference.txt",
+                                           "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n"
+	                                              "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n");
 
 	SECTION("a genuinely different time is a key mismatch")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "4 (1,0) 0.31 <gs|sz|P0> (0,0)\n"
-		    "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n");
+		const auto actual = files.write("actual.txt",
+		                                "4 (1,0) 0.31 <gs|sz|P0> (0,0)\n"
+		                                "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
@@ -621,113 +608,106 @@ TEST_CASE("TextAndNumbersChecker requires exact observable index sets",
 
 	SECTION("a missing index reports its full identity")
 	{
-		const auto actual = files.write(
-		    "actual.txt", "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n");
+		const auto actual = files.write("actual.txt", "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("missing from actual file: (site=5, time=0.3, label=<gs|sz|P0>)")));
+		    MessageMatches(ContainsSubstring(
+		        "missing from actual file: (site=5, time=0.3, label=<gs|sz|P0>)")));
 	}
 
 	SECTION("an extra index reports its full identity")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n"
-		    "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n"
-		    "6 (3,0) 0.3 <gs|sz|P0> (0,0)\n");
+		const auto actual = files.write("actual.txt",
+		                                "4 (1,0) 0.3 <gs|sz|P0> (0,0)\n"
+		                                "5 (2,0) 0.3 <gs|sz|P0> (0,0)\n"
+		                                "6 (3,0) 0.3 <gs|sz|P0> (0,0)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("extra in actual file: (site=6, time=0.3, label=<gs|sz|P0>)")));
+		    MessageMatches(ContainsSubstring(
+		        "extra in actual file: (site=6, time=0.3, label=<gs|sz|P0>)")));
 	}
 }
 
-TEST_CASE("TextAndNumbersChecker validates selected observable records",
-          "[TextAndNumbersChecker]")
+TEST_CASE("TextAndNumbersChecker validates selected observable records", "[TextAndNumbersChecker]")
 {
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(1e-6);
 	const std::string     label = "<gs|sz|P0>";
-	const auto reference = files.write(
-	    "reference.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+	const auto reference = files.write("reference.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
 
 	SECTION("a malformed selected record fails")
 	{
-		const auto actual = files.write(
-		    "actual.txt", "5 malformed 0.3 <gs|sz|P0> (0,0)\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual = files.write("actual.txt", "5 malformed 0.3 <gs|sz|P0> (0,0)\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("a malformed selected record with no numeric site fails closed")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "x bad 0.3 <gs|sz|P0> bad\n"
-		    "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual = files.write("actual.txt",
+		                                "x bad 0.3 <gs|sz|P0> bad\n"
+		                                "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("a missing value cannot shift the selected label out of position")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "5 0.3 <gs|sz|P0> (0,0)\n"
-		    "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual = files.write("actual.txt",
+		                                "5 0.3 <gs|sz|P0> (0,0)\n"
+		                                "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("a missing time cannot shift the selected label out of position")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "5 (1,2) <gs|sz|P0> (0,0)\n"
-		    "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual = files.write("actual.txt",
+		                                "5 (1,2) <gs|sz|P0> (0,0)\n"
+		                                "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("trailing fields fail")
 	{
-		const auto actual = files.write(
-		    "actual.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0) trailing\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual
+		    = files.write("actual.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0) trailing\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("no selected records fails explicitly")
 	{
-		const auto actual = files.write(
-		    "actual.txt",
-		    "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n"
-		    "5 (1,2) 0.3 <gs|other|P0> (0,0)\n");
+		const auto actual = files.write("actual.txt",
+		                                "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n"
+		                                "5 (1,2) 0.3 <gs|other|P0> (0,0)\n");
 		CHECK_THROWS_MATCHES(
 		    checker.runObservables(reference, actual, label),
 		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("No observable records for label <gs|sz|P0> in actual file")));
+		    MessageMatches(ContainsSubstring(
+		        "No observable records for label <gs|sz|P0> in actual file")));
 	}
 
 	SECTION("non-finite time fails")
 	{
-		const auto actual = files.write(
-		    "actual.txt", "5 (1,2) nan <gs|sz|P0> (0,0)\n");
-		CHECK_THROWS_MATCHES(
-		    checker.runObservables(reference, actual, label),
-		    std::runtime_error,
-		    MessageMatches(ContainsSubstring("Malformed observable record in actual file at line 1")));
+		const auto actual = files.write("actual.txt", "5 (1,2) nan <gs|sz|P0> (0,0)\n");
+		CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring(
+		                         "Malformed observable record in actual file at line 1")));
 	}
 
 	SECTION("a read error is not treated as end of file")
@@ -747,11 +727,9 @@ TEST_CASE("TextAndNumbersChecker rejects an oversized observable site token",
 	TemporaryFiles        files;
 	TextAndNumbersChecker checker(1e-6);
 	const std::string     label = "<gs|sz|P0>";
-	const auto reference = files.write(
-	    "reference.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
-	const auto actual = files.write(
-	    "actual.txt",
-	    std::string(200000, '9') + " (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+	const auto reference = files.write("reference.txt", "5 (1,2) 0.3 <gs|sz|P0> (0,0)\n");
+	const auto actual
+	    = files.write("actual.txt", std::string(200000, '9') + " (1,2) 0.3 <gs|sz|P0> (0,0)\n");
 
 	CHECK_THROWS_MATCHES(checker.runObservables(reference, actual, label),
 	                     std::runtime_error,

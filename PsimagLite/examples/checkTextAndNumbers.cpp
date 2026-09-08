@@ -24,21 +24,19 @@ ParsedOption parseOption(const char* text)
 {
 	const std::string argument(text);
 	const std::string ignoredLinePrefixOption = "--ignore-line-prefix=";
-	const std::string insituLabelOption        = "--insitu-label=";
+	const std::string insituLabelOption       = "--insitu-label=";
 
-	if (argument.compare(0, ignoredLinePrefixOption.size(), ignoredLinePrefixOption)
-	    == 0) {
+	if (argument.compare(0, ignoredLinePrefixOption.size(), ignoredLinePrefixOption) == 0) {
 		if (argument.size() == ignoredLinePrefixOption.size())
 			throw std::invalid_argument("Invalid option: \"" + argument + "\"");
 		return { ComparisonMode::IgnoreLinePrefix,
-		         argument.substr(ignoredLinePrefixOption.size()) };
+			 argument.substr(ignoredLinePrefixOption.size()) };
 	}
 
 	if (argument.compare(0, insituLabelOption.size(), insituLabelOption) == 0) {
 		if (argument.size() == insituLabelOption.size())
 			throw std::invalid_argument("Invalid option: \"" + argument + "\"");
-		return { ComparisonMode::Observable,
-		         argument.substr(insituLabelOption.size()) };
+		return { ComparisonMode::Observable, argument.substr(insituLabelOption.size()) };
 	}
 
 	throw std::invalid_argument("Invalid option: \"" + argument + "\"");
@@ -75,7 +73,7 @@ int main(int argc, char* argv[])
 		const ParsedOption option = (argc == 5)
 		    ? parseOption(argv[4])
 		    : ParsedOption { ComparisonMode::Generic, "" };
-		const std::string ignoredLinePrefix
+		const std::string  ignoredLinePrefix
 		    = (option.mode == ComparisonMode::IgnoreLinePrefix) ? option.value : "";
 		const PsimagLite::TextAndNumbersChecker checker(parseTolerance(argv[3]),
 		                                                ignoredLinePrefix);

@@ -31,13 +31,14 @@ add_test(NAME checkTextAndNumbers COMMAND checkTextAndNumbers ${CMAKE_CURRENT_SO
 
 set(check_text_observable_reference ${CMAKE_CURRENT_BINARY_DIR}/checkTextAndNumbers_observable_reference.txt)
 set(check_text_observable_actual ${CMAKE_CURRENT_BINARY_DIR}/checkTextAndNumbers_observable_actual.txt)
-file(WRITE ${check_text_observable_reference}
-     "5 (9,9) 0.3 <gs|sz|P0> (8,8)\n5 (-0.18,0.05) 0.3 <gs|sz|P0> (0,0)\n")
-file(WRITE ${check_text_observable_actual}
-     "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n5 (-7,-7) 0.300000 <gs|sz|P0> (-6,-6)\n5 (-0.18,0.05) 0.300000 <gs|sz|P0> (0,0)\n")
+file(WRITE ${check_text_observable_reference} "5 (9,9) 0.3 <gs|sz|P0> (8,8)\n5 (-0.18,0.05) 0.3 <gs|sz|P0> (0,0)\n")
+file(
+  WRITE ${check_text_observable_actual}
+  "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n5 (-7,-7) 0.300000 <gs|sz|P0> (-6,-6)\n5 (-0.18,0.05) 0.300000 <gs|sz|P0> (0,0)\n"
+)
 add_test(NAME checkTextAndNumbers_observables
-         COMMAND $<TARGET_FILE:checkTextAndNumbers> ${check_text_observable_reference} ${check_text_observable_actual} 1e-6
-                 "--insitu-label=<gs|sz|P0>")
+         COMMAND $<TARGET_FILE:checkTextAndNumbers> ${check_text_observable_reference} ${check_text_observable_actual}
+                 1e-6 "--insitu-label=<gs|sz|P0>")
 
 add_executable(closuresTest closuresTest.cpp)
 target_link_libraries(closuresTest psimaglite)

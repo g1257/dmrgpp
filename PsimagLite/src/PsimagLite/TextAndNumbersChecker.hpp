@@ -142,8 +142,7 @@ public:
 
 		const ObservableMap reference
 		    = readObservables(referenceFile, observableLabel, "reference");
-		const ObservableMap actual
-		    = readObservables(actualFile, observableLabel, "actual");
+		const ObservableMap actual = readObservables(actualFile, observableLabel, "actual");
 
 		auto referenceIter = reference.begin();
 		auto actualIter    = actual.begin();
@@ -151,8 +150,9 @@ public:
 			if (actualIter == actual.end()
 			    || (referenceIter != reference.end()
 			        && referenceIter->first < actualIter->first))
-				throw std::runtime_error("Observable index missing from actual file: "
-				                         + formatIndex(referenceIter->first));
+				throw std::runtime_error(
+				    "Observable index missing from actual file: "
+				    + formatIndex(referenceIter->first));
 
 			if (referenceIter == reference.end()
 			    || actualIter->first < referenceIter->first)
@@ -278,8 +278,7 @@ private:
 	/*!
 	 * \brief Test whether text equals an ASCII word without regard to case
 	 */
-	static bool equalsAsciiNoCase(const std::string& text, std::size_t offset,
-	                              const char* word)
+	static bool equalsAsciiNoCase(const std::string& text, std::size_t offset, const char* word)
 	{
 		std::size_t index = offset;
 		for (; *word != '\0'; ++word, ++index) {
@@ -357,13 +356,11 @@ private:
 			return false;
 
 		const std::size_t comma = token.find(',', 1);
-		if (comma == std::string::npos
-		    || token.find(',', comma + 1) != std::string::npos)
+		if (comma == std::string::npos || token.find(',', comma + 1) != std::string::npos)
 			return false;
 
 		return isComplexComponentSyntax(token.substr(1, comma - 1))
-		    && isComplexComponentSyntax(
-		        token.substr(comma + 1, token.size() - comma - 2));
+		    && isComplexComponentSyntax(token.substr(comma + 1, token.size() - comma - 2));
 	}
 
 	//---------------------------------------------------------------------------//
@@ -420,8 +417,7 @@ private:
 		}
 
 		bool hasExponent = false;
-		if (position < token.size()
-		    && (token[position] == 'e' || token[position] == 'E')) {
+		if (position < token.size() && (token[position] == 'e' || token[position] == 'E')) {
 			hasExponent = true;
 			++position;
 			if (position < token.size()
@@ -578,11 +574,10 @@ private:
 		    || comma == std::string::npos)
 			throw std::runtime_error("Invalid complex token: " + quote(token));
 
-		const std::string realPart = token.substr(1, comma - 1);
-		const std::string imaginaryPart
-		    = token.substr(comma + 1, token.size() - comma - 2);
+		const std::string realPart      = token.substr(1, comma - 1);
+		const std::string imaginaryPart = token.substr(comma + 1, token.size() - comma - 2);
 		return { parseComplexComponent(realPart, token),
-		         parseComplexComponent(imaginaryPart, token) };
+			 parseComplexComponent(imaginaryPart, token) };
 	}
 
 	//---------------------------------------------------------------------------//
@@ -591,8 +586,7 @@ private:
 	 */
 	static std::size_t parseSite(const std::string& token)
 	{
-		if (token.empty()
-		    || token.find_first_not_of("0123456789") != std::string::npos)
+		if (token.empty() || token.find_first_not_of("0123456789") != std::string::npos)
 			throw std::runtime_error("Invalid site token: " + quote(token));
 
 		std::size_t parsed = 0;
@@ -600,7 +594,8 @@ private:
 			const unsigned long long value = std::stoull(token, &parsed, 10);
 			if (parsed != token.size()
 			    || value > std::numeric_limits<std::size_t>::max())
-				throw std::runtime_error("Site token is out of range: " + quote(token));
+				throw std::runtime_error("Site token is out of range: "
+				                         + quote(token));
 			return static_cast<std::size_t>(value);
 		} catch (const std::invalid_argument&) {
 			throw std::runtime_error("Invalid site token: " + quote(token));
@@ -641,11 +636,11 @@ private:
 	 * \brief Identify selected rows even when a missing field shifts the label
 	 */
 	static bool isObservableCandidate(const std::vector<std::string>& tokens,
-	                                  const std::string& observableLabel)
+	                                  const std::string&              observableLabel)
 	{
-		bool containsLabel = false;
+		bool containsLabel         = false;
 		bool labelAtRecordPosition = false;
-		bool containsComplex = false;
+		bool containsComplex       = false;
 		for (std::size_t index = 0; index < tokens.size(); ++index) {
 			const std::string& token = tokens[index];
 			if (token == observableLabel) {
@@ -667,22 +662,22 @@ private:
 	 * \brief Read and collapse selected observable rows from one file
 	 */
 	static ObservableMap readObservables(const std::filesystem::path& file,
-	                                     const std::string& observableLabel,
-	                                     const std::string& fileRole)
+	                                     const std::string&           observableLabel,
+	                                     const std::string&           fileRole)
 	{
 		std::ifstream stream(file);
 		if (!stream)
-			throw std::runtime_error("Cannot open " + fileRole + " file: "
-			                         + file.string());
+			throw std::runtime_error("Cannot open " + fileRole
+			                         + " file: " + file.string());
 
 		ObservableMap data;
 		std::string   line;
 		std::size_t   lineNumber = 0;
 		while (std::getline(stream, line)) {
 			++lineNumber;
-			std::istringstream lineStream(line);
+			std::istringstream       lineStream(line);
 			std::vector<std::string> tokens;
-			std::string token;
+			std::string              token;
 			while (lineStream >> token)
 				tokens.push_back(token);
 
@@ -697,13 +692,14 @@ private:
 			try {
 				if (classify(tokens[1]) != TokenClass::Complex
 				    || classify(tokens[4]) != TokenClass::Complex)
-					throw std::runtime_error("value or superdensity is not complex");
+					throw std::runtime_error(
+					    "value or superdensity is not complex");
 
-				const std::size_t site = parseSite(tokens[0]);
-				const RealType time = parseObservableTime(tokens[2]);
+				const std::size_t     site = parseSite(tokens[0]);
+				const RealType        time = parseObservableTime(tokens[2]);
 				const ObservableIndex index { site, time, tokens[3] };
-				const ObservableData observableData { parseComplex(tokens[1]),
-				                                          parseComplex(tokens[4]) };
+				const ObservableData  observableData { parseComplex(tokens[1]),
+                                                                      parseComplex(tokens[4]) };
 				data[index] = observableData;
 			} catch (const std::exception& error) {
 				throw std::runtime_error(location + ": " + error.what());
@@ -711,13 +707,13 @@ private:
 		}
 
 		if (stream.bad())
-			throw std::runtime_error("Error while reading " + fileRole + " file: "
-			                         + file.string());
+			throw std::runtime_error("Error while reading " + fileRole
+			                         + " file: " + file.string());
 
 		if (data.empty())
 			throw std::runtime_error("No observable records for label "
-			                         + observableLabel + " in " + fileRole + " file: "
-			                         + file.string());
+			                         + observableLabel + " in " + fileRole
+			                         + " file: " + file.string());
 		return data;
 	}
 
@@ -738,8 +734,8 @@ private:
 	 * \brief Compare both data fields for one common observable index
 	 */
 	void compareObservableData(const ObservableIndex& index,
-	                           const ObservableData& reference,
-	                           const ObservableData& actual) const
+	                           const ObservableData&  reference,
+	                           const ObservableData&  actual) const
 	{
 		const RealType valueError = std::abs(reference.value - actual.value);
 		if (valueError > tolerance_)
@@ -760,16 +756,16 @@ private:
 	/*!
 	 * \brief Throw a detailed observable-data mismatch
 	 */
-	[[noreturn]] void failObservable(const std::string& field,
-	                                 const ObservableIndex& index,
+	[[noreturn]] void failObservable(const std::string&            field,
+	                                 const ObservableIndex&        index,
 	                                 const std::complex<RealType>& reference,
 	                                 const std::complex<RealType>& actual,
-	                                 RealType error) const
+	                                 RealType                      error) const
 	{
 		std::ostringstream message;
-		message << field << " mismatch at " << formatIndex(index) << "; reference="
-		        << reference << ", actual=" << actual << ", error=" << error
-		        << ", tolerance=" << tolerance_;
+		message << field << " mismatch at " << formatIndex(index)
+		        << "; reference=" << reference << ", actual=" << actual
+		        << ", error=" << error << ", tolerance=" << tolerance_;
 		throw std::runtime_error(message.str());
 	}
 
