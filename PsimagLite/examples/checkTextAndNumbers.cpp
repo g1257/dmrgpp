@@ -24,7 +24,7 @@ ParsedOption parseOption(const char* text)
 {
 	const std::string argument(text);
 	const std::string ignoredLinePrefixOption = "--ignore-line-prefix=";
-	const std::string observableLabelOption    = "--observable-label=";
+	const std::string insituLabelOption        = "--insitu-label=";
 
 	if (argument.compare(0, ignoredLinePrefixOption.size(), ignoredLinePrefixOption)
 	    == 0) {
@@ -34,11 +34,11 @@ ParsedOption parseOption(const char* text)
 		         argument.substr(ignoredLinePrefixOption.size()) };
 	}
 
-	if (argument.compare(0, observableLabelOption.size(), observableLabelOption) == 0) {
-		if (argument.size() == observableLabelOption.size())
+	if (argument.compare(0, insituLabelOption.size(), insituLabelOption) == 0) {
+		if (argument.size() == insituLabelOption.size())
 			throw std::invalid_argument("Invalid option: \"" + argument + "\"");
 		return { ComparisonMode::Observable,
-		         argument.substr(observableLabelOption.size()) };
+		         argument.substr(insituLabelOption.size()) };
 	}
 
 	throw std::invalid_argument("Invalid option: \"" + argument + "\"");
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 	if (argc != 4 && argc != 5) {
 		std::cerr << "Usage: " << argv[0]
 		          << " FILE1 FILE2 TOLERANCE "
-		             "[--ignore-line-prefix=PREFIX|--observable-label=LABEL]\n";
+		             "[--ignore-line-prefix=PREFIX|--insitu-label=LABEL]\n";
 		return EXIT_FAILURE;
 	}
 

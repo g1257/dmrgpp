@@ -37,7 +37,7 @@ file(WRITE ${check_text_observable_actual}
      "PsiApp: CmdLine: dmrg -f input21.ain <gs|sz|P0>\n5 (-7,-7) 0.300000 <gs|sz|P0> (-6,-6)\n5 (-0.18,0.05) 0.300000 <gs|sz|P0> (0,0)\n")
 add_test(NAME checkTextAndNumbers_observables
          COMMAND $<TARGET_FILE:checkTextAndNumbers> ${check_text_observable_reference} ${check_text_observable_actual} 1e-6
-                 "--observable-label=<gs|sz|P0>")
+                 "--insitu-label=<gs|sz|P0>")
 
 add_executable(closuresTest closuresTest.cpp)
 target_link_libraries(closuresTest psimaglite)
