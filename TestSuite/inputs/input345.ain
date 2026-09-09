@@ -1,0 +1,59 @@
+##Ainur1.0
+
+TotalNumberOfSites=16;
+NumberOfTerms=3;
+
+gt0:DegreesOfFreedom=2;
+gt0:GeometryKind=ladderx;
+gt0:GeometryOptions=ConstantValues;
+gt0:LadderLeg=2;
+gt0:dir0:Connectors=[
+[-0.058, 0],
+[0, -0.2196]];
+
+gt0:dir1:Connectors=[
+[-0.2196, 0],
+[0, -0.058]];
+
+gt0:dir2:Connectors=[
+[0.20828, 0.079],
+[0.079, 0.20828]];
+
+gt0:dir3:Connectors=[
+[0.20828, -0.079],
+[-0.079, 0.20828]];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind=ladderx;
+gt1:GeometryOptions=ConstantValues;
+gt1:LadderLeg=2;
+gt1:dir0:Connectors= [0.1];
+gt1:dir1:Connectors= [0.1];
+gt1:dir2:Connectors= [0.02];
+gt1:dir3:Connectors= [0.02];
+
+gt2:DegreesOfFreedom=1;
+gt2:GeometryKind=ladderx;
+gt2:GeometryOptions=ConstantValues;
+gt2:LadderLeg=2;
+gt2:dir0:Connectors= [0.1];
+gt2:dir1:Connectors= [0.1];
+gt2:dir2:Connectors= [0.02];
+gt2:dir3:Connectors= [0.02];
+
+hubbardU=[4.,...x4];
+# The syntax below implies 32 zeroes for the vector
+potentialV=[0.,...x64];
+Model=FeAsBasedScExtended;
+FeAsMode=INT_PAPER33;
+Orbitals=2;
+SolverOptions=twositedmrg,minimizedisk;
+Version=61289987cdd32b8485213ac0415baf4e9cd16432;
+OutputFile=data345;
+InfiniteLoopKeptStates=20;
+FiniteLoops=[
+	[@auto, 1000, 0],
+	[@auto, 1000, 0]];
+TargetElectronsUp=15;
+TargetElectronsDown=15;
+
