@@ -31,6 +31,9 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 		io.readline(uFinal, "HubbardUFinal=");
 		io.readline(tMax, "TmaxNeq=");
 		io.readline(nT, "NtNeq=");
+		if (nT == 0)
+			throw PsimagLite::RuntimeError("Non-equilibrium GBEK requires NtNeq>0; "
+			                               "at least one real-time step is required\n");
 		dt = tMax / static_cast<RealType>(nT);
 
 		try {
@@ -38,12 +41,21 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 		} catch (std::exception&) { }
 
 		try {
-			io.readline(neqDmftError, "NeqDmftTolerance=");
-		} catch (std::exception&) { }
-
-		try {
 			io.readline(neqBathRank, "NeqBathRank=");
 		} catch (std::exception&) { }
+
+		if (neqDmftIter == 0)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqDmftIter>0; "
+			    "at least one corrector iteration is required at each time step\n");
+		if (neqBathRank == 0)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqBathRank>0; "
+			    "the frozen rank-zero bath path is no longer supported\n");
+		if (neqBathRank > nT)
+			throw PsimagLite::RuntimeError(
+			    "Non-equilibrium GBEK requires NeqBathRank<=NtNeq; "
+			    "every bath column must have a real-time seed\n");
 
 		try {
 			io.readline(bandwidthFinal, "BandwidthFinal=");
@@ -63,9 +75,8 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 	}
 
 	/// True atomic limit start (GBEK PRB 88, 235106 (2013), Sec. VI): no
-	/// equilibrium bath at all, so the lattice hopping t*(t) ramp starts
-	/// from exactly 0 (see NeqLatticeGf's tStar_ construction) and the
-	/// impurity solver starts from an empty bath (see cincuenta.cpp).
+	/// equilibrium bath at all, so the lattice hopping ramp starts from exactly
+	/// 0 and the impurity solver starts from an empty bath (see cincuenta.cpp).
 	/// Read before `grid` (declaration order) so `grid` knows whether
 	/// LatticeGf= is even meaningful.
 	const bool neqAtomicLimit;
@@ -79,12 +90,12 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 	SizeType nT   = 0; ///<
 	RealType dt   = 0; ///<
 
-	SizeType neqDmftIter  = 10; ///< Inner DMFT convergence at each time step
-	RealType neqDmftError = 1e-4; ///<
+	SizeType neqDmftIter = 10; ///< Fixed corrector count at each time step
 
 	/// Rank L of the low-rank Cholesky second bath (GBEK scheme).
-	/// L=0: first bath only (no GBEK second bath; equivalent to single-shot ExactDiag).
-	/// L>0: second bath with 2L orbitals (L empty + L occupied at t=0).
+	/// Production neq-DMFT requires L>0; zero remains the omitted-input
+	/// sentinel and is rejected by the production dispatcher.
+	/// L>0 creates a second bath with 2L orbitals (L empty + L occupied at t=0).
 	SizeType neqBathRank = 0;
 
 	/// Hopping quench: Bethe lattice bandwidth for t > 0.

@@ -8,6 +8,9 @@
 #include "LatticeGf.h"
 #include "ParamsDmftSolver.h"
 #include <PsimagLite/InputNg.h>
+#include <fstream>
+#include <iomanip>
+#include <limits>
 
 namespace Dmft {
 
@@ -31,6 +34,36 @@ public:
 	using AndersonFunctionType        = typename FitType::AndersonFunctionType;
 	using VectorComplexType           = typename ImpuritySolverType::VectorComplexType;
 	using InputNgType                 = PsimagLite::InputNg<CincuentaInputCheck>;
+
+	// Equilibrium information needed by a future neq initialization. It owns
+	// the Matsubara data because the subsequent real-frequency solve replaces
+	// impuritySolver_->gimp().
+	struct EquilibriumInitialData {
+		VectorRealType    bathParameters;
+		VectorComplexType gimpMatsubara;
+		VectorRealType    matsubaraFrequencies;
+
+		void writeMatsubara(const std::string& filename) const
+		{
+			if (matsubaraFrequencies.size() != gimpMatsubara.size())
+				err("EquilibriumInitialData: frequency/value size mismatch\n");
+
+			std::ofstream output(filename);
+			if (!output)
+				err("EquilibriumInitialData: cannot open " + filename + "\n");
+
+			output << std::setprecision(std::numeric_limits<RealType>::max_digits10);
+			for (SizeType i = 0; i < matsubaraFrequencies.size(); ++i) {
+				const ComplexOrRealType value = gimpMatsubara[i];
+				output << matsubaraFrequencies[i] << " " << PsimagLite::real(value)
+				       << " " << PsimagLite::imag(value) << "\n";
+			}
+
+			if (!output)
+				err("EquilibriumInitialData: failed while writing " + filename
+				    + "\n");
+		}
+	};
 
 	DmftSolver(const ParamsDmftSolverType&          params,
 	           const typename FitType::InitResults& initResults,
@@ -115,6 +148,8 @@ public:
 				break;
 		}
 
+		snapshotEquilibriumInitialData();
+
 		impuritySolver_->solve(fit_.result(), PsimagLite::FreqEnum::REAL, 0);
 		this->logDebug();
 
@@ -130,6 +165,11 @@ public:
 	}
 
 	const VectorRealType& bathResult() const { return fit_.result(); }
+
+	const EquilibriumInitialData& equilibriumInitialData() const
+	{
+		return equilibriumInitialData_;
+	}
 
 	void print(std::ostream& os) const
 	{
@@ -159,6 +199,20 @@ public:
 	}
 
 private:
+
+	void snapshotEquilibriumInitialData()
+	{
+		assert(impuritySolver_->freqEnum() == PsimagLite::FreqEnum::MATSUBARA);
+		equilibriumInitialData_.bathParameters = fit_.result();
+		equilibriumInitialData_.gimpMatsubara  = impuritySolver_->gimp();
+
+		const MatsubarasType& matsubaras      = impuritySolver_->matsubaras();
+		const SizeType        totalMatsubaras = matsubaras.total();
+		assert(equilibriumInitialData_.gimpMatsubara.size() == totalMatsubaras);
+		equilibriumInitialData_.matsubaraFrequencies.resize(totalMatsubaras);
+		for (SizeType i = 0; i < totalMatsubaras; ++i)
+			equilibriumInitialData_.matsubaraFrequencies[i] = matsubaras.omega(i);
+	}
 
 	void printAndersonFunction(std::ostream& os, const AndersonFunctionType& af) const
 	{
@@ -309,6 +363,7 @@ private:
 	LatticeGfType               latticeG_;
 	FitType                     fit_;
 	ImpuritySolverType*         impuritySolver_;
+	EquilibriumInitialData      equilibriumInitialData_;
 	InputNgType::Readable&      io_;
 };
 }

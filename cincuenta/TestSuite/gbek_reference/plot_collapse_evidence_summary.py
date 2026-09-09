@@ -16,16 +16,18 @@ import matplotlib.pyplot as plt
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
 OUT = "collapse_evidence_summary.png"
+BUILD_DIR = default_build_dir()
 
 # --- Atomic limit (working) ---
-AL_TARGET = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
-AL_CPP = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-plus-bath-lesser"
+AL_TARGET = str(BUILD_DIR / "atomic-limit-gbek-L3-lambda-lesser")
+AL_CPP = str(BUILD_DIR / "atomic-limit-gbek-L3-plus-bath-lesser")
 
 # --- Near-atomic (collapsing) ---
-NA_TOTAL = "/Users/Shared/ornldev/code/dmrgpp/build/gebk-fig3-L3-weiss-delta-lesser"
-NA_CPP = "/Users/Shared/ornldev/code/dmrgpp/build/gebk-fig3-L3-plus-bath-lesser"
+NA_TOTAL = str(BUILD_DIR / "gebk-fig3-L3-lambda-lesser")
+NA_CPP = str(BUILD_DIR / "gebk-fig3-L3-plus-bath-lesser")
 V_FIT = np.array([0.0053999167313065, -0.0160504072383437, -0.0052095584077009,
                   0.0053999167313065, -0.0160504072383437])
 EPS_FIT = np.array([0.8959557182654330, 0.5321005311792999, 0.0,

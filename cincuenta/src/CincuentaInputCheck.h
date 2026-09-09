@@ -61,12 +61,13 @@ public:
 		str += "real TmaxNeq;\n";
 		str += "integer NtNeq;\n";
 		str += "integer NeqDmftIter;\n";
+		// Keep the removed labels declared solely so InputNg can reach the
+		// migration rejection in checkSimpleLabel(), rather than issuing its
+		// generic undeclared-label parse error first.
+		str += "string NeqSolver;\n";
 		str += "real NeqDmftTolerance;\n";
-		str += "string NeqSolver;\n"; // "exactdiag" (default) or "tdmrg" to select solver
-		// GBEK two-bath scheme (Gramsch, Balzer, Eckstein, Kollar PRB 88, 235106),
-		// active under NeqSolver="exactdiag" when NeqBathRank>0
-		str += "integer NeqBathRank;\n"; // L: rank of Cholesky second bath (0 = first bath
-		                                 // only)
+		// GBEK two-bath scheme (Gramsch, Balzer, Eckstein, Kollar PRB 88, 235106).
+		str += "integer NeqBathRank;\n"; // L: rank of Cholesky second bath
 		str += "real BandwidthFinal;\n"; // W_f for hopping quench; default 0 = no quench
 		str += "string QuenchShape;\n"; // "step" (default), "cosine", "tanh"
 		str += "real QuenchDuration;\n"; // ramp duration t_q in real time; 0 = step quench
@@ -93,6 +94,21 @@ public:
 
 	bool checkSimpleLabel(const PsimagLite::String& label, SizeType line) const
 	{
+		// InputNg calls this while reading every label, before any typed
+		// readline() call. Reject removed labels here so they cannot be merely
+		// warned about and then silently ignored by the GBEK-only dispatcher.
+		if (label == "NeqSolver")
+			return error1(
+			    "NeqSolver= was removed: GBEK is now the only non-equilibrium "
+			    "solver. Remove NeqSolver= and configure GBEK with "
+			    "NeqBathRank>0 and NeqDmftIter>0",
+			    line);
+		if (label == "NeqDmftTolerance")
+			return error1("NeqDmftTolerance= was removed: GBEK uses the fixed "
+			              "corrector count NeqDmftIter, not a convergence tolerance. "
+			              "Remove NeqDmftTolerance= and set NeqDmftIter>0",
+			              line);
+
 		for (SizeType i = 0; i < knownLabels_.size(); ++i)
 			if (knownLabels_[i] == label)
 				return true;
@@ -107,7 +123,39 @@ public:
 		std::cerr << "USAGE is " << name << "\n";
 	}
 
+	// Ainur validates typed labels before InputNg invokes checkSimpleLabel().
+	// Every executable using this input check must call this immediately after
+	// constructing its Readable input, so typed legacy labels receive the same
+	// useful migration error as legacy input syntax.
+	template <typename ReadableType> static void rejectRemovedLabels(ReadableType& io)
+	{
+		PsimagLite::String solver;
+		if (hasLabel(io, solver, "NeqSolver="))
+			throw PsimagLite::RuntimeError(
+			    "NeqSolver= was removed: GBEK is now the only non-equilibrium "
+			    "solver; remove NeqSolver= and configure GBEK with NeqBathRank>0 "
+			    "and NeqDmftIter>0\n");
+
+		double tolerance = 0;
+		if (hasLabel(io, tolerance, "NeqDmftTolerance="))
+			throw PsimagLite::RuntimeError(
+			    "NeqDmftTolerance= was removed: GBEK uses the fixed corrector "
+			    "count NeqDmftIter, not a convergence tolerance; remove "
+			    "NeqDmftTolerance= and set NeqDmftIter>0\n");
+	}
+
 private:
+
+	template <typename ReadableType, typename T>
+	static bool hasLabel(ReadableType& io, T& value, const PsimagLite::String& label)
+	{
+		try {
+			io.readline(value, label);
+		} catch (std::exception&) {
+			return false;
+		}
+		return true;
+	}
 
 	bool checkForVector(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
 	{

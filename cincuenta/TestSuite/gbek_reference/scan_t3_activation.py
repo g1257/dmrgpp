@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-2026-07-09: Fable's proposed decisive test for the seeding-timing hypothesis
+2026-07-09: decisive test for the seeding-timing hypothesis
 -- scan the FIXED activation time of the third causal-Cholesky column (L=3)
 over rows 1..50 (t in [0.04, 2.0]) and plot final err[ch] (global relative
 Frobenius error over the full t_max=4 window), looking for an interior
@@ -31,8 +31,9 @@ import matplotlib.pyplot as plt
 from compare_reference import read_lesser_file
 from gbek_cholesky import _solve_optimal_update, reconstruct
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
-TARGET = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
+TARGET = str(default_build_dir() / "atomic-limit-gbek-L3-lambda-lesser")
 L = 3
 
 
@@ -121,7 +122,7 @@ if __name__ == "__main__":
     ax.axhline(0.17, color='red', ls=':', lw=1, label='paper err[ch]=0.17')
     ax.set_xlabel('forced activation time t3 of column 3')
     ax.set_ylabel('err[ch] (global, full t_max=4 window)')
-    ax.set_title('Fable t3-activation scan, L=3 atomic-limit target')
+    ax.set_title('t3-activation scan, L=3 atomic-limit target')
     ax.legend(fontsize=8)
     ax.grid(alpha=0.3)
     fig.tight_layout()

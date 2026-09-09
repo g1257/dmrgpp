@@ -27,7 +27,7 @@ be directly compared against:
 Both trajectories share the SAME rank-L Cholesky bath coupling V(t) --
 obtained from a converged run_self_consistency() call using the standard
 alpha-only shortcut -- since V(t) is a property of the (converged) input
-Weiss field, not of which trajectory is being used to probe it.
+hybridization target Lambda, not of which trajectory is being used to probe it.
 
 Usage:
     uv run --with numpy --with scipy python3 cross_check_beta_trajectory.py \\

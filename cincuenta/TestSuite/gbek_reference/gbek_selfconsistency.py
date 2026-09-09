@@ -354,7 +354,7 @@ def compute_energy_observables(L, N, dt, U, tstar_f, tq, V, verbose=False):
 def dump_lesser(path, Lambda, dt):
     """
     Write Lambda^<(t,t') in the same "t t' Re Im" format used by
-    KadanoffBaym::dump (see cincuenta/TestSuite/compare_neq_delta_lesser.py),
+    NeqRealTimeGf::dump (see cincuenta/TestSuite/compare_neq_delta_lesser.py),
     so the reference curve can be plotted with the existing tooling.
 
     Lambda is HERMITIAN (Lambda(t,t')^* = Lambda(t',t)), not anti-Hermitian:

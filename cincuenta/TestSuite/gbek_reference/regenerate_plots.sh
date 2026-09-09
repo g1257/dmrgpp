@@ -10,11 +10,11 @@
 #   (A) Pure Python, no C++ build needed: Fig. 7/8/9/10 double-occupation and
 #       energy-conservation reproduction (fig7_docc.png, fig8_docc.png,
 #       fig9_energy.png, fig10_docc.png) and their prerequisite .npz data.
-#   (B) Depend on actual cincuenta C++ runs having produced dump files in
-#       build/ first (the GBEK Fig. 3 causal-Cholesky-vs-eigenvector
-#       validation plots from the earlier seeding-timing investigation).
-#       This script builds cincuenta and runs the two prerequisite .ain
-#       inputs if their dumps aren't already present in build/.
+#   (B) Compare the independent Python atomic-limit reference with an actual
+#       atomic-limit cincuenta run. This script configures/builds cincuenta
+#       and runs the prerequisite .ain input when its dumps are absent or
+#       stale. Fitted-first-bath stress tests are deliberately not part of
+#       plot or report generation.
 #
 # Usage:
 #   ./regenerate_plots.sh            # regenerate everything (groups A+B)
@@ -30,7 +30,10 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 REPO_ROOT="$(cd ../../.. && pwd)"
-BUILD_DIR="$REPO_ROOT/build"
+# Keep Python diagnostics, generated C++ dumps, and the runner on the same
+# configurable build tree. An explicit environment setting wins.
+BUILD_DIR="${DMRGPP_BUILD_DIR:-$REPO_ROOT/build}"
+export DMRGPP_BUILD_DIR="$BUILD_DIR"
 UV_NUMPY="uv run --with numpy --with scipy --with matplotlib python3"
 
 GROUP_A=1
@@ -81,28 +84,32 @@ fi
 if [ "$GROUP_B" = "1" ]; then
 	echo "=== Group B: C++-dependent validation plots ==="
 
-	AL_PREFIX="$BUILD_DIR/atomic-limit-gbek-L3"       # inputNeqAtomicLimitGBEKL3.ain
-	FIG3_PREFIX="$BUILD_DIR/gebk-fig3-L3"             # inputNeqGBEKFig3L3.ain
+	AL_INPUT="$REPO_ROOT/cincuenta/TestSuite/inputs/inputNeqAtomicLimitGBEKL3.ain"
+	AL_PREFIX="$BUILD_DIR/atomic-limit-gbek-L3"
 
-	need_cincuenta_run() {
-		local prefix="$1"
-		[ ! -f "${prefix}-weiss-delta-lesser" ] || [ ! -f "${prefix}-plus-bath-lesser" ]
+	if [ ! -f "$BUILD_DIR/CMakeCache.txt" ]; then
+		echo "Configuring cincuenta build tree in $BUILD_DIR..."
+		cmake -S "$REPO_ROOT" -B "$BUILD_DIR" -DBUILD_TESTING=OFF
+	fi
+
+	echo "Building cincuenta in $BUILD_DIR..."
+	cmake --build "$BUILD_DIR" --target cincuenta -j4
+	CINCUENTA="$BUILD_DIR/cincuenta/src/cincuenta"
+
+	need_atomic_run() {
+		local suffix
+		for suffix in lambda-lesser plus-bath-lesser cholesky-V docc-energy; do
+			[ -s "${AL_PREFIX}-${suffix}" ] || return 0
+			[ "${AL_PREFIX}-${suffix}" -nt "$CINCUENTA" ] || return 0
+			[ "${AL_PREFIX}-${suffix}" -nt "$AL_INPUT" ] || return 0
+		done
+		return 1
 	}
 
-	if need_cincuenta_run "$AL_PREFIX" || need_cincuenta_run "$FIG3_PREFIX"; then
-		echo "Missing prerequisite cincuenta dumps -- building cincuenta..."
-		cmake --build "$BUILD_DIR" --target cincuenta -j4
-	fi
-
-	if need_cincuenta_run "$AL_PREFIX"; then
+	if need_atomic_run; then
 		echo "Running inputNeqAtomicLimitGBEKL3.ain to produce ${AL_PREFIX}-*..."
-		( cd "$BUILD_DIR" && ./cincuenta/src/cincuenta \
-			-f "$REPO_ROOT/cincuenta/TestSuite/inputs/inputNeqAtomicLimitGBEKL3.ain" )
-	fi
-	if need_cincuenta_run "$FIG3_PREFIX"; then
-		echo "Running inputNeqGBEKFig3L3.ain to produce ${FIG3_PREFIX}-*..."
-		( cd "$BUILD_DIR" && ./cincuenta/src/cincuenta \
-			-f "$REPO_ROOT/cincuenta/TestSuite/inputs/inputNeqGBEKFig3L3.ain" )
+		rm -f "${AL_PREFIX}-"{green-retarded,green-lesser,lambda-retarded,lambda-lesser,plus-bath-lesser,cholesky-V,docc-energy,equilibrium-gimp-matsubara}
+		( cd "$BUILD_DIR" && "$CINCUENTA" -f "$AL_INPUT" )
 	fi
 
 	if [ ! -f gbek-atomic-limit-exact-lesser ]; then
@@ -111,38 +118,21 @@ if [ "$GROUP_B" = "1" ]; then
 			--L 3 --N 100 --dt 0.04 --U 2.0 --tq 0.25 --out gbek-atomic-limit-exact-lesser
 	fi
 
-	# Each of these has its input paths hardcoded as module-level constants
-	# pointing at $BUILD_DIR/atomic-limit-gbek-L3-* or
-	# $BUILD_DIR/gebk-fig3-L3-* -- see each script's own header if you need
-	# to point it elsewhere.
+	# Report plots are all based on the atomic-limit target. Diagnostics use
+	# DMRGPP_BUILD_DIR (exported above) to find the matching C++ dump.
+	$UV_NUMPY plot_fig3_errstep.py --target gbek-atomic-limit-exact-lesser
+	$UV_NUMPY plot_fig4_hybridization.py --target gbek-atomic-limit-exact-lesser
 	$UV_NUMPY plot_atomic_limit_2d.py
-	$UV_NUMPY plot_collapse_evidence_summary.py
-	$UV_NUMPY plot_errstep_t3scan.py
-	$UV_NUMPY plot_fig3l3_post_fix.py
-	$UV_NUMPY scan_t3_activation.py
-	# These two calls use compare_reference.py's DEFAULT labels ("Exact
-	# reference" / "cincuenta rank-L Cholesky approx"), which is correct
-	# ONLY because arg1 here is genuinely the independent, undecomposed
-	# Python target and arg2 is genuinely cincuenta's reconstruction of it.
-	# gbek_reference_comparison.png is embedded in the GBEK progress report
-	# artifact -- if you ever repoint either argument at something else
-	# (e.g. comparing two cincuenta runs against each other), you MUST add
-	# --ref-label/--approx-label explicitly, or the report will silently
-	# ship a mislabeled plot (this happened once already -- see
-	# small_bath_vs_atomic_limit_L2.png's generation for the fix).
-	$UV_NUMPY compare_reference.py \
-		gbek-atomic-limit-exact-lesser "${AL_PREFIX}-plus-bath-lesser" \
-		--tmax 4.0 --out atomic_limit_true_comparison.png
+
+	# The default labels are correct because arg1 is the independent,
+	# undecomposed Python target and arg2 is cincuenta's atomic-limit
+	# rank-L Cholesky reconstruction.
 	$UV_NUMPY compare_reference.py \
 		gbek-atomic-limit-exact-lesser "${AL_PREFIX}-plus-bath-lesser" \
 		--tmax 4.0 --out gbek_reference_comparison.png
-	$UV_NUMPY quantify_lambda_minus_leak.py "$FIG3_PREFIX"
 
-	echo "Group B done: atomic_limit_2d_rank_comparison.png,"
-	echo "  atomic_limit_true_comparison.png, collapse_evidence_summary.png,"
-	echo "  lambda_minus_leak_check.png, errstep_t3scan_comparison.png,"
-	echo "  fig3L3_near_atomic_post_fix.png, gbek_reference_comparison.png,"
-	echo "  t3_activation_scan.png"
+	echo "Group B done: fig3_errstep.png, fig4_hybridization.png,"
+	echo "  atomic_limit_2d_rank_comparison.png, gbek_reference_comparison.png"
 fi
 
 # ---------------------------------------------------------------------------

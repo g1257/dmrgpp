@@ -3,7 +3,7 @@
 Reproduce the inputs for GBEK PRB 88, 235106 (2013) Fig. 8: CONVERGED double
 occupation d(t) = <n0up(t) n0dn(t)> at U=5, t_q=0.25, dt=0.04 (fixed per the
 paper's Fig. 8 caption), for four (L_bath, t_max) combinations, under BOTH the
-eigenvector and Cholesky decomposition of the Weiss field:
+eigenvector and Cholesky decomposition of the hybridization target Lambda:
 
   combo A: L=2 (Lbath=4), t_max=4  (N=100)
   combo B: L=2 (Lbath=4), t_max=2  (N=50)

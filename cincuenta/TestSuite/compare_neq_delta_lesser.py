@@ -2,18 +2,18 @@
 """Plot Re[-i Λ^<(t,t')] = Im(delta.lesser(t,t')) as a 2D colormap.
 
 Reproduces the style of GEBK Fig. 3 (Gramsch, Balzer, Eckstein, Kollar,
-Phys. Rev. B 88, 235106, 2013): the "input Weiss field" -iΛ^<_+(t,t').
+Phys. Rev. B 88, 235106, 2013): the "input hybridization target Lambda" -iΛ^<_+(t,t').
 
 In the atomic limit (Λ_- ≈ 0): Λ^<_+ ≈ Λ^< = delta.lesser.
 So Re[-iΛ^<_+] = Im(delta.lesser).
 
-File format (written by KadanoffBaym::dump, prefix-lesser):
+File format written by NeqRealTimeGf::dump (prefix-lesser):
     t  t'  Re(Λ^<)  Im(Λ^<)
 one line per (t,t') pair, full (nT+1)×(nT+1) matrix row-major.
 
 Usage
 -----
-    python3 compare_neq_delta_lesser.py gebk-fig3-weiss-delta-lesser \\
+    python3 compare_neq_delta_lesser.py gebk-fig3-lambda-lesser \\
         [--tmax 4.0] [--title "GEBK Fig. 3: Re[-i Λ^<_+]"]
 """
 
@@ -63,7 +63,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("lesser_file", metavar="LESSER_FILE",
-                   help="*-weiss-delta-lesser file from dumpGreenFunctions()")
+                   help="*-lambda-lesser file from dumpGreenFunctions()")
     p.add_argument("--output", default=None,
                    help="Output image filename (default: <lesser_file>.png)")
     p.add_argument("--tmax", type=float, default=None,

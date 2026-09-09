@@ -41,9 +41,8 @@ template <typename ComplexOrRealType> struct ParamsMatsubaraGrid {
 		// other calculation. Under NeqAtomicLimit=1 there is no equilibrium
 		// bath at all, so the only value currently supported is the
 		// zero-bandwidth limit -- not because a nonzero pre-quench bath is
-		// physically meaningless here, but because the atomic-limit closed
-		// form (ImpuritySolverNeqExactDiag::solveAtomicLimit()) doesn't
-		// support one yet.
+		// physically meaningless here, but because the positive-rank GBEK
+		// atomic-limit initialization does not support one yet.
 		io.readline(latticeGf, "LatticeGf=");
 		v_hop = parseVhop(latticeGf);
 

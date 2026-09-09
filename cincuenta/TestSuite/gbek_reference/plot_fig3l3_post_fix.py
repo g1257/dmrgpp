@@ -2,8 +2,8 @@
 """
 2D (t,t') heatmap check of the near-atomic (W_i=0.1) Fig3L3 target after
 the swapped-conjugate bug fix in NeqBathDecomposition.h -- confirms whether
-the previously-diagnosed "input-field sensitivity, not a bug" rank-1
-collapse (see project_gbek_cosine_bug.md) persists once the conjugate bug
+the previously diagnosed input-field-sensitivity rank-1 collapse persists
+once the conjugate bug
 (fixed 2026-07-08) is no longer a confound.
 
 Usage:
@@ -17,9 +17,11 @@ import matplotlib.pyplot as plt
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal, reconstruct
 from provenance import write_provenance
+from gbek_paths import default_build_dir
 
-WEISS_DELTA_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/gebk-fig3-L3-weiss-delta-lesser"
-PLUS_BATH_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/gebk-fig3-L3-plus-bath-lesser"
+BUILD_DIR = default_build_dir()
+LAMBDA_FILE = str(BUILD_DIR / "gebk-fig3-L3-lambda-lesser")
+PLUS_BATH_FILE = str(BUILD_DIR / "gebk-fig3-L3-plus-bath-lesser")
 OUT = "fig3L3_near_atomic_post_fix.png"
 
 # Equilibrium bath fit result printed by the run (NumberOfBathPoints=5).
@@ -37,7 +39,7 @@ def fermi(eps):
 
 
 def main():
-    ts, re, im = read_lesser_file(WEISS_DELTA_FILE)
+    ts, re, im = read_lesser_file(LAMBDA_FILE)
     raw_total = re + 1j * im
     N = len(ts)
     tn = np.arange(N) * DT
@@ -76,7 +78,7 @@ def main():
     fig.tight_layout()
     fig.savefig(OUT, dpi=150)
     print(f"Wrote {OUT}")
-    write_provenance(OUT, extra_files=[WEISS_DELTA_FILE, PLUS_BATH_FILE])
+    write_provenance(OUT, extra_files=[LAMBDA_FILE, PLUS_BATH_FILE])
 
     print()
     print("target top eigs:    ", sorted(np.linalg.eigvalsh(lam_target))[-6:][::-1])

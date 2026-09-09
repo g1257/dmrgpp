@@ -1,13 +1,13 @@
-#include "KadanoffBaym.h"
 #include "NeqBathDecomposition.h"
+#include "NeqRealTimeGf.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <complex>
 #include <vector>
 
-using Dmft::KadanoffBaym;
 using Dmft::NeqBathDecomposition;
+using Dmft::NeqRealTimeGf;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -23,18 +23,16 @@ static NeqBathDecomposition<double> makeDecomp(SizeType rank, SizeType nT)
 	                                    /*mu=*/0.0,
 	                                    bathParams,
 	                                    nT,
-	                                    /*nTau=*/4,
-	                                    /*dt=*/0.2,
-	                                    /*dtau=*/0.5);
+	                                    /*dt=*/0.2);
 }
 
 // Fill delta.lesser so that -iΔ⁺<(n,j) = target[n][j].
 // With zero first bath: iDeltaPlusLesser = i * delta.lesser,
 // so setting delta.lesser(n,j) = i * target gives -iDeltaPlusLesser = target. ✓
-static KadanoffBaym<double> makeDelta(SizeType nT, const std::vector<std::vector<double>>& target)
+static NeqRealTimeGf<double> makeDelta(SizeType nT, const std::vector<std::vector<double>>& target)
 {
 	const std::complex<double> I(0, 1);
-	KadanoffBaym<double>       delta(nT, /*nTau=*/4, /*dt=*/0.2, /*dtau=*/0.5);
+	NeqRealTimeGf<double>      delta(nT, /*dt=*/0.2);
 	for (SizeType n = 0; n <= nT; ++n)
 		for (SizeType j = 0; j <= nT; ++j)
 			delta.lesser(n, j) = I * target[n][j];
@@ -43,7 +41,7 @@ static KadanoffBaym<double> makeDelta(SizeType nT, const std::vector<std::vector
 
 // Call update for n = 0..nT in sequence.
 static void
-runUpdates(NeqBathDecomposition<double>& decomp, const KadanoffBaym<double>& delta, SizeType nT)
+runUpdates(NeqBathDecomposition<double>& decomp, const NeqRealTimeGf<double>& delta, SizeType nT)
 {
 	for (int n = 0; n <= static_cast<int>(nT); ++n)
 		decomp.update(n, delta);
@@ -352,11 +350,11 @@ makeComplexPhaseTarget(SizeType nT, double dt, double decay, double omega)
 	return mat;
 }
 
-static KadanoffBaym<double>
+static NeqRealTimeGf<double>
 makeComplexDelta(SizeType nT, const std::vector<std::vector<std::complex<double>>>& target)
 {
 	const std::complex<double> I(0, 1);
-	KadanoffBaym<double>       delta(nT, /*nTau=*/4, /*dt=*/0.2, /*dtau=*/0.5);
+	NeqRealTimeGf<double>      delta(nT, /*dt=*/0.2);
 	for (SizeType n = 0; n <= nT; ++n)
 		for (SizeType j = 0; j <= nT; ++j)
 			delta.lesser(n, j) = I * target[n][j];

@@ -9,7 +9,7 @@ IMPORTANT convention note: this reads the target with `re + 1j*im` directly
 (no extra -1j factor), because gbek_selfconsistency.py::dump_lesser already
 writes Lambda^<_+ itself. This is a DIFFERENT convention from
 plot_errstep.py's load_lambda(), which is designed for cincuenta's raw
-*-weiss-delta-lesser C++ dumps (the raw lesser component, needing an extra
+*-lambda-lesser C++ dumps (the raw lesser component, needing an extra
 -i to become Lambda) -- using that loader on a gbek_selfconsistency.py dump
 silently rotates every value by an erroneous extra factor of -i, which
 looks like nonsense (e.g. two different ranks appearing to give identical,
@@ -47,7 +47,7 @@ def main():
                                   formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", default=DEFAULT_TARGET,
                     help="gbek_selfconsistency.py dump_lesser output (NOT a C++ "
-                         "weiss-delta-lesser dump -- see module docstring)")
+                         "lambda-lesser dump -- see module docstring)")
     ap.add_argument("--ranks", default="2,3", help="comma-separated Cholesky/eigenvector ranks")
     ap.add_argument("--out", default="fig3_errstep.png")
     ap.add_argument("--title", default="cf. GBEK Fig. 3 bottom-left panel")

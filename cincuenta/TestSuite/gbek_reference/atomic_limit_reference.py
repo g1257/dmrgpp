@@ -6,22 +6,17 @@ quench, since the atomic limit here is used only as the equilibrium
 starting point for a real-time hopping/bandwidth quench carried entirely by
 the second bath -- the impurity's OWN Hamiltonian never changes in time).
 
-Purpose: cincuenta's ImpuritySolverNeqExactDiag needs a special-case bypass
-for nBath=0 (the true GBEK atomic limit -- see NeqAtomicLimit), because its
-general Lehmann machinery (built for finite baths with an actual U_i->U_f
-interaction quench) goes through LanczosPlusPlus/Ainur, which chokes on a
-literal single-site system (see cincuenta.cpp / CincuentaInputCheck.h
-history), AND because a single spin-seeded impurity has a Pauli-forbidden
-particle-addition or removal sector (dim=0) that needs the paper's Gα/Gβ
-averaging to resolve correctly.
+Purpose: validate positive-rank GBEK's nBath=0 atomic initialization (see
+NeqAtomicLimit). Its extended Fock-space propagation must retain the paper's
+Gα/Gβ averaging because a single spin-seeded atom has a Pauli-forbidden
+particle-addition or removal sector (dim=0).
 
 This script computes the correctly-averaged G^R, G^<, G^M (Matsubara),
 and G^Left (mixed real/imaginary time) for the bare atom DIRECTLY via
 exact diagonalization of the 4-state atomic Fock space, independent of and
 before touching the C++ special-case implementation -- so the C++ can be
 checked against these numbers exactly the same way the Cholesky bugs were
-caught (see README.md's "The real bug(s)" and
-feedback_trust_the_publication.md).
+caught (see the repository-local GBEK reference README).
 
 Physics (verified against the standard atomic-limit result before writing
 this file): H = U*(n_up-1/2)*(n_dn-1/2), so the atomic spectrum is

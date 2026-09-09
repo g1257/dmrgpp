@@ -14,8 +14,8 @@ An earlier version of this file was a line-for-line port of
 NeqBathDecomposition.h::choleskyOptimalUpdate, and "confirmed" that C++ code
 was correct because it reproduced the same output -- but a faithful port
 shares any bug in what it's ported from; it does not independently verify
-the algorithm. See feedback_trust_the_publication.md in the assistant's
-memory for the general lesson. Both bugs below were found by instead
+the algorithm. A faithful port can share the source implementation's bugs;
+both bugs below were found by instead
 implementing directly from the paper's own equations and comparing.
 
 **Bug 1 -- fixed reference window.** The paper's "optimal update" step
@@ -281,9 +281,8 @@ def cholesky_causal(lam, L, floor_rtol=1e-10):
       largest diagonal magnitude seen so far. Default 1e-10.
     Returns V of shape (nT+1, L).
 
-    Seeding-phase zero-clamp floor (added 2026-07-09, see
-    project_gbek_solveOptimalUpdateJoint_bug and the seeding-fragility
-    follow-on): the exact-Cholesky seeding residual `d` for column L-1 (the
+    Seeding-phase zero-clamp floor (added 2026-07-09 after the
+    seeding-fragility investigation): the exact-Cholesky seeding residual `d` for column L-1 (the
     last column, seeded from the most information-starved early row) is
     often the tiny difference of O(1)-scale terms -- confirmed via an
     independent 50-digit mpmath replay that this is NOT a linear-algebra
@@ -466,8 +465,8 @@ def cholesky_causal_deferred(lam, L, rtol=1e-6, verbose=False):
     reference set -- causality is preserved throughout: only already-seen
     rows are ever used to decide anything.
 
-    Motivation (found 2026-07-09, see project_gbek_solveOptimalUpdateJoint_bug
-    and the follow-on rank-scan/seeding-fragility investigation): the plain
+    Motivation (found 2026-07-09 during the rank-scan and
+    seeding-fragility investigation): the plain
     causal seeding recursion computes each successive column's residual as
     a small difference of O(1)-scale terms (observed: 3.6e-3, 1.4e-5,
     6.5e-6, 1.4e-7, 2.1e-8 for L=5's first 5 rows on the true-atomic-limit

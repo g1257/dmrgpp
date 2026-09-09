@@ -14,9 +14,8 @@ of the true pre-quench ground state, giving a wrong t=0 state
 (docc(0)~0.24, Ekin(0)~0.47 instead of the exact atomic-limit 0/0).
 FIXED 2026-07-16: lanczosGS() now seeds Lanczos with the known analytic
 atomic-limit product state instead (exact for nBath=0, since the
-pre-quench Hamiltonian then has no hopping at all) -- see project memory
-project_gbek_cpp_lanczosGS_bug for the full diagnosis and fix. L=2,3 use
-full diagonalization (nsites_ext_<=8) and were never affected.
+pre-quench Hamiltonian then has no hopping at all). L=2,3 use full
+diagonalization (nsites_ext_<=8) and were never affected.
 
 C++ data source: cincuenta/TestSuite/gbek_reference/cpp_docc_energy/
   atomic-limit-gbek-L{L}[-U{U}]-docc-energy, format "t docc Ekin Eint Etot"

@@ -2,7 +2,7 @@
 """
 Reproduce the inputs for GBEK PRB 88, 235106 (2013) Fig. 7: per-DMFT-iteration
 double occupation d_it(t) = <n0up(t) n0dn(t)>, at U=5, L_bath=4 (L=2), t_max=4,
-t_q=0.25, for BOTH the eigenvector and Cholesky decomposition of the Weiss
+t_q=0.25, for BOTH the eigenvector and Cholesky decomposition of the hybridization target Lambda
 field, run for exactly 7 iterations (the paper's own choice) regardless of
 whether either mode has numerically converged by then -- Fig. 7's whole point
 is to show the shape of the iteration-to-iteration CHANGE, not just the

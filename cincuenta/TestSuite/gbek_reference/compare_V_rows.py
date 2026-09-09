@@ -9,9 +9,9 @@ the same final converged target.
 
 Purpose: pin down exactly which row n the two implementations first
 diverge at, to distinguish "small numerical drift that compounds" from "a
-hard branch mismatch" -- see project_gbek_cosine_bug.md's "Update
-2026-07-07 overnight" section for why this comparison is needed (the two
-implementations agree on the near-atomic Fig3L3 target but disagree here).
+hard branch mismatch. The two implementations agree on the near-atomic
+Fig3L3 target but disagreed on this atomic-limit target, motivating this
+row-level comparison.
 
 Usage:
     uv run --with numpy python3 compare_V_rows.py
@@ -20,9 +20,11 @@ import numpy as np
 
 from compare_reference import read_lesser_file
 from gbek_cholesky import cholesky_causal
+from gbek_paths import default_build_dir
 
-TARGET_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-weiss-delta-lesser"
-V_CPP_FILE = "/Users/Shared/ornldev/code/dmrgpp/build/atomic-limit-gbek-L3-cholesky-V"
+BUILD_DIR = default_build_dir()
+TARGET_FILE = str(BUILD_DIR / "atomic-limit-gbek-L3-lambda-lesser")
+V_CPP_FILE = str(BUILD_DIR / "atomic-limit-gbek-L3-cholesky-V")
 L = 3
 
 

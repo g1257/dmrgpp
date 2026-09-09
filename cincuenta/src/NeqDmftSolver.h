@@ -2,9 +2,9 @@
 #define NEQ_DMFT_SOLVER_H
 
 #include "CincuentaInputCheck.h"
-#include "ImpuritySolverNeqExactDiag.h"
-#include "KadanoffBaym.h"
-#include "NeqLatticeGf.h"
+#include "ImpuritySolverNeqGBEK.h"
+#include "NeqHybridizationTarget.h"
+#include "NeqRealTimeGf.h"
 #include "ParamsNeqDmftSolver.h"
 #include <iostream>
 
@@ -14,41 +14,35 @@ namespace Dmft {
  * \brief NeqDmftSolver
  * Non-equilibrium DMFT self-consistency loop for an interaction quench U_i -> U_f.
  *
- * The loop advances the Kadanoff-Baym equations one real-time step at a time.
- * At each step n:
- *   1. Compute G_imp(n, j) from the impurity solver (fixed bath).
- *   2. Update the hybridization Δ(n, j) = t*² G_imp(n, j) (Bethe self-consistency).
- *   3. Advance the Weiss field G_0(n, j) via the Volterra integro-differential equation.
+ * At each step the GBEK progressive scheme predicts G_imp, makes the Bethe
+ * hybridization target Λ(n,j) = v(n)v(j)G_imp(n,j), updates the bath
+ * decomposition, then corrects G_imp with that bath. There is no propagated
+ * hybridization-target Green's function in this path.
  *
- * ImpSolverTemplate selects the impurity solver:
- *   ImpuritySolverNeqExactDiag — full Lehmann (default, exact for small baths)
- *   ImpuritySolverNeqGBEK      — two-bath Cholesky scheme (GBEK PRB 88, 235106)
+ * ImpSolverTemplate selects the impurity solver.  Production uses
+ * ImpuritySolverNeqGBEK, the two-bath Cholesky scheme (GBEK PRB 88, 235106).
  */
 template <typename ComplexOrRealType,
-          template <typename> class ImpSolverTemplate = ImpuritySolverNeqExactDiag>
+          template <typename> class ImpSolverTemplate = ImpuritySolverNeqGBEK>
 class NeqDmftSolver {
 
 public:
 
-	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using ComplexType       = std::complex<RealType>;
-	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
-	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
-	using KBType            = KadanoffBaym<ComplexOrRealType>;
-	using KBDerivType       = KBDerivative<ComplexOrRealType>;
-	using ParamsNeqType     = ParamsNeqDmftSolver<ComplexOrRealType>;
-	using InputNgType       = PsimagLite::InputNg<CincuentaInputCheck>;
-	using ImpSolverType     = ImpSolverTemplate<ComplexOrRealType>;
-	using LatticeGfType     = NeqLatticeGf<ComplexOrRealType>;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType             = std::complex<RealType>;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType       = typename PsimagLite::Vector<ComplexType>::Type;
+	using RealTimeGfType          = NeqRealTimeGf<ComplexOrRealType>;
+	using ParamsNeqType           = ParamsNeqDmftSolver<ComplexOrRealType>;
+	using InputNgType             = PsimagLite::InputNg<CincuentaInputCheck>;
+	using ImpSolverType           = ImpSolverTemplate<ComplexOrRealType>;
+	using HybridizationTargetType = NeqHybridizationTarget<ComplexOrRealType>;
 
 	NeqDmftSolver(const ParamsNeqType& params, typename InputNgType::Readable& io)
 	    : params_(params)
 	    , impSolver_(params, io)
-	    , latticeGf_(params)
-	    , gimp_(params.nT,
-	            params.grid.nMatsubaras,
-	            params.dt,
-	            params.grid.ficticiousBeta / static_cast<RealType>(params.grid.nMatsubaras))
+	    , hybridizationTarget_(params)
+	    , gimp_(params.nT, params.dt)
 	{ }
 
 	/*!
@@ -62,18 +56,12 @@ public:
 		std::cout << "NeqDmftSolver: running impurity solver setup\n";
 		impSolver_.solve(bathParams);
 
-		// Copy equilibrium Matsubara components from the solver's internal gimp —
-		// computeGimp() only fills real-time (retarded/lesser/left-mixing) slices.
-		gimp_.matsubara_t = impSolver_.gimp().matsubara_t;
-		gimp_.matsubara_w = impSolver_.gimp().matsubara_w;
-
-		// Populate t=0 (equilibrium) boundary conditions.
+		// Populate t=0 and seed the Cholesky decomposition.  The target is
+		// established before prepareTimeStep(0); it is never propagated as a
+		// Green's function.
 		impSolver_.computeGimp(gimp_, 0);
-		latticeGf_.initialize(gimp_);
-		// Seed the Cholesky decomposition for step 0.
-		// prepareTimeStep(n) is called in the n>=1 loop; n=0 must be primed here.
-		latticeGf_.updateDelta(0, gimp_);
-		impSolver_.prepareTimeStep(0, latticeGf_.delta());
+		hybridizationTarget_.updateTimeRow(0, gimp_);
+		impSolver_.prepareTimeStep(0, hybridizationTarget_.lambda());
 
 		std::cout << "NeqDmftSolver: starting time propagation to t_max=" << params_.tMax
 		          << " with nT=" << params_.nT << " steps\n";
@@ -90,15 +78,10 @@ public:
 	/*!
 	 * \brief Access the impurity GF (populated after solve()).
 	 */
-	const KBType& gimp() const { return gimp_; }
+	const RealTimeGfType& gimp() const { return gimp_; }
 
 	/*!
-	 * \brief Access the Weiss field G_0 (populated after solve()).
-	 */
-	const KBType& g0() const { return latticeGf_.g0(); }
-
-	/*!
-	 * \brief Write KB Green's functions to files.
+	 * \brief Write retained real-time Green's functions to files.
 	 *
 	 * When params_.neqOutputPrefix is set, filenames are "{prefix}-green-retarded"
 	 * etc.; otherwise "green-retarded" etc.
@@ -107,8 +90,7 @@ public:
 	{
 		const std::string& p = params_.neqOutputPrefix;
 		gimp_.dump(p.empty() ? "green" : p + "-green");
-		latticeGf_.g0().dump(p.empty() ? "weiss-green" : p + "-weiss-green");
-		latticeGf_.delta().dump(p.empty() ? "weiss-delta" : p + "-weiss-delta");
+		hybridizationTarget_.lambda().dump(p.empty() ? "lambda" : p + "-lambda");
 		impSolver_.dumpPlusBath(p.empty() ? "plus-bath-lesser" : p + "-plus-bath-lesser");
 		impSolver_.dumpV(p.empty() ? "cholesky-V" : p + "-cholesky-V");
 		impSolver_.dumpDoccAndEnergy(p.empty() ? "docc-energy" : p + "-docc-energy");
@@ -116,42 +98,36 @@ public:
 
 private:
 
-	// Advance all KB components by one time step n.
+	// Advance all real-time components by one time step n.
 	//
 	// Self-consistency following GBEK Fig. 2(b) progressive scheme (PRB 88, 235106):
-	//   Predictor: computeGimp uses V[n] from the previous step (extrapolation).
-	//   Corrector iterations: updateDelta fills row n of Delta, prepareTimeStep updates
-	//   the Cholesky bath V[n] from the complete row, then computeGimp re-evaluates.
-	//   For ExactDiag prepareTimeStep is a no-op, so this reduces to the single
-	//   exact-bath evaluation it always was.
-	//   advance(n) runs after the final corrector so G^< is consistent with final V[n].
+	//   Predictor: V[n] is a zero-row cold start until prepareTimeStep updates it.
+	//   Corrector iterations: updateTimeRow fills Λ(n,j), prepareTimeStep updates
+	//   the Cholesky bath V[n] from that complete target row, then computeGimp
+	//   re-evaluates G_imp. No post-corrector target propagation is performed.
 	void timeStep(int n)
 	{
-		// Predictor: G_imp(n,j) with V[n] inherited from the previous step.
+		// Predictor: G_imp(n,j) with V[n]'s zero-row cold start.
 		impSolver_.computeGimp(gimp_, n);
 
 		for (SizeType iter = 0; iter < params_.neqDmftIter; ++iter) {
-			// Δ(n, j) = t*² G_imp(n, j) — fills delta row n
-			latticeGf_.updateDelta(n, gimp_);
+			// Λ(n,j) = v(n)v(j)G_imp(n,j): fill the complete target row.
+			hybridizationTarget_.updateTimeRow(n, gimp_);
 
-			// Update bath for step n using the now-complete delta row n.
-			// No-op for ExactDiag; updates Cholesky V[n] for GBEK.
-			impSolver_.prepareTimeStep(n, latticeGf_.delta());
+			// Update bath from that complete target row.
+			impSolver_.prepareTimeStep(n, hybridizationTarget_.lambda());
 
 			// Corrector: re-evaluate G_imp with the updated bath.
-			// Always called so that advance(n) sees G^< computed with the
-			// final V[n], not the penultimate one.
+			// This final evaluation makes G^< consistent with V[n], rather than
+			// with the penultimate bath update.
 			impSolver_.computeGimp(gimp_, n);
 		}
-
-		// Advance G_0(n, j) via Volterra integro-differential equation.
-		latticeGf_.advance(n);
 	}
 
-	const ParamsNeqType& params_;
-	ImpSolverType        impSolver_;
-	LatticeGfType        latticeGf_;
-	KBType               gimp_; ///< local copy filled step by step
+	const ParamsNeqType&    params_;
+	ImpSolverType           impSolver_;
+	HybridizationTargetType hybridizationTarget_;
+	RealTimeGfType          gimp_; ///< local copy filled step by step
 };
 
 } // namespace Dmft
