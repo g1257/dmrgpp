@@ -1,0 +1,42 @@
+##Ainur1.0
+
+# Large star-bath stress calculation inspired by Garcia, Hallberg, and Rozenberg
+# (PRL 93, 246403). Bethe half-bandwidth D=1; centered-interaction convention.
+FicticiousBeta=64;
+ChemicalPotential=0.;
+Matsubaras=128;
+LatticeGf="energy,semicircular,2";
+NumberOfBathPoints=15;
+DmftNumberOfIterations=20;
+DmftTolerance=1e-4;
+ImpuritySolver="dmrg";
+FitOptions=particleholesymmetric;
+
+# Eight independent V values followed by seven positive bath energies. The fit
+# reconstructs their mirror partners and the zero-energy bath site.
+vector InitBathVector=[0.1290994449,0.1290994449,0.1290994449,0.1290994449,0.1290994449,0.1290994449,0.1290994449,0.1290994449,0.1428571429,0.2857142857,0.4285714286,0.5714285714,0.7142857143,0.8571428571,1.];
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-6;
+MinParamsVerbose=0;
+
+int ImpuritySite=0;
+real HubbardU=2.5;
+SolverOptions=doNotCheckDmEigs;
+RootOutputname="GHR2004StarNb15U2p5";
+InfiniteLoopKeptStates=600;
+matrix FiniteLoopsGs=[[@auto,600,0],[@auto,600,0],[@auto,600,0]];
+matrix FiniteLoopsOmega=[[@auto,600,2],[@auto,600,2],[@auto,600,2]];
+TargetElectronsUp=8;
+TargetElectronsDown=8;
+
+real OmegaBegin=-4.;
+integer OmegaTotal=513;
+real OmegaStep=0.015625;
+real OmegaDelta=0.05;
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;

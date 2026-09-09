@@ -1,3 +1,8 @@
+add_executable(test_Fit test_Fit.cpp)
+target_link_libraries(test_Fit PRIVATE Catch2::Catch2WithMain dmrgpp_utils psimaglite)
+target_include_directories(test_Fit PRIVATE ${CMAKE_SOURCE_DIR}/cincuenta/src ${CMAKE_SOURCE_DIR}/dmrg/Engine)
+catch_discover_tests(test_Fit)
+
 add_executable(test_NeqBathDecomposition test_NeqBathDecomposition.cpp)
 target_link_libraries(test_NeqBathDecomposition PRIVATE Catch2::Catch2WithMain psimaglite)
 target_include_directories(test_NeqBathDecomposition PRIVATE ${CMAKE_SOURCE_DIR}/cincuenta/src)

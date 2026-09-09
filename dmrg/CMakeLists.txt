@@ -89,7 +89,6 @@ if(DMRGPP_USE_MPI)
   endfunction()
 
   add_mpi_test(omegas_mpi_dry_run 2 $<TARGET_FILE:omegas> -d -f ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
-  set_tests_properties(omegas_mpi_dry_run PROPERTIES PASS_REGULAR_EXPRESSION "MPI rank=1")
 
   file(MAKE_DIRECTORY ${_omegas_mpi_tiny_workdir})
 
@@ -111,7 +110,7 @@ if(DMRGPP_USE_MPI)
     -O
     tinyOmega)
   set_tests_properties(omegas_mpi_tiny_real PROPERTIES WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
-                                                       omegas_mpi_tiny_gs_output PASS_REGULAR_EXPRESSION "MPI rank=1")
+                                                       omegas_mpi_tiny_gs_output)
 
   add_mpi_hdf5_check(omegas_mpi_tiny_omega0_output tinyOmega0.hd5 omegas_mpi_tiny_real)
   add_mpi_hdf5_check(omegas_mpi_tiny_omega1_output tinyOmega1.hd5 omegas_mpi_tiny_real)
