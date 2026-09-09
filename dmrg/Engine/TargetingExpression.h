@@ -303,8 +303,10 @@ private:
 		AlgebraType                   opEmpty(aux);
 		bool                          needsTrimming = false;
 		PsimagLite::String            allpvectors;
-		for (SizeType i = 0; i < total; ++i) {
 
+		const RestartStruct& checkpoint = this->common().aoe().model().params().checkpoint;
+
+		for (SizeType i = 0; i < total; ++i) {
 			if (pvectors_(i).isDone())
 				continue;
 
@@ -326,10 +328,18 @@ private:
 					v0                        = this->tv(x);
 					v0 *= tmp.term(0).ket().factor();
 				} else {
-					std::cerr << "Ignoring self assignment P";
-					std::cerr << i << "=P" << x << "\n";
+					// FIXME: Check if self-assignment make sense
 				}
 
+				pvectors_.setAsDone(i);
+				continue;
+			}
+
+			// Set explicitly mapped vectors (to old vectors) as done
+			RestartStruct::PairRestartVectorEnumSizeType pmap
+			    = checkpoint.mappingTvs(i);
+			if (pmap.first == RestartStruct::RestartVectorEnum::RESTART_BY_INDEX
+			    && pmap.second == i) {
 				pvectors_.setAsDone(i);
 				continue;
 			}

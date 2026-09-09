@@ -13,6 +13,15 @@ struct RestartStruct {
 
 	using VectorIntType = PsimagLite::Vector<int>::Type;
 
+	enum class RestartVectorEnum
+	{
+		UNMAPPED,
+		DO_NOT_RESTART,
+		RESTART_BY_INDEX
+	};
+
+	using PairRestartVectorEnumSizeType = std::pair<RestartVectorEnum, SizeType>;
+
 	RestartStruct()
 	    : filename_("")
 	    , labelForEnergy_("Energies")
@@ -67,15 +76,17 @@ struct RestartStruct {
 
 	bool mapStages() const { return mapStages_; }
 
-	int mappingTvs(SizeType ind) const
+	PairRestartVectorEnumSizeType mappingTvs(SizeType ind) const
 	{
-		if (mappingTvs_.size() == 0)
-			return ind;
-
-		if (ind >= mappingTvs_.size())
-			err("RestartStruct::mappingTvs not provided for ind= " + ttos(ind) + "\n");
-
-		return mappingTvs_[ind];
+		if (ind < mappingTvs_.size()) {
+			int value = mappingTvs_[ind];
+			return (value < 0)
+			    ? PairRestartVectorEnumSizeType(RestartVectorEnum::DO_NOT_RESTART, 0)
+			    : PairRestartVectorEnumSizeType(RestartVectorEnum::RESTART_BY_INDEX,
+			                                    value);
+		} else {
+			return PairRestartVectorEnumSizeType(RestartVectorEnum::UNMAPPED, 0);
+		}
 	}
 
 	int sourceTvForPsi() const { return sourceTvForPsi_; }
