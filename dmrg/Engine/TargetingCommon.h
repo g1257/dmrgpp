@@ -317,11 +317,26 @@ public:
 		ApplyOperatorExpressionType& aoeNonConst
 		    = const_cast<ApplyOperatorExpressionType&>(aoe_);
 		for (SizeType i = 0; i < dtvs; ++i) {
-			const int j = checkpoint.mappingTvs(i);
-			if (j < 0)
+			RestartStruct::PairRestartVectorEnumSizeType pmap
+			    = checkpoint.mappingTvs(i);
+			SizeType j = i;
+			switch (pmap.first) {
+			case RestartStruct::RestartVectorEnum::UNMAPPED:
+				// new vector i = old vector i (default)
+				break;
+			case RestartStruct::RestartVectorEnum::DO_NOT_RESTART:
+				// do not touch new vector i
 				continue;
-			const SizeType jj = j;
-			if (jj >= rtvs) {
+				break; // <-- cosmetic only
+			case RestartStruct::RestartVectorEnum::RESTART_BY_INDEX:
+				// set new vector i = old vector j
+				j = pmap.second;
+				break;
+			default:
+				err("Internal error in TargetingCommon\n");
+			}
+
+			if (j >= rtvs) {
 				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " + ttos(j)
 				    + " >= " + ttos(rtvs) + "\n");
 			}
