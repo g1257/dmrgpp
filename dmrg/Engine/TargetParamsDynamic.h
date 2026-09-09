@@ -109,7 +109,7 @@ public:
 		return 0;
 	}
 
-	virtual SizeType type() const { return type_; }
+	SizeType type() const override { return type_; }
 
 private:
 

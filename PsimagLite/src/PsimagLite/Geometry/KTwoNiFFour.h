@@ -120,22 +120,22 @@ public:
 		std::cout << "KTwoNiFFour: SIGN CHANGE=" << signChange_ << "\n";
 	}
 
-	SizeType getVectorSize(SizeType) const
+	SizeType getVectorSize(SizeType) const override
 	{
 		assert(false);
 		throw RuntimeError("getVectorSize: unimplemented\n");
 	}
 
-	virtual SizeType dirs() const { return 4; }
+	SizeType dirs() const override { return 4; }
 
-	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
+	SizeType length(SizeType) const override { return this->unimplemented("length"); }
 
-	virtual SizeType translate(SizeType, SizeType, SizeType) const
+	SizeType translate(SizeType, SizeType, SizeType) const override
 	{
 		return this->unimplemented("translate");
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -174,7 +174,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1, SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const override
 	{
 		PairType type1 = findTypeOfSite(i1);
 		PairType type2 = findTypeOfSite(i2);
@@ -203,7 +203,7 @@ public:
 		return (type1.second == SUBTYPE_X) ? DIR_X : DIR_Y;
 	}
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		SizeType r = smax % 4;
 		switch (r) {
@@ -221,14 +221,14 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType, SizeType) const
+	SizeType handle(SizeType, SizeType) const override
 	{
 		assert(false);
 		return 0;
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const override
 	{
 		SizeType r = smax % 4;
 		switch (r) {
@@ -245,16 +245,16 @@ public:
 		return 0;
 	}
 
-	String label() const { return "KTwoNiFFour"; }
+	String label() const override { return "KTwoNiFFour"; }
 
-	SizeType maxConnections() const { return 6; }
+	SizeType maxConnections() const override { return 6; }
 
-	SizeType findReflection(SizeType) const
+	SizeType findReflection(SizeType) const override
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	SizeType matrixRank(SizeType, SizeType) const
+	SizeType matrixRank(SizeType, SizeType) const override
 	{
 		SizeType sites = linSize_;
 		SizeType no    = 0;
@@ -270,7 +270,7 @@ public:
 	}
 
 	// FIXME: GENERALIZE by using orbitals per type of site
-	int index(SizeType i, SizeType orb, SizeType) const
+	int index(SizeType i, SizeType orb, SizeType) const override
 	{
 		SizeType type1 = findTypeOfSite(i).first;
 		if (type1 == TYPE_C && orb > 0)
@@ -283,7 +283,7 @@ public:
 		return sites + i - tmp;
 	}
 
-	int signChange(SizeType i1, SizeType i2) const
+	int signChange(SizeType i1, SizeType i2) const override
 	{
 		// change the sign of Cu-O
 		SizeType newi1 = std::min(i1, i2);
@@ -304,7 +304,7 @@ public:
 		return sign1;
 	}
 
-	SizeType orbitals(SizeType orbs, SizeType site) const
+	SizeType orbitals(SizeType orbs, SizeType site) const override
 	{
 		PairType type1 = findTypeOfSite(site);
 		return (type1.first == TYPE_C) ? 1 : orbs;

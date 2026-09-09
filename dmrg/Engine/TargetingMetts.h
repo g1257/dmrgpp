@@ -203,7 +203,7 @@ public:
 		this->common().aoeNonConst().initTimeVectors(mettsStruct_, ioIn);
 	}
 
-	~TargetingMetts()
+	~TargetingMetts() override
 	{
 		SizeType n = garbage_.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -212,17 +212,17 @@ public:
 		}
 	}
 
-	SizeType sites() const { return mettsStruct_.sites(); }
+	SizeType sites() const override { return mettsStruct_.sites(); }
 
-	SizeType targets() const { return mettsStruct_.times().size() + 1; }
+	SizeType targets() const override { return mettsStruct_.times().size() + 1; }
 
-	RealType weight(SizeType i) const { return weight_[i]; }
+	RealType weight(SizeType i) const override { return weight_[i]; }
 
-	RealType gsWeight() const { return gsWeight_; }
+	RealType gsWeight() const override { return gsWeight_; }
 
-	bool includeGroundStage() const { return (fabs(gsWeight_) > 1e-6); }
+	bool includeGroundStage() const override { return (fabs(gsWeight_) > 1e-6); }
 
-	SizeType size() const
+	SizeType size() const override
 	{
 		if (this->common().aoe().allStages(StageEnumType::DISABLED))
 			return 1;
@@ -236,7 +236,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            SizeType                      loopNumber) override
 	{
 		RealType Eg = 0;
 
@@ -312,14 +312,14 @@ public:
 		}
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "Metts");
 	}
 
 	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String           prefix) const
+	           PsimagLite::String           prefix) const override
 	{
 		this->common().write(io, block, prefix);
 
@@ -333,12 +333,12 @@ public:
 		this->common().writeNGSTs(io, prefix, block, "Metts");
 	}
 
-	void updateOnSiteForCorners(BasisWithOperatorsType&) const
+	void updateOnSiteForCorners(BasisWithOperatorsType&) const override
 	{
 		// nothing to do here
 	}
 
-	bool end() const { return false; }
+	bool end() const override { return false; }
 
 private:
 

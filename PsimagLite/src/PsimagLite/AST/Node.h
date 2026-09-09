@@ -66,13 +66,13 @@ template <typename VectorValueType> class Plus : public Node<VectorValueType> {
 
 public:
 
-	Plus* clone() const { return new Plus(*this); }
+	Plus* clone() const override { return new Plus(*this); }
 
-	virtual PsimagLite::String code() const { return "+"; }
+	PsimagLite::String code() const override { return "+"; }
 
-	virtual SizeType arity() const { return 2; }
+	SizeType arity() const override { return 2; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 2);
 		return v[0] + v[1];
@@ -86,13 +86,13 @@ template <typename VectorValueType> class Minus : public Node<VectorValueType> {
 
 public:
 
-	Minus* clone() const { return new Minus(*this); }
+	Minus* clone() const override { return new Minus(*this); }
 
-	virtual PsimagLite::String code() const { return "-"; }
+	PsimagLite::String code() const override { return "-"; }
 
-	virtual SizeType arity() const { return 2; }
+	SizeType arity() const override { return 2; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 2);
 		return v[0] - v[1];
@@ -106,13 +106,13 @@ template <typename VectorValueType> class Times : public Node<VectorValueType> {
 
 public:
 
-	Times* clone() const { return new Times(*this); }
+	Times* clone() const override { return new Times(*this); }
 
-	virtual PsimagLite::String code() const { return "*"; }
+	PsimagLite::String code() const override { return "*"; }
 
-	virtual SizeType arity() const { return 2; }
+	SizeType arity() const override { return 2; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		if (v.size() != 2) {
 			throw RuntimeError("Expected two arguments for operator *, but found "
@@ -140,16 +140,16 @@ public:
 	    : kind_(kind)
 	{ }
 
-	DividedBy* clone() const { return new DividedBy(*this); }
+	DividedBy* clone() const override { return new DividedBy(*this); }
 
-	virtual PsimagLite::String code() const
+	PsimagLite::String code() const override
 	{
 		return (kind_ == Kind::FLOATING_POINT) ? "/" : "i/";
 	}
 
-	virtual SizeType arity() const { return 2; }
+	SizeType arity() const override { return 2; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 2);
 		if (std::norm(v[1]) < 1e-6)
@@ -232,21 +232,21 @@ public:
 		strOneChar_[0] = char_;
 	}
 
-	Input* clone() const { return new Input(*this); }
+	Input* clone() const override { return new Input(*this); }
 
-	virtual PsimagLite::String code() const { return strOneChar_; }
+	PsimagLite::String code() const override { return strOneChar_; }
 
-	virtual SizeType arity() const { return 0; }
+	SizeType arity() const override { return 0; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 0);
 		return input_;
 	}
 
-	virtual void set(const ValueType& x) const { input_ = x; }
+	void set(const ValueType& x) const override { input_ = x; }
 
-	virtual bool isInput() const { return true; }
+	bool isInput() const override { return true; }
 
 private:
 

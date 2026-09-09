@@ -104,16 +104,16 @@ public:
 		return 0;
 	}
 
-	virtual SizeType sites() const { return 0; }
+	SizeType sites() const override { return 0; }
 
-	virtual RealType correctionA() const { return correctionA_; }
+	RealType correctionA() const override { return correctionA_; }
 
-	virtual SizeType sectorIndex() const
+	SizeType sectorIndex() const override
 	{
 		throw PsimagLite::RuntimeError("sectorIndex called for gs\n");
 	}
 
-	virtual SizeType levelIndex() const
+	SizeType levelIndex() const override
 	{
 		throw PsimagLite::RuntimeError("levelIndex called for gs\n");
 	}

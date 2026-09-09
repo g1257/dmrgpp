@@ -40,7 +40,9 @@ public:
 	    , newSite_(0)
 	{ }
 
-	void setToProduct(SizeType smaxOrEmin, SizeType newSite, ProgramGlobals::DirectionEnum dir)
+	void setToProduct(SizeType                      smaxOrEmin,
+	                  SizeType                      newSite,
+	                  ProgramGlobals::DirectionEnum dir) override
 	{
 		smaxOrEmin_ = smaxOrEmin;
 		newSite_    = newSite;
@@ -53,11 +55,11 @@ public:
 	// This below is for a plaquette, and will have to be
 	// written somewhere else
 	// testing devel FIXME TODO
-	SizeType size() const { return 1; }
+	SizeType size() const override { return 1; }
 
 	PairMetaOpForConnection finalIndices(const VectorSizeType&          hItems,
 	                                     ProgramGlobals::ConnectionEnum type,
-	                                     SizeType                       rightBlockSize) const
+	                                     SizeType rightBlockSize) const override
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;
@@ -97,7 +99,7 @@ public:
 		throw PsimagLite::RuntimeError("How to encode two plaquettes: depends on hItems\n");
 	}
 
-	PairBoolSizeType leftOperatorIndex(SizeType) const
+	PairBoolSizeType leftOperatorIndex(SizeType) const override
 	{
 		if (isTriangle_) {
 			if (BaseType::dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
@@ -110,7 +112,7 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	PairBoolSizeType rightOperatorIndex(SizeType) const
+	PairBoolSizeType rightOperatorIndex(SizeType) const override
 	{
 		if (isTriangle_) {
 			if (BaseType::dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {

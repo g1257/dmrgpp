@@ -106,18 +106,18 @@ public:
 	    , leg_(ladder_.leg())
 	{ }
 
-	virtual SizeType maxConnections() const { return leg_ + 1; }
+	SizeType maxConnections() const override { return leg_ + 1; }
 
-	virtual SizeType dirs() const { return 4; }
+	SizeType dirs() const override { return 4; }
 
-	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
+	SizeType length(SizeType) const override { return this->unimplemented("length"); }
 
-	virtual SizeType translate(SizeType, SizeType, SizeType) const
+	SizeType translate(SizeType, SizeType, SizeType) const override
 	{
 		return this->unimplemented("translate");
 	}
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		switch (dirId) {
 		case DIRECTION_XPY:
@@ -129,7 +129,7 @@ public:
 		return ladder_.getVectorSize(dirId);
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -155,7 +155,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1, SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const override
 	{
 		if (ladder_.sameColumn(i1, i2))
 			return DIRECTION_Y;
@@ -167,7 +167,7 @@ public:
 		return DIRECTION_XMY;
 	}
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		bool a = (i < emin && i >= smax - 1);
 		bool b = (i > smax && i <= emin + 1);
@@ -179,7 +179,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1, SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const override
 	{
 		SizeType dir  = calcDir(i1, i2);
 		SizeType imin = (i1 < i2) ? i1 : i2;
@@ -197,14 +197,14 @@ public:
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const override
 	{
 		return smax + siteNew2 - emin + 1;
 	}
 
-	String label() const { return "ladderx"; }
+	String label() const override { return "ladderx"; }
 
-	SizeType findReflection(SizeType) const
+	SizeType findReflection(SizeType) const override
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}

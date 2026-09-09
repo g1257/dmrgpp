@@ -105,7 +105,7 @@ public:
 		} catch (std::exception&) { }
 	}
 
-	virtual RealType maxTime() const { return maxTime_; }
+	RealType maxTime() const override { return maxTime_; }
 
 private:
 

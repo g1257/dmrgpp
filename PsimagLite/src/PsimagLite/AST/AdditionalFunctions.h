@@ -27,13 +27,13 @@ template <typename VectorValueType> class Modulus : public Node<VectorValueType>
 
 public:
 
-	Modulus* clone() const { return new Modulus(*this); }
+	Modulus* clone() const override { return new Modulus(*this); }
 
-	virtual PsimagLite::String code() const { return "%"; }
+	PsimagLite::String code() const override { return "%"; }
 
-	virtual SizeType arity() const { return 2; }
+	SizeType arity() const override { return 2; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		using RealType = typename Real<ValueType>::Type;
 
@@ -57,13 +57,13 @@ template <typename VectorValueType> class Cosine : public Node<VectorValueType> 
 
 public:
 
-	Cosine* clone() const { return new Cosine(*this); }
+	Cosine* clone() const override { return new Cosine(*this); }
 
-	virtual PsimagLite::String code() const { return "cos"; }
+	PsimagLite::String code() const override { return "cos"; }
 
-	virtual SizeType arity() const { return 1; }
+	SizeType arity() const override { return 1; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 1);
 		return cos(v[0]);
@@ -76,13 +76,13 @@ template <typename VectorValueType> class Sine : public Node<VectorValueType> {
 
 public:
 
-	Sine* clone() const { return new Sine(*this); }
+	Sine* clone() const override { return new Sine(*this); }
 
-	virtual PsimagLite::String code() const { return "sin"; }
+	PsimagLite::String code() const override { return "sin"; }
 
-	virtual SizeType arity() const { return 1; }
+	SizeType arity() const override { return 1; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 1);
 		return sin(v[0]);
@@ -95,13 +95,13 @@ template <typename VectorValueType> class Exp : public Node<VectorValueType> {
 
 public:
 
-	Exp* clone() const { return new Exp(*this); }
+	Exp* clone() const override { return new Exp(*this); }
 
-	virtual PsimagLite::String code() const { return "exp"; }
+	PsimagLite::String code() const override { return "exp"; }
 
-	virtual SizeType arity() const { return 1; }
+	SizeType arity() const override { return 1; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 1);
 		return std::exp(v[0]);
@@ -114,13 +114,13 @@ template <typename VectorValueType> class TernaryOp : public Node<VectorValueTyp
 
 public:
 
-	TernaryOp* clone() const { return new TernaryOp(*this); }
+	TernaryOp* clone() const override { return new TernaryOp(*this); }
 
-	virtual PsimagLite::String code() const { return "?"; }
+	PsimagLite::String code() const override { return "?"; }
 
-	virtual SizeType arity() const { return 3; }
+	SizeType arity() const override { return 3; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 3);
 		SizeType b = static_cast<SizeType>(PsimagLite::norm(v[0]));
@@ -134,13 +134,13 @@ template <typename VectorValueType> class Log : public Node<VectorValueType> {
 
 public:
 
-	Log* clone() const { return new Log(*this); }
+	Log* clone() const override { return new Log(*this); }
 
-	virtual PsimagLite::String code() const { return "log"; }
+	PsimagLite::String code() const override { return "log"; }
 
-	virtual SizeType arity() const { return 1; }
+	SizeType arity() const override { return 1; }
 
-	virtual ValueType exec(const VectorValueType& v) const
+	ValueType exec(const VectorValueType& v) const override
 	{
 		assert(v.size() == 1);
 		return log(v[0]);

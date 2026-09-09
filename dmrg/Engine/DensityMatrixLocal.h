@@ -196,9 +196,9 @@ public:
 		}
 	}
 
-	virtual const BlockDiagonalMatrixType& operator()() { return data_; }
+	const BlockDiagonalMatrixType& operator()() override { return data_; }
 
-	void diag(typename PsimagLite::Vector<RealType>::Type& eigs, char jobz)
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs, char jobz) override
 	{
 		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_, eigs, jobz);
 	}

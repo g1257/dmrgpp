@@ -166,7 +166,7 @@ public:
 		}
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -180,7 +180,7 @@ public:
 		io.write(label + "/statesOxygen_", statesOxygen_);
 	}
 
-	virtual SizeType maxElectronsOneSpin() const
+	SizeType maxElectronsOneSpin() const override
 	{
 		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * superGeometry_.numberOfSites() + 1;
 	}
@@ -189,7 +189,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		for (SizeType site = 0; site < differentTypesOfAtoms(); ++site) {
 			OpsLabelType& c      = this->createOpsLabel("c", site);
@@ -257,7 +257,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks() { err("Immm is broken\n"); }
+	void fillModelLinks() override { err("Immm is broken\n"); }
 
 private:
 
@@ -426,7 +426,7 @@ private:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 

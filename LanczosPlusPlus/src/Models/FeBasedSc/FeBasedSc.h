@@ -157,26 +157,29 @@ public:
 		checkSpinOrbit();
 	}
 
-	~FeBasedSc() { BaseType::deleteGarbage(garbage_); }
+	~FeBasedSc() override { BaseType::deleteGarbage(garbage_); }
 
-	SizeType size() const { return basis_.size(); }
+	SizeType size() const override { return basis_.size(); }
 
-	SizeType orbitals(SizeType) const { return mp_.orbitals; }
+	SizeType orbitals(SizeType) const override { return mp_.orbitals; }
 
-	void setupHamiltonian(SparseMatrixType& matrix) const { setupHamiltonian(matrix, basis_); }
+	void setupHamiltonian(SparseMatrixType& matrix) const override
+	{
+		setupHamiltonian(matrix, basis_);
+	}
 
 	bool hasNewParts(std::pair<SizeType, SizeType>&       newParts,
 	                 const std::pair<SizeType, SizeType>& oldParts,
 	                 const LabeledOperator&               lOperator,
 	                 SizeType                             spin,
-	                 SizeType                             orb) const
+	                 SizeType                             orb) const override
 	{
 		return basis_.hasNewParts(newParts, oldParts, lOperator, spin, orb);
 	}
 
-	const GeometryType& geometry() const { return geometry_; }
+	const GeometryType& geometry() const override { return geometry_; }
 
-	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const
+	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const override
 	{
 		// Calculate diagonal elements AND count non-zero matrix elements
 		SizeType                                    hilbert = basis.size();
@@ -249,13 +252,14 @@ public:
 		matrix.setRow(hilbert, nCounter);
 	}
 
-	void matrixVectorProduct(VectorType& x, const VectorType& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
 		matrixVectorProduct(x, y, basis_);
 	}
 
-	void
-	matrixVectorProduct(VectorType& x, const VectorType& y, const BasisBaseType& basis) const
+	void matrixVectorProduct(VectorType&          x,
+	                         const VectorType&    y,
+	                         const BasisBaseType& basis) const override
 	{
 		// Calculate off-diagonal elements AND store matrix
 		typedef MatrixVectorHelper                   HelperType;
@@ -270,18 +274,18 @@ public:
 		threadObject.loopCreate(helper);
 	}
 
-	const BasisType& basis() const { return basis_; }
+	const BasisType& basis() const override { return basis_; }
 
-	PsimagLite::String name() const { return __FILE__; }
+	PsimagLite::String name() const override { return __FILE__; }
 
-	BasisType* createBasis(SizeType nup, SizeType ndown) const
+	BasisType* createBasis(SizeType nup, SizeType ndown) const override
 	{
 		BasisType* ptr = new BasisType(geometry_, nup, ndown, mp_.orbitals);
 		garbage_.push_back(ptr);
 		return ptr;
 	}
 
-	void print(std::ostream& os) const { os << mp_; }
+	void print(std::ostream& os) const override { os << mp_; }
 
 private:
 

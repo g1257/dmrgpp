@@ -211,12 +211,12 @@ public:
 		return creationMatrix_[sigma].getCRS();
 	}
 
-	SizeType maxElectronsOneSpin() const
+	SizeType maxElectronsOneSpin() const override
 	{
 		return modelParameters_.orbitals * superGeometry_.numberOfSites() + 1;
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -234,7 +234,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType                        site = 0;
 		VectorSizeType                  block(1, site);
@@ -354,7 +354,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		OpForLinkType  sx("sx");
 		OpForLinkType  sy("sy");
@@ -611,7 +611,7 @@ private:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 

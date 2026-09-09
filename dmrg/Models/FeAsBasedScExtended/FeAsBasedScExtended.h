@@ -129,7 +129,7 @@ public:
 	    , orbitals_(modelParameters_.orbitals)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -141,16 +141,16 @@ public:
 		io.write(label + "/orbitals_", orbitals_);
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                        const BlockType&  block,
-	                                        RealType          time) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	                                const BlockType&  block,
+	                                RealType          time) const override
 	{
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		modelFeAs_.fillLabeledOperators(qns);
 		SizeType                                        site = 0;
@@ -179,7 +179,7 @@ protected:
 		this->makeTrackable("naturalSz");
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		modelFeAs_.fillModelLinks();
 

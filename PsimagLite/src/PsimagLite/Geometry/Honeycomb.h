@@ -117,37 +117,40 @@ public:
 		} catch (std::exception&) { }
 	}
 
-	virtual SizeType maxConnections() const
+	SizeType maxConnections() const override
 	{
 		// max connections broken when splitting the lattice
 		return ly_ + 1; // overestimate probably
 	}
 
-	virtual SizeType dirs() const { return 3; }
+	SizeType dirs() const override { return 3; }
 
-	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
+	SizeType length(SizeType) const override { return this->unimplemented("length"); }
 
-	virtual SizeType translate(SizeType, SizeType, SizeType) const
+	SizeType translate(SizeType, SizeType, SizeType) const override
 	{
 		return this->unimplemented("translate");
 	}
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		throw RuntimeError("Honeycomb::getVectorSize() unimplemented\n");
 	}
 
-	bool connected(SizeType i1, SizeType i2) const { return connectedInternal(i1, i2).first; }
+	bool connected(SizeType i1, SizeType i2) const override
+	{
+		return connectedInternal(i1, i2).first;
+	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1, SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const override
 	{
 		std::pair<bool, Dir> bdir = connectedInternal(i1, i2);
 		assert(bdir.first);
 		return bdir.second;
 	}
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		if (i <= smax)
 			return isThereAneighbor(i, emin, linSize_);
@@ -159,20 +162,20 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1, SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const override
 	{
 		throw RuntimeError("Honeycomb::handle() unimplemented\n");
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const override
 	{
 		throw RuntimeError("Honeycomb::getSubstituteSite() unimplemented\n");
 	}
 
-	String label() const { return "Honeycomb"; }
+	String label() const override { return "Honeycomb"; }
 
-	SizeType findReflection(SizeType) const
+	SizeType findReflection(SizeType) const override
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}

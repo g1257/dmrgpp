@@ -181,10 +181,10 @@ public:
 		}
 	}
 
-	virtual void calcTimeVectors(const VectorSizeType&               indices,
-	                             RealType                            Eg,
-	                             const VectorWithOffsetType&         phi,
-	                             const typename BaseType::ExtraData& extra)
+	void calcTimeVectors(const VectorSizeType&               indices,
+	                     RealType                            Eg,
+	                     const VectorWithOffsetType&         phi,
+	                     const typename BaseType::ExtraData& extra) override
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -284,7 +284,7 @@ public:
 		timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced()
+	void timeHasAdvanced() override
 	{
 		timeHasAdvanced_ = true;
 		this->advanceCurrentTime(tstStruct_.tau());

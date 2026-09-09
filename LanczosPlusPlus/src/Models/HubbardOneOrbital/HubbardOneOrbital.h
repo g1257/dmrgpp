@@ -49,27 +49,31 @@ public:
 	    , helper_(geometry, mp_)
 	{ }
 
-	~HubbardOneOrbital() { BaseType::deleteGarbage(garbage_); }
+	~HubbardOneOrbital() override { BaseType::deleteGarbage(garbage_); }
 
-	SizeType size() const { return basis_.size(); }
+	SizeType size() const override { return basis_.size(); }
 
-	SizeType orbitals(SizeType) const { return 1; }
+	SizeType orbitals(SizeType) const override { return 1; }
 
-	void setupHamiltonian(SparseMatrixType& matrix) const { setupHamiltonian(matrix, basis_); }
+	void setupHamiltonian(SparseMatrixType& matrix) const override
+	{
+		setupHamiltonian(matrix, basis_);
+	}
 
 	//! Gf. related functions below:
-	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const
+	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const override
 	{
 		helper_.setupHamiltonian(matrix, basis);
 	}
 
-	void matrixVectorProduct(VectorType& x, const VectorType& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
 		matrixVectorProduct(x, y, basis_);
 	}
 
-	void
-	matrixVectorProduct(VectorType& x, VectorType const& y, const BasisBaseType& basis) const
+	void matrixVectorProduct(VectorType&          x,
+	                         VectorType const&    y,
+	                         const BasisBaseType& basis) const override
 	{
 		helper_.matrixVectorProduct(x, y, basis);
 	}
@@ -78,7 +82,7 @@ public:
 	                 const std::pair<SizeType, SizeType>& oldParts,
 	                 const LabeledOperator&               lOperator,
 	                 SizeType                             spin,
-	                 SizeType) const
+	                 SizeType) const override
 	{
 		if (lOperator.id() == LabeledOperator::Label::OPERATOR_C
 		    || lOperator.id() == LabeledOperator::Label::OPERATOR_CDAGGER)
@@ -98,22 +102,22 @@ public:
 		throw std::runtime_error(str.c_str());
 	}
 
-	const GeometryType& geometry() const { return geometry_; }
+	const GeometryType& geometry() const override { return geometry_; }
 
-	const BasisType& basis() const { return basis_; }
+	const BasisType& basis() const override { return basis_; }
 
-	PsimagLite::String name() const { return __FILE__; }
+	PsimagLite::String name() const override { return __FILE__; }
 
-	BasisType* createBasis(SizeType nup, SizeType ndown) const
+	BasisType* createBasis(SizeType nup, SizeType ndown) const override
 	{
 		BasisType* ptr = new BasisType(geometry_, nup, ndown);
 		garbage_.push_back(ptr);
 		return ptr;
 	}
 
-	void print(std::ostream& os) const { os << mp_; }
+	void print(std::ostream& os) const override { os << mp_; }
 
-	void printOperators(std::ostream& os) const
+	void printOperators(std::ostream& os) const override
 	{
 		SizeType nup   = basis_.electrons(SPIN_UP);
 		SizeType ndown = basis_.electrons(SPIN_DOWN);

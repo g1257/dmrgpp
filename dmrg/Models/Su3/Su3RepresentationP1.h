@@ -11,7 +11,7 @@ public:
 
 	using MatrixType = PsimagLite::Matrix<ComplexOrRealType>;
 
-	void getMatrix(MatrixType& m, SizeType n) const
+	void getMatrix(MatrixType& m, SizeType n) const override
 	{
 		m.resize(3, 3);
 
@@ -48,7 +48,7 @@ public:
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1
-	SizeType t3OfState(SizeType ind) const
+	SizeType t3OfState(SizeType ind) const override
 	{
 		if (ind == 0)
 			return 2;
@@ -59,13 +59,13 @@ public:
 	}
 
 	// diagonal 1 1 -2 ==> 3 3 0
-	SizeType t8OfState(SizeType ind) const
+	SizeType t8OfState(SizeType ind) const override
 	{
 		assert(ind < 3);
 		return (ind < 2) ? 3 : 0;
 	}
 
-	SizeType size() const { return 3; }
+	SizeType size() const override { return 3; }
 };
 
 template <typename ComplexOrRealType>
@@ -77,7 +77,7 @@ public:
 	using RealType   = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using MatrixType = PsimagLite::Matrix<ComplexOrRealType>;
 
-	void getMatrix(MatrixType& m, SizeType n) const
+	void getMatrix(MatrixType& m, SizeType n) const override
 	{
 		m.resize(3, 3);
 
@@ -127,7 +127,7 @@ public:
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1
-	SizeType t3OfState(SizeType ind) const
+	SizeType t3OfState(SizeType ind) const override
 	{
 		if (ind == 0)
 			return 2;
@@ -138,13 +138,13 @@ public:
 	}
 
 	// diagonal 1 1 -2 ==> 3 3 0
-	SizeType t8OfState(SizeType ind) const
+	SizeType t8OfState(SizeType ind) const override
 	{
 		assert(ind < 3);
 		return (ind < 2) ? 3 : 0;
 	}
 
-	SizeType size() const { return 3; }
+	SizeType size() const override { return 3; }
 };
 
 #endif // SU3REPRESENTATIONP1_H

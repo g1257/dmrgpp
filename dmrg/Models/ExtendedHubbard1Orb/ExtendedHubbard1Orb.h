@@ -125,7 +125,7 @@ public:
 	    , modelHubbard_(solverParams, io, geometry, extension)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -136,21 +136,21 @@ public:
 		modelHubbard_.write(label, io);
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                        const BlockType&  block,
-	                                        RealType          time) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	                                const BlockType&  block,
+	                                RealType          time) const override
 	{
 		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		modelHubbard_.fillLabeledOperators(qns);
 
 		this->makeTrackable("n");
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		modelHubbard_.fillModelLinks();
 

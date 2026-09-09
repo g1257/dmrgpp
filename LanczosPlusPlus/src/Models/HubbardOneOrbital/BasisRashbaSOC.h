@@ -53,26 +53,27 @@ public:
 		assert(k == hilbert);
 	}
 
-	PairIntType parts() const
+	PairIntType parts() const override
 	{
 		return PairIntType(0, 0); // dummy, we don't care
 	}
 
 	static const WordType& bitmask(SizeType i) { return BasisType::bitmask(i); }
 
-	SizeType size() const { return data_.size(); }
+	SizeType size() const override { return data_.size(); }
 
 	//! Spin up and spin down
-	SizeType dofs() const { throw PsimagLite::RuntimeError("dofs() unimplemented\n"); }
+	SizeType dofs() const override { throw PsimagLite::RuntimeError("dofs() unimplemented\n"); }
 
-	SizeType hilbertOneSite(SizeType) const { return 4; }
+	SizeType hilbertOneSite(SizeType) const override { return 4; }
 
-	SizeType perfectIndex(const typename PsimagLite::Vector<WordType>::Type& kets) const
+	SizeType
+	perfectIndex(const typename PsimagLite::Vector<WordType>::Type& kets) const override
 	{
 		throw PsimagLite::RuntimeError("dofs() perfectIndex\n");
 	}
 
-	SizeType perfectIndex(WordType ket1, WordType ket2) const
+	SizeType perfectIndex(WordType ket1, WordType ket2) const override
 	{
 		const PairWordType p(ket1, ket2);
 		auto               it = std::find(data_.begin(), data_.end(), p);
@@ -81,12 +82,12 @@ public:
 		throw PsimagLite::RuntimeError("perfectIndex(): Index not found for state\n");
 	}
 
-	SizeType perfectIndex(WordType newKet, SizeType ispace, SizeType spinOfNew) const
+	SizeType perfectIndex(WordType newKet, SizeType ispace, SizeType spinOfNew) const override
 	{
 		throw PsimagLite::RuntimeError("dofs() perfectIndex\n");
 	}
 
-	WordType operator()(SizeType i, SizeType spin) const
+	WordType operator()(SizeType i, SizeType spin) const override
 	{
 		assert(i < data_.size());
 		return (spin == LanczosGlobals::SPIN_UP) ? data_[i].first : data_[i].second;
@@ -97,7 +98,7 @@ public:
 	                        const LabeledOperatorType&,
 	                        SizeType site,
 	                        SizeType spin,
-	                        SizeType orb) const
+	                        SizeType orb) const override
 	{
 		throw PsimagLite::RuntimeError("getBraIndex()\n");
 	}
@@ -108,19 +109,21 @@ public:
 	           SizeType orb1,
 	           SizeType j,
 	           SizeType orb2,
-	           SizeType spin) const
+	           SizeType spin) const override
 	{
 		assert(i <= j);
 		return (spin == SPIN_UP) ? BasisOneSpin::doSign(ket1, i, j)
 		                         : BasisOneSpin::doSign(ket2, i, j);
 	}
 
-	int doSignGf(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const
+	int
+	doSignGf(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const override
 	{
 		throw PsimagLite::RuntimeError("doSignGf()\n");
 	}
 
-	int doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const
+	int
+	doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const override
 	{
 		return 1;
 	}
@@ -129,30 +132,31 @@ public:
 	                             WordType ket2,
 	                             SizeType site,
 	                             SizeType spin,
-	                             SizeType) const
+	                             SizeType) const override
 	{
 		return (spin == LanczosGlobals::SPIN_UP)
 		    ? BasisOneSpin::isThereAnElectronAt(ket1, site)
 		    : BasisOneSpin::isThereAnElectronAt(ket2, site);
 	}
 
-	SizeType orbsPerSite(SizeType i) const { return 1; }
+	SizeType orbsPerSite(SizeType i) const override { return 1; }
 
-	SizeType orbs() const { return 1; }
+	SizeType orbs() const override { return 1; }
 
-	SizeType getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType) const
+	SizeType
+	getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType) const override
 	{
 		return (spin == LanczosGlobals::SPIN_UP) ? BasisOneSpin::getN(ket1, site)
 		                                         : BasisOneSpin::getN(ket2, site);
 	}
 
-	bool
-	getBra(WordType&, WordType, WordType, const LabeledOperatorType&, SizeType, SizeType) const
+	bool getBra(WordType&, WordType, WordType, const LabeledOperatorType&, SizeType, SizeType)
+	    const override
 	{
 		throw PsimagLite::RuntimeError("getBra()\n");
 	}
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		const SizeType n = data_.size();
 		for (SizeType i = 0; i < n; ++i)

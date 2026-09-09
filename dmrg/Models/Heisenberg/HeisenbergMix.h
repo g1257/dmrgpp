@@ -146,12 +146,12 @@ public:
 		    : n_(n)
 		{ }
 
-		virtual SizeType siteToAtomKind(SizeType site) const
+		SizeType siteToAtomKind(SizeType site) const override
 		{
 			return (site == 0 || site == n_ - 1) ? 1 : 0;
 		}
 
-		virtual SizeType kindsOfAtoms() const { return 2; }
+		SizeType kindsOfAtoms() const override { return 2; }
 
 	private:
 
@@ -195,13 +195,13 @@ public:
 		}
 	}
 
-	~HeisenbergMix()
+	~HeisenbergMix() override
 	{
 		delete atomKind_;
 		atomKind_ = nullptr;
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -219,7 +219,7 @@ public:
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -266,14 +266,14 @@ public:
 
 protected:
 
-	virtual const AtomKindBaseType& getAtomKind()
+	const AtomKindBaseType& getAtomKind() override
 	{
 		if (!atomKind_)
 			atomKind_ = new AtomKind(superGeometry_.numberOfSites());
 		return *atomKind_;
 	}
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		qns.clear();
 		SizeType offset = fillLabeledOperators(qns, 0, SiteType::SITE_MIDDLE);
@@ -340,7 +340,7 @@ protected:
 		return natBasis.size();
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		if (BasisType::useSu2Symmetry())
 			err("SU(2) not supported\n");

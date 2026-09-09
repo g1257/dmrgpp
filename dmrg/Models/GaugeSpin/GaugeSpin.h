@@ -136,7 +136,7 @@ public:
 	    , superOpHelperPlaquette_(nullptr)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -148,7 +148,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -168,7 +168,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		const SizeType   total = TWICE_THE_SPIN + 1;
 		HilbertBasisType natBasis(total);
@@ -216,7 +216,7 @@ protected:
 		this->makeTrackable("sx");
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		if (BasisType::useSu2Symmetry())
 			err("SU(2): no longer supported\n");
@@ -231,7 +231,7 @@ protected:
 
 	void fillNewNonLocals(std::vector<OperatorType>& newNonLocals,
 	                      const LeftRightSuperType&  lrs,
-	                      RealType) const // last argument is time
+	                      RealType) const override // last argument is time
 	{
 		bool isSys = (lrs.super().block()[0] == 0);
 		if (isSys) {
@@ -258,7 +258,7 @@ protected:
 		}
 	}
 
-	SuperOpHelperBaseType* setSuperOpHelper()
+	SuperOpHelperBaseType* setSuperOpHelper() override
 	{
 		if (!superOpHelperPlaquette_)
 			superOpHelperPlaquette_

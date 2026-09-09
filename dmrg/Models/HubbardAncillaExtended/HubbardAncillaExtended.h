@@ -141,21 +141,21 @@ public:
 	    , helperHubbardAncilla_(geometry, modelParameters_)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		helperHubbardAncilla_.write(label1, io, this->params().model);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          t) const
+	                                RealType          t) const override
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType         site = 0;
 		BlockType        block(1, site);
@@ -236,7 +236,7 @@ protected:
 		//			assert(creationMatrix.size() == 8);
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		const SizeType orbitals = (helperHubbardAncilla_.isHot()) ? 2 : 1;
 		const bool     isSu2    = BasisType::useSu2Symmetry();

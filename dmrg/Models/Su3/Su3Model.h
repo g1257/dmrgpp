@@ -146,13 +146,13 @@ public:
 		}
 	}
 
-	~Su3Model()
+	~Su3Model() override
 	{
 		delete su3Rep_;
 		su3Rep_ = nullptr;
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -165,7 +165,7 @@ public:
 	// m*T3(i)*T3(i) + m*T8(i)*T8(i)
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -192,7 +192,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		if (IS_REAL)
 			fillLabeledOperatorsReal(qns);
@@ -288,7 +288,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		if (IS_REAL)
 			fillModelLinksReal();

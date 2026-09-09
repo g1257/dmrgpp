@@ -138,10 +138,10 @@ public:
 	    , lrs_(lrs)
 	{ }
 
-	virtual void calcTimeVectors(const VectorSizeType&       indices,
-	                             RealType                    Eg,
-	                             const VectorWithOffsetType& phi,
-	                             const typename BaseType::ExtraData&)
+	void calcTimeVectors(const VectorSizeType&       indices,
+	                     RealType                    Eg,
+	                     const VectorWithOffsetType& phi,
+	                     const typename BaseType::ExtraData&) override
 	{
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();

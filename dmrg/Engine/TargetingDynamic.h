@@ -149,17 +149,17 @@ public:
 			err(" TargetingDynamic needs an enabled wft\n");
 	}
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return 0; }
+	SizeType targets() const override { return 0; }
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType i) const override
 	{
 		assert(!this->common().aoe().allStages(StageEnumType::DISABLED));
 		return weight_[i];
 	}
 
-	RealType gsWeight() const
+	RealType gsWeight() const override
 	{
 		if (this->common().aoe().allStages(StageEnumType::DISABLED))
 			return 1.0;
@@ -170,7 +170,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            SizeType                      loopNumber) override
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -200,7 +200,7 @@ public:
 
 	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String           prefix) const
+	           PsimagLite::String           prefix) const override
 	{
 		this->common().write(io, block, prefix);
 
@@ -226,7 +226,7 @@ public:
 		this->common().writeNGSTs(io, prefix, block, "Dynamic", cf);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "Dynamic");
 	}

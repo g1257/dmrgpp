@@ -175,32 +175,32 @@ public:
 			err("FirstRitz must be 0 for Matsubara\n");
 	}
 
-	virtual RealType correctionA() const { return correctionA_; }
+	RealType correctionA() const override { return correctionA_; }
 
-	virtual SizeType type() const { return type_; }
+	SizeType type() const override { return type_; }
 
-	virtual void type(SizeType x) { type_ = x; }
+	void type(SizeType x) override { type_ = x; }
 
-	virtual SizeType cgSteps() const { return cgSteps_; }
+	SizeType cgSteps() const override { return cgSteps_; }
 
-	virtual PairFreqType omega() const { return omega_; }
+	PairFreqType omega() const override { return omega_; }
 
-	virtual void omega(PsimagLite::FreqEnum freqEnum, RealType x)
+	void omega(PsimagLite::FreqEnum freqEnum, RealType x) override
 	{
 		omega_ = PairFreqType(freqEnum, x);
 	}
 
-	virtual RealType eta() const { return eta_; }
+	RealType eta() const override { return eta_; }
 
-	virtual RealType cgEps() const { return cgEps_; }
+	RealType cgEps() const override { return cgEps_; }
 
-	virtual typename BaseType::AlgorithmEnum algorithm() const { return algorithm_; }
+	typename BaseType::AlgorithmEnum algorithm() const override { return algorithm_; }
 
 	virtual SizeType firstRitz() const { return firstRitz_; }
 
 	virtual SizeType nForFraction() const { return nForFraction_; }
 
-	virtual SizeType advanceEach() const { return advanceEach_; }
+	SizeType advanceEach() const override { return advanceEach_; }
 
 private:
 

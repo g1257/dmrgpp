@@ -144,37 +144,37 @@ public:
 		}
 	}
 
-	virtual void set(MatrixType& m, SizeType orbitals) const
+	void set(MatrixType& m, SizeType orbitals) const override
 	{
 		m = matrix_;
 		if (orbitals != dofs_)
 			throw RuntimeError("General geometry connectors: wrong size\n");
 	}
 
-	virtual SizeType maxConnections() const
+	SizeType maxConnections() const override
 	{
 		return (maxConnections_ == 0) ? linSize_ * linSize_ * 0.25 : maxConnections_;
 	}
 
-	virtual SizeType dirs() const { return 1; }
+	SizeType dirs() const override { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const { return (i < j) ? i : j; }
+	SizeType handle(SizeType i, SizeType j) const override { return (i < j) ? i : j; }
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		assert(dirId == 0);
 		throw RuntimeError("LongRange::getVectorSize(): unimplemented\n");
 	}
 
-	bool connected(SizeType i1, SizeType i2) const { return true; }
+	bool connected(SizeType i1, SizeType i2) const override { return true; }
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType, SizeType) const { return 0; }
+	SizeType calcDir(SizeType, SizeType) const override { return 0; }
 
-	bool fringe(SizeType, SizeType, SizeType) const { return true; }
+	bool fringe(SizeType, SizeType, SizeType) const override { return true; }
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const override
 	{
 		assert(siteNew2 >= emin);
 		SizeType tmp = siteNew2 - emin + smax + 1;
@@ -182,17 +182,17 @@ public:
 		return tmp;
 	}
 
-	String label() const { return "LongRange"; }
+	String label() const override { return "LongRange"; }
 
-	SizeType findReflection(SizeType site) const { return linSize_ - site - 1; }
+	SizeType findReflection(SizeType site) const override { return linSize_ - site - 1; }
 
-	SizeType length(SizeType i) const
+	SizeType length(SizeType i) const override
 	{
 		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const override
 	{
 		assert(dir == 0);
 

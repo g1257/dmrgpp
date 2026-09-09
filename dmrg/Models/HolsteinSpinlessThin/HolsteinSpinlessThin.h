@@ -140,9 +140,9 @@ public:
 
 	public:
 
-		virtual SizeType siteToAtomKind(SizeType site) const { return (site & 1); }
+		SizeType siteToAtomKind(SizeType site) const override { return (site & 1); }
 
-		virtual SizeType kindsOfAtoms() const { return 2; }
+		SizeType kindsOfAtoms() const override { return 2; }
 	};
 
 	static const int FERMION_SIGN = -1;
@@ -161,7 +161,7 @@ public:
 			err("SSH not supported in thin version yet!\n");
 	}
 
-	~HolsteinSpinlessThin()
+	~HolsteinSpinlessThin() override
 	{
 		delete atomKind_;
 		atomKind_ = nullptr;
@@ -171,7 +171,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -194,7 +194,7 @@ public:
 		}
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -206,14 +206,14 @@ public:
 
 protected:
 
-	virtual const AtomKindBaseType& getAtomKind()
+	const AtomKindBaseType& getAtomKind() override
 	{
 		if (!atomKind_)
 			atomKind_ = new AtomKind();
 		return *atomKind_;
 	}
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		OpsLabelType& c = this->createOpsLabel("c", 1); // 1 == fermionic site
 		OpsLabelType& a = this->createOpsLabel("a", 0); // 0 == bosonic site
@@ -306,7 +306,7 @@ protected:
 		                       su2Related3));
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
 

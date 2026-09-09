@@ -133,16 +133,16 @@ public:
 	    , progress_("TargetingGroundState")
 	{ }
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return 0; }
+	SizeType targets() const override { return 0; }
 
-	RealType weight(SizeType) const
+	RealType weight(SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 	}
 
-	RealType gsWeight() const
+	RealType gsWeight() const override
 	{
 		const VectorVectorVectorWithOffsetType& v = this->common().aoe().psiConst();
 		const SizeType                          n = v.size();
@@ -163,13 +163,13 @@ public:
 		return 1.0 / sum;
 	}
 
-	SizeType size() const { return 0; }
+	SizeType size() const override { return 0; }
 
 	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&,
-	            SizeType)
+	            SizeType) override
 	{
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
@@ -177,12 +177,12 @@ public:
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out&                       io,
-	           PsimagLite::String                                 prefix) const
+	           PsimagLite::String                                 prefix) const override
 	{
 		this->common().write(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "GroundState");
 	}

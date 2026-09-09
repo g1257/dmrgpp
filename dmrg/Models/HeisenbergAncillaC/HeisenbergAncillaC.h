@@ -166,7 +166,7 @@ public:
 		}
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -179,7 +179,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -198,7 +198,7 @@ public:
 		}
 	}
 
-	virtual PsimagLite::String oracle() const
+	PsimagLite::String oracle() const override
 	{
 		const RealType nup    = ModelBaseType::targetQuantum().qn(0).other[0];
 		const RealType n      = ModelBaseType::superGeometry().numberOfSites();
@@ -208,7 +208,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 
 		if (modelParameters_.twiceTheSpin > 2)
@@ -312,7 +312,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		const bool isSu2 = BasisType::useSu2Symmetry();
 

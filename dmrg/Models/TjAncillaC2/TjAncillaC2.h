@@ -137,7 +137,7 @@ public:
 	    , hot_(superGeometry_.geometry().term(0).orbitals(0) > 1)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -148,7 +148,7 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
-	virtual PsimagLite::String oracle() const
+	PsimagLite::String oracle() const override
 	{
 		const RealType ne     = ModelBaseType::targetQuantum().qn(0).other[0];
 		const RealType n      = ModelBaseType::superGeometry().numberOfSites();
@@ -158,7 +158,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType  site = 0;
 		BlockType block(1, site);
@@ -289,7 +289,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		//! There are orbitals*orbitals different orbitals
 		//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
@@ -554,7 +554,7 @@ private:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 

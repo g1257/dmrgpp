@@ -141,10 +141,10 @@ public:
 	    , twoSiteDmrg_(wft_.options().twoSiteDmrg)
 	{ }
 
-	virtual void calcTimeVectors(const VectorSizeType&               indices,
-	                             RealType                            Eg,
-	                             const VectorWithOffsetType&         phi,
-	                             const typename BaseType::ExtraData& extraData)
+	void calcTimeVectors(const VectorSizeType&               indices,
+	                     RealType                            Eg,
+	                     const VectorWithOffsetType&         phi,
+	                     const typename BaseType::ExtraData& extraData) override
 	{
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -258,7 +258,7 @@ public:
 		}
 	}
 
-	void timeHasAdvanced()
+	void timeHasAdvanced() override
 	{
 		linksSeen_.clear();
 		PsimagLite::OstringStream                     msgg(std::cout.precision());

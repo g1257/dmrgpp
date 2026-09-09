@@ -195,20 +195,20 @@ public:
 		this->common().aoeNonConst().initTimeVectors(*tstStruct2_, ioIn);
 	}
 
-	~TargetingRixsDynamic()
+	~TargetingRixsDynamic() override
 	{
 		delete tstStruct2_;
 		tstStruct2_ = nullptr;
 	}
 
-	SizeType sites() const
+	SizeType sites() const override
 	{
 		return (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
 		    ? tstStruct_.sites()
 		    : tstStruct2_->sites();
 	}
 
-	SizeType targets() const
+	SizeType targets() const override
 	{
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
@@ -220,15 +220,15 @@ public:
 		}
 	}
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType i) const override
 	{
 		assert(i < weight_.size());
 		return weight_[i];
 	}
 
-	RealType gsWeight() const { return gsWeightActual_; }
+	RealType gsWeight() const override { return gsWeightActual_; }
 
-	SizeType size() const
+	SizeType size() const override
 	{
 		if (!applied_ && appliedFirst_)
 			return 8;
@@ -257,7 +257,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            SizeType                      loopNumber) override
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -330,13 +330,13 @@ public:
 
 	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String           prefix) const
+	           PsimagLite::String           prefix) const override
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsDynamic");
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().read(io, prefix);
 

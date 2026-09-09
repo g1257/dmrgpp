@@ -134,11 +134,11 @@ public:
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 
-	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
+	SizeType maxConnections() const override { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
 
-	virtual SizeType dirs() const { return 2; }
+	SizeType dirs() const override { return 2; }
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		if (dirId == DIRECTION_X)
 			return (isPeriodicX_) ? linSize_ : linSize_ - leg_;
@@ -148,7 +148,7 @@ public:
 		throw RuntimeError("Unknown direction\n");
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -163,13 +163,13 @@ public:
 		return false;
 	}
 
-	SizeType calcDir(SizeType i1, SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const override
 	{
 		assert(connected(i1, i2));
 		return (sameColumn(i1, i2)) ? DIRECTION_Y : DIRECTION_X;
 	}
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		SizeType c = smax % leg_;
 		SizeType r = 2 + 2 * c;
@@ -185,7 +185,7 @@ public:
 	}
 
 	// siteEnv is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteEnv) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteEnv) const override
 	{
 		if (smax + 1 == emin)
 			return siteEnv; // finite loops
@@ -198,7 +198,7 @@ public:
 		return siteEnv - s * leg_;
 	}
 
-	SizeType handle(SizeType i1, SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const override
 	{
 		const SizeType dir  = calcDir(i1, i2);
 		const SizeType imin = (i1 < i2) ? i1 : i2;
@@ -236,9 +236,9 @@ public:
 		return false;
 	}
 
-	String label() const { return "ladder"; }
+	String label() const override { return "ladder"; }
 
-	SizeType length(SizeType i) const
+	SizeType length(SizeType i) const override
 	{
 		assert(i < 2);
 		return (i == 1) ? leg_ : SizeType(linSize_ / leg_);
@@ -246,7 +246,7 @@ public:
 
 	SizeType leg() const { return leg_; }
 
-	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const override
 	{
 		assert(dir < 2);
 		SizeType x  = SizeType(site / leg_);
@@ -261,7 +261,7 @@ public:
 		return ind;
 	}
 
-	SizeType findReflection(SizeType site) const
+	SizeType findReflection(SizeType site) const override
 	{
 		SizeType x   = SizeType(site / leg_);
 		SizeType y   = site % leg_;

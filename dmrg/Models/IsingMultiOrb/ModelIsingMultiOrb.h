@@ -167,7 +167,7 @@ public:
 		                                          orbs1);
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -182,7 +182,7 @@ public:
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		//			ModelBaseType::additionalOnSiteHamiltonianFromFile(hmatrix,
 		// block, ii, data);
@@ -212,7 +212,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType         site = 0;
 		BlockType        block(1, site);
@@ -292,7 +292,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		if (BasisType::useSu2Symmetry())
 			err("SU(2) no longer supported\n");

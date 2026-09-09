@@ -159,7 +159,7 @@ public:
 			    + "but not " + option + "\n");
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -171,7 +171,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -215,7 +215,7 @@ protected:
 	// ...
 	// (2s + 1)(2l + 1)    s      l
 	//
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		HilbertBasisType natBasis;
 		setBasis(natBasis);
@@ -558,7 +558,7 @@ protected:
 	// d        SzLz SzLz  N N
 	//
 	// more will be needed for J3L term
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
 		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *= 0.25; };

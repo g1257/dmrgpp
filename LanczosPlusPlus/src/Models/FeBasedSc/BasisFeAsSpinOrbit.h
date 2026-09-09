@@ -66,39 +66,42 @@ public:
 		}
 	}
 
-	PairIntType parts() const { return PairIntType(nup_, ndown_); }
+	PairIntType parts() const override { return PairIntType(nup_, ndown_); }
 
 	static const WordType& bitmask(SizeType i) { return BasisOneSpinType::bitmask(i); }
 
-	SizeType dofs() const { return 2 * orbitals_; }
+	SizeType dofs() const override { return 2 * orbitals_; }
 
-	SizeType size() const { return basis_.size(); }
+	SizeType size() const override { return basis_.size(); }
 
-	virtual SizeType hilbertOneSite(SizeType) const { return (1 << (orbitals_ * 2)); }
+	SizeType hilbertOneSite(SizeType) const override { return (1 << (orbitals_ * 2)); }
 
-	WordType operator()(SizeType i, SizeType spin) const
+	WordType operator()(SizeType i, SizeType spin) const override
 	{
 		return (spin == SPIN_UP) ? basis_[i].first : basis_[i].second;
 	}
 
-	SizeType perfectIndex(const VectorWordType& kets) const
+	SizeType perfectIndex(const VectorWordType& kets) const override
 	{
 		assert(kets.size() == 2);
 		return perfectIndex(kets[0], kets[1]);
 	}
 
-	SizeType perfectIndex(WordType ket1, WordType ket2) const
+	SizeType perfectIndex(WordType ket1, WordType ket2) const override
 	{
 		return reverse_[PairWordType(ket1, ket2)];
 	}
 
-	SizeType perfectIndex(WordType, SizeType, SizeType) const
+	SizeType perfectIndex(WordType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("perfectIndex\n");
 	}
 
-	SizeType
-	getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType orb) const
+	SizeType getN(WordType ket1,
+	              WordType ket2,
+	              SizeType site,
+	              SizeType spin,
+	              SizeType orb) const override
 	{
 		return (spin == SPIN_UP) ? basis1_.getN(ket1, site, orb)
 		                         : basis1_.getN(ket2, site, orb);
@@ -109,7 +112,7 @@ public:
 	                        const LabeledOperatorType& lOperator,
 	                        SizeType                   site,
 	                        SizeType                   spin,
-	                        SizeType                   orb) const
+	                        SizeType                   orb) const override
 	{
 		if (lOperator.id() == LabeledOperatorType::Label::OPERATOR_C
 		    || lOperator.id() == LabeledOperatorType::Label::OPERATOR_CDAGGER
@@ -135,7 +138,7 @@ public:
 	           SizeType orb1,
 	           SizeType j,
 	           SizeType orb2,
-	           SizeType spin) const
+	           SizeType spin) const override
 	{
 		if (i > j) {
 			std::cerr << "FATAL: At doSign\n";
@@ -148,7 +151,8 @@ public:
 		                         : basis1_.doSign(ket2, i, orb1, j, orb2);
 	}
 
-	int doSignGf(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const
+	int
+	doSignGf(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const override
 	{
 		if (spin == SPIN_UP)
 			return basis1_.doSignGf(a, ind, orb);
@@ -183,7 +187,8 @@ public:
 		return x * s * basis1_.doSignGf(a, ind, orb2) * basis1_.doSignGf(b, ind, orb1);
 	}
 
-	int doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const
+	int
+	doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType orb) const override
 	{
 		if (spin == SPIN_UP) { // spin here means S^\dagger
 			// FIXME: Count over a (up)
@@ -198,7 +203,7 @@ public:
 	                             WordType ket2,
 	                             SizeType site,
 	                             SizeType spin,
-	                             SizeType orb) const
+	                             SizeType orb) const override
 	{
 		return (spin == SPIN_UP) ? basis1_.isThereAnElectronAt(ket1, site, orb)
 		                         : basis1_.isThereAnElectronAt(ket2, site, orb);
@@ -225,11 +230,14 @@ public:
 		throw std::runtime_error(str.c_str());
 	}
 
-	SizeType orbsPerSite(SizeType) const { throw PsimagLite::RuntimeError("orbsPerSite\n"); }
+	SizeType orbsPerSite(SizeType) const override
+	{
+		throw PsimagLite::RuntimeError("orbsPerSite\n");
+	}
 
-	SizeType orbs() const { throw PsimagLite::RuntimeError("orbs\n"); }
+	SizeType orbs() const override { throw PsimagLite::RuntimeError("orbs\n"); }
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		bool     isBinary = (binaryOrDecimal == BaseType::PRINT_BINARY);
 		SizeType hilbert  = 1;
@@ -241,8 +249,8 @@ public:
 		}
 	}
 
-	virtual bool
-	getBra(WordType&, WordType, WordType, const LabeledOperator&, SizeType, SizeType) const
+	bool getBra(WordType&, WordType, WordType, const LabeledOperator&, SizeType, SizeType)
+	    const override
 	{
 		throw PsimagLite::RuntimeError("BasisFeAs: getBra\n");
 	}

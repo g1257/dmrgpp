@@ -162,10 +162,10 @@ public:
 	    , krylovHelper_(model.params(), 0)
 	{ }
 
-	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
-	                             RealType                                  Eg,
-	                             const VectorWithOffsetType&               phi,
-	                             const typename BaseType::ExtraData&       extra)
+	void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
+	                     RealType                                  Eg,
+	                     const VectorWithOffsetType&               phi,
+	                     const typename BaseType::ExtraData&       extra) override
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -231,7 +231,7 @@ public:
 			timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced()
+	void timeHasAdvanced() override
 	{
 		timeHasAdvanced_ = true;
 		this->advanceCurrentTime(tstStruct_.tau());
