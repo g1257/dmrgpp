@@ -1,9 +1,8 @@
 ##Ainur1.0
 
 FicticiousBeta=50;
-# Because we're using U nup ndown
-# the mu should be 0.5*U
-ChemicalPotential=4.;
+# ModelParams centers U*nup*ndown by placing -U/2 on the impurity.
+ChemicalPotential=0.;
 Matsubaras=400;
 # LatticeGf: 50 is the number of K points
 #LatticeGf="momentum,1D,50";
