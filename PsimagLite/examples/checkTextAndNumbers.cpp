@@ -3,20 +3,43 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
-#include <memory>
 #include <stdexcept>
 #include <string>
 
 namespace {
 
-std::string parseIgnoredLinePrefix(const char* text)
+enum class ComparisonMode
+{
+	Generic,
+	IgnoreLinePrefix,
+	Observable
+};
+
+struct ParsedOption {
+	ComparisonMode mode;
+	std::string    value;
+};
+
+ParsedOption parseOption(const char* text)
 {
 	const std::string argument(text);
-	const std::string option = "--ignore-line-prefix=";
-	if (argument.compare(0, option.size(), option) != 0 || argument.size() == option.size())
-		throw std::invalid_argument("Invalid option: \"" + argument + "\"");
+	const std::string ignoredLinePrefixOption = "--ignore-line-prefix=";
+	const std::string insituLabelOption       = "--insitu-label=";
 
-	return argument.substr(option.size());
+	if (argument.compare(0, ignoredLinePrefixOption.size(), ignoredLinePrefixOption) == 0) {
+		if (argument.size() == ignoredLinePrefixOption.size())
+			throw std::invalid_argument("Invalid option: \"" + argument + "\"");
+		return { ComparisonMode::IgnoreLinePrefix,
+			 argument.substr(ignoredLinePrefixOption.size()) };
+	}
+
+	if (argument.compare(0, insituLabelOption.size(), insituLabelOption) == 0) {
+		if (argument.size() == insituLabelOption.size())
+			throw std::invalid_argument("Invalid option: \"" + argument + "\"");
+		return { ComparisonMode::Observable, argument.substr(insituLabelOption.size()) };
+	}
+
+	throw std::invalid_argument("Invalid option: \"" + argument + "\"");
 }
 
 double parseTolerance(const char* text)
@@ -41,25 +64,26 @@ int main(int argc, char* argv[])
 {
 	if (argc != 4 && argc != 5) {
 		std::cerr << "Usage: " << argv[0]
-		          << " FILE1 FILE2 TOLERANCE [--ignore-line-prefix=PREFIX]\n";
+		          << " FILE1 FILE2 TOLERANCE "
+		             "[--ignore-line-prefix=PREFIX|--insitu-label=LABEL]\n";
 		return EXIT_FAILURE;
 	}
 
-	std::string                                        file1;
-	std::string                                        file2;
-	std::unique_ptr<PsimagLite::TextAndNumbersChecker> checker;
-
 	try {
-		file1 = argv[1];
-		file2 = argv[2];
-		const std::string ignoredLinePrefix
-		    = (argc == 5) ? parseIgnoredLinePrefix(argv[4]) : "";
-		checker = std::make_unique<PsimagLite::TextAndNumbersChecker>(
-		    parseTolerance(argv[3]), ignoredLinePrefix);
+		const ParsedOption option = (argc == 5)
+		    ? parseOption(argv[4])
+		    : ParsedOption { ComparisonMode::Generic, "" };
+		const std::string  ignoredLinePrefix
+		    = (option.mode == ComparisonMode::IgnoreLinePrefix) ? option.value : "";
+		const PsimagLite::TextAndNumbersChecker checker(parseTolerance(argv[3]),
+		                                                ignoredLinePrefix);
+
+		if (option.mode == ComparisonMode::Observable)
+			checker.runObservables(argv[1], argv[2], option.value);
+		else
+			checker.run(argv[1], argv[2]);
 	} catch (const std::exception& error) {
 		std::cerr << error.what() << '\n';
 		return EXIT_FAILURE;
 	}
-
-	checker->run(file1, file2);
 }
