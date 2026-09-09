@@ -4,6 +4,7 @@
 
 #include "PsimagLite/KokkosType.h"
 #include <Kokkos_Core.hpp>
+#include <Kokkos_Profiling_ScopedRegion.hpp>
 
 static IntegerType is_initialized = 0;
 
@@ -259,6 +260,7 @@ void dmrg_Xgemm_vbatch(char         ctransa,
 		 * extra checks
 		 * ------------
 		 */
+		Kokkos::Profiling::ScopedRegion region("BatchedGemm::setup::gemm");
 		if (idebug >= 1) {
 			IntegerType i = 0;
 			for (i = 0; i < batch_size; i++) {

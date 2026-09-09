@@ -4,6 +4,7 @@
 #include "setup_nC.h"
 
 #include <Kokkos_Core.hpp>
+#include <Kokkos_Profiling_ScopedRegion.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -43,6 +44,8 @@ void setup_sparse_batch(
  ---------------------------------------------------------
 */
 {
+	Kokkos::Profiling::pushRegion("BatchedGemmPluginSc::setup_sparse_batch");
+
 	const IntegerType idebug = 1;
 	const IntegerType ialign = 32;
 	const IntegerType lfalse = 0;
